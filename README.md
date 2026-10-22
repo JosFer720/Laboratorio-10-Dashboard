@@ -1,6 +1,6 @@
 # Observatorio de turismo sostenible
 
-Tablero interactivo para consultar indicadores de turismo receptor en Guatemala. La base inicial contiene las llegadas mensuales de visitantes no residentes publicadas por el Instituto Guatemalteco de Turismo (INGUAT) para 2022, 2023 y 2024.
+Tablero interactivo para consultar indicadores de turismo receptor en Guatemala. Usa datos mensuales del Instituto Guatemalteco de Turismo (INGUAT) para 2022, 2023 y 2024: las llegadas de visitantes no residentes y la ocupación hotelera.
 
 ## Requisitos
 
