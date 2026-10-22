@@ -4,7 +4,11 @@ from pathlib import Path
 
 import pytest
 
-from tourism_dashboard.config import load_settings
+from tourism_dashboard.config import DEFAULT_DATA_PATH, load_settings
+
+
+def test_default_data_path_uses_the_migration_series() -> None:
+    assert DEFAULT_DATA_PATH == Path("data/arrivals_migration_2009_2026.csv")
 
 
 def test_load_settings_uses_explicit_environment() -> None:

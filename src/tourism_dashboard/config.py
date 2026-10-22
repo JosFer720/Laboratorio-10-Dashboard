@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-DEFAULT_DATA_PATH = Path("data/arrivals_inguat_2022_2024.csv")
+DEFAULT_DATA_PATH = Path("data/arrivals_migration_2009_2026.csv")
 TRUE_VALUES = {"1", "true", "yes", "on"}
 FALSE_VALUES = {"", "0", "false", "no", "off"}
 

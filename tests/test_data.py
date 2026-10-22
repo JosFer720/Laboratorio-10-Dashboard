@@ -14,23 +14,34 @@ from tourism_dashboard.data import (
 )
 
 
-DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "arrivals_inguat_2022_2024.csv"
+DATA_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "data"
+    / "arrivals_migration_2009_2026.csv"
+)
 
 
 def test_load_arrivals_returns_canonical_tidy_data() -> None:
     result = load_arrivals(DATA_PATH)
 
     assert tuple(result.columns) == CANONICAL_COLUMNS
-    assert len(result) == 396
+    assert len(result) == 2_310
     assert pd.api.types.is_datetime64_any_dtype(result["date"])
-    assert result["arrivals"].dtype == "Int64"
+    assert result["arrivals"].dtype == "Float64"
     assert result["destination_zone"].unique().tolist() == ["Guatemala"]
-    assert set(result["origin_level"]) == {"country", "region", "segment"}
+    assert set(result["origin_level"]) == {"country", "region"}
+    assert result["date"].nunique() == 210
+    assert result["date"].min() == pd.Timestamp("2009-01-01")
+    assert result["date"].max() == pd.Timestamp("2026-06-01")
 
 
 @pytest.mark.parametrize(
     ("date", "expected"),
-    [("2022-01-01", 78_285), ("2023-01-01", 217_869), ("2024-12-01", 322_849)],
+    [
+        ("2009-01-01", 149_944.02934517286),
+        ("2022-01-01", 134_303.0),
+        ("2026-06-01", 245_687.58097737003),
+    ],
 )
 def test_load_arrivals_preserves_reported_monthly_totals(
     date: str, expected: int
@@ -39,7 +50,7 @@ def test_load_arrivals_preserves_reported_monthly_totals(
 
     monthly_total = result.loc[result["date"] == date, "arrivals"].sum()
 
-    assert monthly_total == expected
+    assert monthly_total == pytest.approx(expected, abs=1e-6)
 
 
 def test_load_arrivals_derives_calendar_fields() -> None:
@@ -68,6 +79,24 @@ def test_load_arrivals_rejects_negative_values(tmp_path: Path) -> None:
 
     with pytest.raises(TourismDataError, match="negativos"):
         load_arrivals(path)
+
+
+def test_load_arrivals_preserves_the_expected_origin_categories() -> None:
+    result = load_arrivals(DATA_PATH)
+
+    assert result["origin"].drop_duplicates().tolist() == [
+        "Canadá",
+        "Estados Unidos",
+        "México",
+        "Belice",
+        "El Salvador",
+        "Honduras",
+        "Resto de América Central",
+        "América del Sur",
+        "Europa",
+        "Resto del mundo",
+        "Guatemala",
+    ]
 
 
 def test_load_arrivals_reports_missing_file(tmp_path: Path) -> None:

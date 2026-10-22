@@ -7,7 +7,9 @@ from dash import Dash, dcc
 from tourism_dashboard.application import create_app
 
 DATA_PATH = (
-    Path(__file__).resolve().parents[1] / "data" / "arrivals_inguat_2022_2024.csv"
+    Path(__file__).resolve().parents[1]
+    / "data"
+    / "arrivals_migration_2009_2026.csv"
 )
 
 
@@ -25,7 +27,7 @@ def test_create_app_loads_data_and_mounts_timeline_and_markets() -> None:
     app = create_app(DATA_PATH)
 
     assert isinstance(app, Dash)
-    assert len(app.server.config["TOURISM_DATA"]) == 396
+    assert len(app.server.config["TOURISM_DATA"]) == 2_310
     graphs = [
         component for component in _walk(app.layout) if isinstance(component, dcc.Graph)
     ]
@@ -46,7 +48,7 @@ def test_layout_has_unique_component_ids_and_shared_selection() -> None:
     assert len(ids) == len(set(ids))
     selection = next(store for store in stores if store.id == "v1-selection").data
     assert selection["is_selected"] is False
-    assert len(selection["dates"]) == 36
+    assert len(selection["dates"]) == 210
     assert selection["market"] == "all"
 
 

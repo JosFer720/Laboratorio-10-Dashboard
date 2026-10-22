@@ -7,7 +7,7 @@ import pytest
 from tourism_dashboard.application import create_app
 
 DATA_PATH = (
-    Path(__file__).resolve().parents[1] / "data" / "arrivals_inguat_2022_2024.csv"
+    Path(__file__).resolve().parents[1] / "data" / "arrivals_migration_2009_2026.csv"
 )
 DEFAULT_INPUTS = {
     "period-start.value": "2022-01-01",
@@ -114,7 +114,7 @@ def test_global_filter_or_clear_discards_stale_graph_selection(app, trigger):
         "v1-selection.data",
         {
             "period-start.value": "2024-01-01",
-            "origin-filter.value": "origin:Mexico",
+            "origin-filter.value": "origin:México",
             "arrivals-timeline.selectedData": {"points": [{"customdata": ["2022-01"]}]},
             "arrivals-timeline.clickData": {"points": [{"customdata": ["2022-01"]}]},
         },
@@ -123,7 +123,7 @@ def test_global_filter_or_clear_discards_stale_graph_selection(app, trigger):
 
     selection = result["v1-selection"]["data"]
     assert len(selection["dates"]) == 12
-    assert selection["market"] == "origin:Mexico"
+    assert selection["market"] == "origin:México"
     assert selection["is_selected"] is False
     assert result["clear-selection"]["disabled"] is True
 
@@ -187,7 +187,7 @@ def test_markets_follow_the_period_selected_in_the_timeline(app):
         ["period-start.value"],
     )["arrivals-total"]["children"]
 
-    assert sum(bars["x"]) == int(total.replace(".", ""))
+    assert sum(bars["x"]) == pytest.approx(int(total.replace(".", "")), abs=len(bars["x"]))
     assert "Julio de 2024" in result["market-caption"]["children"]
 
 

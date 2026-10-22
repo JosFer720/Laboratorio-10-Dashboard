@@ -6,21 +6,21 @@ import pandas as pd
 
 
 ORIGIN_METADATA = {
-    "canada": ("Canada", "America del Norte", "country"),
-    "united_states": ("Estados Unidos", "America del Norte", "country"),
-    "mexico": ("Mexico", "America del Norte", "country"),
-    "belize": ("Belice", "America Central", "country"),
-    "el_salvador": ("El Salvador", "America Central", "country"),
-    "honduras": ("Honduras", "America Central", "country"),
+    "canada": ("Canadá", "América del Norte", "country"),
+    "united_states": ("Estados Unidos", "América del Norte", "country"),
+    "mexico": ("México", "América del Norte", "country"),
+    "belize": ("Belice", "América Central", "country"),
+    "el_salvador": ("El Salvador", "América Central", "country"),
+    "honduras": ("Honduras", "América Central", "country"),
     "rest_of_central_america": (
-        "Resto de America Central",
-        "America Central",
+        "Resto de América Central",
+        "América Central",
         "region",
     ),
-    "south_america": ("America del Sur", "America del Sur", "region"),
+    "south_america": ("América del Sur", "América del Sur", "region"),
     "europe": ("Europa", "Europa", "region"),
     "rest_of_world": ("Resto del mundo", "Resto del mundo", "region"),
-    "cruise_passengers": ("Cruceristas", "Cruceristas", "segment"),
+    "guatemala": ("Guatemala", "América Central", "country"),
 }
 
 MONTH_NAMES = {
@@ -122,12 +122,8 @@ def load_arrivals(path: str | Path) -> pd.DataFrame:
         raise TourismDataError("Las llegadas contienen valores no numericos o vacios.")
     if (values < 0).any().any() or (data["reported_total"] < 0).any():
         raise TourismDataError("Las llegadas contienen valores negativos.")
-    if ((values % 1) != 0).any().any() or (
-        (data["reported_total"] % 1) != 0
-    ).any():
-        raise TourismDataError("Las llegadas deben ser numeros enteros.")
     total_difference = values.sum(axis=1) - data["reported_total"]
-    if total_difference.abs().gt(1).any():
+    if total_difference.abs().gt(1e-6).any():
         raise TourismDataError(
             "Las categorias no coinciden con el total mensual reportado."
         )
@@ -149,7 +145,7 @@ def load_arrivals(path: str | Path) -> pd.DataFrame:
     tidy["origin_level"] = tidy["origin_key"].map(
         {key: metadata[2] for key, metadata in ORIGIN_METADATA.items()}
     )
-    tidy["arrivals"] = tidy["arrivals"].astype("Int64")
+    tidy["arrivals"] = tidy["arrivals"].astype("Float64")
     tidy["origin_order"] = tidy["origin_key"].map(
         {key: index for index, key in enumerate(ORIGIN_METADATA)}
     )

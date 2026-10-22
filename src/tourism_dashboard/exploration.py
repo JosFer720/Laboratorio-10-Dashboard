@@ -105,7 +105,7 @@ def aggregate_markets(rows: pd.DataFrame) -> pd.DataFrame:
         .sum()
         .reset_index()
     )
-    totals["arrivals"] = totals["arrivals"].astype("int64")
+    totals["arrivals"] = totals["arrivals"].astype("Float64")
     total = totals["arrivals"].sum()
     totals["share"] = totals["arrivals"] / total * 100 if total else 0.0
     return totals.sort_values("arrivals", ascending=False, kind="stable").reset_index(
