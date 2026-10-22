@@ -7,6 +7,8 @@ from pathlib import Path
 
 
 DEFAULT_DATA_PATH = Path("data/arrivals_migration_2009_2026.csv")
+DEFAULT_MODEL_PREDICTIONS_PATH = Path("data/model_predictions_s0.csv")
+DEFAULT_MODEL_METRICS_PATH = Path("data/model_metrics_s0.csv")
 TRUE_VALUES = {"1", "true", "yes", "on"}
 FALSE_VALUES = {"", "0", "false", "no", "off"}
 
@@ -14,6 +16,8 @@ FALSE_VALUES = {"", "0", "false", "no", "off"}
 @dataclass(frozen=True)
 class Settings:
     data_path: Path
+    model_predictions_path: Path
+    model_metrics_path: Path
     host: str
     port: int
     debug: bool
@@ -40,6 +44,15 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
 
     return Settings(
         data_path=Path(values.get("TOURISM_DATA_PATH", DEFAULT_DATA_PATH)),
+        model_predictions_path=Path(
+            values.get(
+                "TOURISM_MODEL_PREDICTIONS_PATH",
+                DEFAULT_MODEL_PREDICTIONS_PATH,
+            )
+        ),
+        model_metrics_path=Path(
+            values.get("TOURISM_MODEL_METRICS_PATH", DEFAULT_MODEL_METRICS_PATH)
+        ),
         host=values.get("DASH_HOST", "127.0.0.1"),
         port=port,
         debug=debug,

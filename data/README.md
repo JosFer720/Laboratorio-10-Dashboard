@@ -36,6 +36,43 @@ La exportación se deriva de `Base_Migracion_2009-2026jun.xlsx`, la misma base p
 
 La exportación contiene 210 meses consecutivos. Para cada mes, la suma de las once categorías coincide con `reported_total` y con `S0_total.csv` de los laboratorios de series de tiempo dentro de una tolerancia de `1e-6`.
 
+# Resultados de modelos para S0
+
+`model_predictions_s0.csv` y `model_metrics_s0.csv` conservan resultados ya generados para `S0_total`; no vuelven a entrenar modelos. Los tres modelos comparten el mismo tramo de entrenamiento, de enero de 2009 a marzo de 2021, y el mismo tramo de evaluación, de abril de 2021 a junio de 2026.
+
+## Procedencia
+
+| Modelo | Artefactos fuente | Commit fuente |
+|---|---|---|
+| `lstm-catch22-contexto-w24` | `data/processed/resultados/lstm_catch22_s0.csv` y `data/processed/resultados/pronostico_lstm_catch22_s0.csv`, Laboratorio 2 | `f2155dcc34bc9abae93797fb5ec3ceb962833f38` |
+| `prophet` | `data/processed/resultados/metricas_s0_s5.csv` y `data/processed/resultados/pronosticos_s0_s5.csv`, Laboratorio 1 | `534cfd5fc7586122632dab4c28aaddb6587c281d` |
+| `arima-1-1-1` | `data/processed/resultados/metricas_s0_s5.csv` y `data/processed/resultados/pronosticos_s0_s5.csv`, Laboratorio 1 | `534cfd5fc7586122632dab4c28aaddb6587c281d` |
+
+Para los modelos clásicos se conservaron solamente las filas de `S0_total`. Cada modelo aporta 63 estimaciones mensuales y los valores observados son idénticos entre los tres. Los artefactos fuente no incluyen intervalos de predicción, por lo que la exportación tampoco los incorpora.
+
+## Columnas de predicciones
+
+| Columna | Descripción |
+|---|---|
+| `date` | Mes evaluado, en formato `YYYY-MM-01`. |
+| `model_id` | Identificador estable del modelo. |
+| `model_label` | Etiqueta legible del modelo. |
+| `observed` | Valor observado de `S0_total`. |
+| `estimate` | Estimación del modelo para el mes. |
+
+## Columnas de métricas
+
+| Columna | Descripción |
+|---|---|
+| `model_id` | Identificador estable del modelo. |
+| `model_label` | Etiqueta legible del modelo. |
+| `source_lab` | Laboratorio que produjo el artefacto. |
+| `source_commit` | Commit completo del artefacto fuente. |
+| `mae`, `rmse`, `mape` | Métricas calculadas sobre los 63 meses de evaluación. |
+| `aic`, `bic` | Criterios de información cuando el modelo fuente los reporta. |
+| `train_end` | Último mes del entrenamiento. |
+| `evaluation_start`, `evaluation_end` | Límites inclusivos de la evaluación. |
+
 # Ocupación hotelera en Guatemala
 
 `hotel_occupancy_inguat_2022_2024.csv` contiene la ocupación hotelera mensual de Guatemala entre enero de 2022 y diciembre de 2024. Cada fila representa un mes.

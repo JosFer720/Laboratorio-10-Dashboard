@@ -12,7 +12,11 @@ from tourism_dashboard.config import load_settings  # noqa: E402
 
 
 settings = load_settings()
-app = create_app(settings.data_path)
+app = create_app(
+    settings.data_path,
+    settings.model_predictions_path,
+    settings.model_metrics_path,
+)
 server = app.server
 
 

@@ -7,9 +7,13 @@ import pytest
 
 from tourism_dashboard.data import (
     CANONICAL_COLUMNS,
+    MODEL_METRIC_COLUMNS,
+    MODEL_PREDICTION_COLUMNS,
     OCCUPANCY_COLUMNS,
     TourismDataError,
     load_arrivals,
+    load_model_metrics,
+    load_model_predictions,
     load_occupancy,
 )
 
@@ -117,6 +121,13 @@ def test_load_arrivals_rejects_large_difference_from_reported_total(
 
 
 OCCUPANCY_PATH = DATA_PATH.with_name("hotel_occupancy_inguat_2022_2024.csv")
+MODEL_PREDICTIONS_PATH = DATA_PATH.with_name("model_predictions_s0.csv")
+MODEL_METRICS_PATH = DATA_PATH.with_name("model_metrics_s0.csv")
+MODEL_IDS = {
+    "lstm-catch22-contexto-w24",
+    "prophet",
+    "arima-1-1-1",
+}
 
 
 def test_load_occupancy_returns_monthly_series() -> None:
@@ -165,3 +176,92 @@ def test_load_occupancy_rejects_more_occupied_than_available(
 
     with pytest.raises(TourismDataError, match="superan"):
         load_occupancy(path)
+
+
+def test_load_model_predictions_returns_complete_common_holdout() -> None:
+    result = load_model_predictions(MODEL_PREDICTIONS_PATH)
+
+    assert tuple(result.columns) == MODEL_PREDICTION_COLUMNS
+    assert len(result) == 189
+    assert set(result["model_id"]) == MODEL_IDS
+    assert result.groupby("model_id").size().eq(63).all()
+    assert result["date"].min() == pd.Timestamp("2021-04-01")
+    assert result["date"].max() == pd.Timestamp("2026-06-01")
+    assert result.groupby("date")["observed"].nunique().eq(1).all()
+
+
+def test_load_model_predictions_rejects_different_observed_values(
+    tmp_path: Path,
+) -> None:
+    source = pd.read_csv(MODEL_PREDICTIONS_PATH)
+    source.loc[source["model_id"] == "prophet", "observed"] += 1
+    path = tmp_path / "different-observed.csv"
+    source.to_csv(path, index=False)
+
+    with pytest.raises(TourismDataError, match="observados"):
+        load_model_predictions(path)
+
+
+@pytest.mark.parametrize(
+    ("column", "value", "message"),
+    [
+        ("date", "2021-04-02", "meses"),
+        ("estimate", float("inf"), "finitos"),
+        ("estimate", -1, "negativos"),
+    ],
+)
+def test_load_model_predictions_rejects_invalid_values(
+    tmp_path: Path, column: str, value: object, message: str
+) -> None:
+    source = pd.read_csv(MODEL_PREDICTIONS_PATH)
+    source.loc[0, column] = value
+    path = tmp_path / "invalid-predictions.csv"
+    source.to_csv(path, index=False)
+
+    with pytest.raises(TourismDataError, match=message):
+        load_model_predictions(path)
+
+
+def test_load_model_predictions_rejects_incomplete_model(tmp_path: Path) -> None:
+    source = pd.read_csv(MODEL_PREDICTIONS_PATH).iloc[1:]
+    path = tmp_path / "incomplete-predictions.csv"
+    source.to_csv(path, index=False)
+
+    with pytest.raises(TourismDataError, match="63"):
+        load_model_predictions(path)
+
+
+def test_load_model_metrics_returns_one_row_per_model() -> None:
+    result = load_model_metrics(MODEL_METRICS_PATH)
+
+    assert tuple(result.columns) == MODEL_METRIC_COLUMNS
+    assert len(result) == 3
+    assert set(result["model_id"]) == MODEL_IDS
+    assert result["model_id"].is_unique
+    assert result["train_end"].eq(pd.Timestamp("2021-03-01")).all()
+    assert result["evaluation_start"].eq(pd.Timestamp("2021-04-01")).all()
+    assert result["evaluation_end"].eq(pd.Timestamp("2026-06-01")).all()
+    assert result.loc[result["model_id"] == "arima-1-1-1", "aic"].notna().all()
+    assert result.loc[result["model_id"] != "arima-1-1-1", "aic"].isna().all()
+
+
+@pytest.mark.parametrize(
+    ("column", "value", "message"),
+    [
+        ("rmse", float("nan"), "finitas"),
+        ("mape", -1, "negativas"),
+        ("evaluation_end", "2026-05-01", "evaluacion"),
+        ("source_commit", "f2155dcc", "commit"),
+        ("source_commit", "0" * 40, "procedencia"),
+    ],
+)
+def test_load_model_metrics_rejects_invalid_contract(
+    tmp_path: Path, column: str, value: object, message: str
+) -> None:
+    source = pd.read_csv(MODEL_METRICS_PATH)
+    source.loc[0, column] = value
+    path = tmp_path / "invalid-metrics.csv"
+    source.to_csv(path, index=False)
+
+    with pytest.raises(TourismDataError, match=message):
+        load_model_metrics(path)

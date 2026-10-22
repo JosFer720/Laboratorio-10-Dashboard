@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 from dash import Dash, dcc
 
 from tourism_dashboard.application import create_app
@@ -11,6 +12,8 @@ DATA_PATH = (
     / "data"
     / "arrivals_migration_2009_2026.csv"
 )
+MODEL_PREDICTIONS_PATH = DATA_PATH.with_name("model_predictions_s0.csv")
+MODEL_METRICS_PATH = DATA_PATH.with_name("model_metrics_s0.csv")
 
 
 def _walk(component: object):
@@ -32,6 +35,28 @@ def test_create_app_loads_data_and_mounts_timeline_and_markets() -> None:
         component for component in _walk(app.layout) if isinstance(component, dcc.Graph)
     ]
     assert [graph.id for graph in graphs] == ["arrivals-timeline", "market-chart"]
+
+
+def test_create_app_exposes_validated_model_data() -> None:
+    app = create_app(DATA_PATH, MODEL_PREDICTIONS_PATH, MODEL_METRICS_PATH)
+
+    predictions = app.server.config["TOURISM_MODEL_PREDICTIONS"]
+    metrics = app.server.config["TOURISM_MODEL_METRICS"]
+    assert len(predictions) == 189
+    assert len(metrics) == 3
+    assert set(predictions["model_id"]) == set(metrics["model_id"])
+
+
+def test_create_app_keeps_single_path_call_compatible() -> None:
+    app = create_app(DATA_PATH)
+
+    assert app.server.config["TOURISM_MODEL_PREDICTIONS"].empty
+    assert app.server.config["TOURISM_MODEL_METRICS"].empty
+
+
+def test_create_app_rejects_only_one_model_artifact_path() -> None:
+    with pytest.raises(ValueError, match="ambas rutas"):
+        create_app(DATA_PATH, MODEL_PREDICTIONS_PATH)
 
 
 def test_layout_has_unique_component_ids_and_shared_selection() -> None:
