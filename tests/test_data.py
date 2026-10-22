@@ -7,8 +7,10 @@ import pytest
 
 from tourism_dashboard.data import (
     CANONICAL_COLUMNS,
+    OCCUPANCY_COLUMNS,
     TourismDataError,
     load_arrivals,
+    load_occupancy,
 )
 
 
@@ -83,3 +85,54 @@ def test_load_arrivals_rejects_large_difference_from_reported_total(
 
     with pytest.raises(TourismDataError, match="total mensual"):
         load_arrivals(path)
+
+
+OCCUPANCY_PATH = DATA_PATH.with_name("hotel_occupancy_inguat_2022_2024.csv")
+
+
+def test_load_occupancy_returns_monthly_series() -> None:
+    result = load_occupancy(OCCUPANCY_PATH)
+
+    assert tuple(result.columns) == OCCUPANCY_COLUMNS
+    assert len(result) == 36
+    assert result["date"].is_monotonic_increasing
+    assert result["rooms_available"].dtype == "Int64"
+
+
+@pytest.mark.parametrize(
+    ("year", "available", "occupied"),
+    [
+        (2022, 9_142_615, 4_586_817),
+        (2023, 9_367_587, 5_760_943),
+        (2024, 9_453_493, 6_819_342),
+    ],
+)
+def test_load_occupancy_preserves_reported_annual_totals(
+    year: int, available: int, occupied: int
+) -> None:
+    result = load_occupancy(OCCUPANCY_PATH)
+    annual = result.loc[result["year"] == year]
+
+    assert annual["rooms_available"].sum() == available
+    assert annual["rooms_occupied"].sum() == occupied
+
+
+def test_load_occupancy_rate_matches_reported_percentages() -> None:
+    result = load_occupancy(OCCUPANCY_PATH)
+
+    assert (
+        result["occupancy_rate"].round().astype("Int64")
+        == result["reported_occupancy_pct"]
+    ).all()
+
+
+def test_load_occupancy_rejects_more_occupied_than_available(
+    tmp_path: Path,
+) -> None:
+    source = pd.read_csv(OCCUPANCY_PATH).head(1)
+    source.loc[0, "rooms_occupied"] = source.loc[0, "rooms_available"] + 1
+    path = tmp_path / "overbooked.csv"
+    source.to_csv(path, index=False)
+
+    with pytest.raises(TourismDataError, match="superan"):
+        load_occupancy(path)

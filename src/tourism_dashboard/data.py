@@ -52,21 +52,55 @@ CANONICAL_COLUMNS = (
 )
 
 
+OCCUPANCY_COLUMNS = (
+    "date",
+    "year",
+    "quarter",
+    "month",
+    "month_name",
+    "rooms_available",
+    "rooms_occupied",
+    "occupancy_rate",
+    "reported_occupancy_pct",
+)
+
+
 class TourismDataError(ValueError):
     """Indica que la fuente turistica no cumple el contrato esperado."""
 
 
-def load_arrivals(path: str | Path) -> pd.DataFrame:
+def _read_csv(path: str | Path, label: str) -> pd.DataFrame:
     source_path = Path(path)
     if not source_path.is_file():
         raise TourismDataError(f"No se encontro el archivo de datos: {source_path}")
     if source_path.suffix.lower() != ".csv":
-        raise TourismDataError("El archivo de llegadas debe estar en formato CSV.")
+        raise TourismDataError(f"El archivo de {label} debe estar en formato CSV.")
 
     try:
-        raw = pd.read_csv(source_path, encoding="utf-8-sig")
+        return pd.read_csv(source_path, encoding="utf-8-sig")
     except (OSError, UnicodeError, pd.errors.ParserError) as exc:
-        raise TourismDataError("No fue posible leer el archivo de llegadas.") from exc
+        raise TourismDataError(f"No fue posible leer el archivo de {label}.") from exc
+
+
+def _parse_months(dates: pd.Series) -> pd.Series:
+    parsed = pd.to_datetime(dates, errors="coerce")
+    if parsed.isna().any() or not parsed.dt.is_month_start.all():
+        raise TourismDataError("La columna date contiene meses invalidos.")
+    if parsed.duplicated().any():
+        raise TourismDataError("La columna date contiene meses duplicados.")
+    return parsed
+
+
+def _add_calendar_fields(data: pd.DataFrame) -> pd.DataFrame:
+    data["year"] = data["date"].dt.year.astype("Int64")
+    data["quarter"] = data["date"].dt.quarter.astype("Int64")
+    data["month"] = data["date"].dt.month.astype("Int64")
+    data["month_name"] = data["month"].map(MONTH_NAMES)
+    return data
+
+
+def load_arrivals(path: str | Path) -> pd.DataFrame:
+    raw = _read_csv(path, "llegadas")
 
     required = {"date", "reported_total", *ORIGIN_METADATA}
     missing = sorted(required.difference(raw.columns))
@@ -76,11 +110,7 @@ def load_arrivals(path: str | Path) -> pd.DataFrame:
         )
 
     data = raw.loc[:, ["date", *ORIGIN_METADATA, "reported_total"]].copy()
-    data["date"] = pd.to_datetime(data["date"], errors="coerce")
-    if data["date"].isna().any() or not data["date"].dt.is_month_start.all():
-        raise TourismDataError("La columna date contiene meses invalidos.")
-    if data["date"].duplicated().any():
-        raise TourismDataError("La columna date contiene meses duplicados.")
+    data["date"] = _parse_months(data["date"])
 
     for column in ORIGIN_METADATA:
         data[column] = pd.to_numeric(data[column], errors="coerce")
@@ -108,10 +138,7 @@ def load_arrivals(path: str | Path) -> pd.DataFrame:
         var_name="origin_key",
         value_name="arrivals",
     )
-    tidy["year"] = tidy["date"].dt.year.astype("Int64")
-    tidy["quarter"] = tidy["date"].dt.quarter.astype("Int64")
-    tidy["month"] = tidy["date"].dt.month.astype("Int64")
-    tidy["month_name"] = tidy["month"].map(MONTH_NAMES)
+    tidy = _add_calendar_fields(tidy)
     tidy["destination_zone"] = "Guatemala"
     tidy["origin"] = tidy["origin_key"].map(
         {key: metadata[0] for key, metadata in ORIGIN_METADATA.items()}
@@ -129,3 +156,40 @@ def load_arrivals(path: str | Path) -> pd.DataFrame:
     tidy = tidy.sort_values(["date", "origin_order"], kind="stable")
 
     return tidy.loc[:, CANONICAL_COLUMNS].reset_index(drop=True)
+
+
+def load_occupancy(path: str | Path) -> pd.DataFrame:
+    raw = _read_csv(path, "ocupacion hotelera")
+
+    counts = ["rooms_available", "rooms_occupied", "reported_occupancy_pct"]
+    missing = sorted({"date", *counts}.difference(raw.columns))
+    if missing:
+        raise TourismDataError(
+            "Faltan columnas requeridas: " + ", ".join(missing)
+        )
+
+    data = raw.loc[:, ["date", *counts]].copy()
+    data["date"] = _parse_months(data["date"])
+
+    for column in counts:
+        data[column] = pd.to_numeric(data[column], errors="coerce")
+    values = data.loc[:, counts]
+    if values.isna().any().any():
+        raise TourismDataError("La ocupacion contiene valores no numericos o vacios.")
+    if (values < 0).any().any() or ((values % 1) != 0).any().any():
+        raise TourismDataError("La ocupacion debe tener numeros enteros no negativos.")
+    if (data["rooms_available"] == 0).any():
+        raise TourismDataError("Hay meses sin habitaciones disponibles.")
+    if (data["rooms_occupied"] > data["rooms_available"]).any():
+        raise TourismDataError(
+            "Las habitaciones ocupadas superan a las disponibles."
+        )
+
+    for column in counts:
+        data[column] = data[column].astype("Int64")
+    data["occupancy_rate"] = (
+        data["rooms_occupied"] / data["rooms_available"] * 100
+    ).astype("Float64")
+    data = _add_calendar_fields(data).sort_values("date", kind="stable")
+
+    return data.loc[:, OCCUPANCY_COLUMNS].reset_index(drop=True)
