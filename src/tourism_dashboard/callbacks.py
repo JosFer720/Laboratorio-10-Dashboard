@@ -6,12 +6,15 @@ from dash import Dash, Input, Output, ctx
 from tourism_dashboard.exploration import (
     DETAIL_OPTIONS,
     aggregate_arrivals,
+    apply_selection,
     filter_arrivals,
     make_selection,
+    market_labels,
+    markets_caption,
     month_label,
     selection_label,
 )
-from tourism_dashboard.figures import arrivals_figure
+from tourism_dashboard.figures import arrivals_figure, markets_figure
 
 
 def _number(value: int) -> str:
@@ -90,6 +93,19 @@ def register_callbacks(app: Dash, arrivals: pd.DataFrame) -> None:
                 event = click_data
         selection = make_selection(filtered, market, detail, event)
         return selection, selection_label(selection), not selection["is_selected"]
+
+    labels = market_labels(arrivals)
+
+    @app.callback(
+        Output("market-chart", "figure"),
+        Output("market-caption", "children"),
+        Input("v1-selection", "data"),
+    )
+    def update_markets(selection):
+        if not isinstance(selection, dict):
+            selection = {"dates": [], "market": None, "is_selected": False}
+        rows = apply_selection(arrivals, selection)
+        return markets_figure(rows), markets_caption(selection, labels)
 
     @app.callback(
         Output("arrivals-panel", "hidden"),

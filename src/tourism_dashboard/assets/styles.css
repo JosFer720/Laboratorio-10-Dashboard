@@ -87,6 +87,9 @@ main { padding: 28px 0 24px; }
 .metric-value { margin: 6px 0 4px; font-size: 28px; font-weight: 600; line-height: 1.25; }
 .note { font-size: 12px; color: var(--secondary); }
 .chart-card { padding: 20px 24px 0; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.chart-row { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+.chart-row > * { min-width: 0; }
+#market-breakdown > .chart-card { height: 100%; }
 .chart-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .chart-help { margin: 8px 0 6px; font-size: 13px; color: var(--secondary); }
 .selection-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--border); }
@@ -110,6 +113,7 @@ button { font-family: inherit; }
 [hidden] { display: none !important; }
 
 @media (max-width: 1050px) {
+  .chart-row { grid-template-columns: 1fr; }
   .filter-grid { grid-template-columns: 1.2fr 1fr; gap: 16px; }
   .filter-grid > :last-child { grid-column: 1 / -1; }
   .detail-control { min-height: auto; }

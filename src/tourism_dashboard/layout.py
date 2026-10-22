@@ -6,12 +6,15 @@ from dash import dcc, html
 
 from tourism_dashboard.exploration import (
     DETAIL_OPTIONS,
+    apply_selection,
     make_selection,
+    market_labels,
     market_options,
+    markets_caption,
     month_options,
     selection_label,
 )
-from tourism_dashboard.figures import arrivals_figure
+from tourism_dashboard.figures import arrivals_figure, markets_figure
 
 GRAPH_CONFIG = {
     "displaylogo": False,
@@ -19,6 +22,9 @@ GRAPH_CONFIG = {
     "locale": "es",
     "modeBarButtonsToRemove": ["lasso2d"],
     "toImageButtonOptions": {"filename": "llegadas_guatemala", "scale": 2},
+}
+MARKETS_GRAPH_CONFIG = GRAPH_CONFIG | {
+    "toImageButtonOptions": {"filename": "llegadas_por_mercado", "scale": 2}
 }
 DROPDOWN_LABELS = {
     "select_all": "Seleccionar todos",
@@ -226,6 +232,45 @@ def _timeline(arrivals: pd.DataFrame, initial: dict) -> html.Section:
     )
 
 
+def _markets(arrivals: pd.DataFrame, initial: dict) -> html.Section:
+    return html.Section(
+        [
+            html.Div(
+                [
+                    html.H3("Llegadas por mercado de origen"),
+                    html.Span("Observado", className="observed-badge"),
+                ],
+                className="chart-heading",
+            ),
+            html.P(
+                "Muestra de dónde vinieron los visitantes en el periodo que elegiste en la gráfica de llegadas. Sirve para saber qué mercados pesan más y a cuáles dirigir la promoción. Se actualiza al seleccionar puntos allá o al cambiar los filtros.",
+                id="markets-help",
+                className="chart-help",
+            ),
+            dcc.Graph(
+                id="market-chart",
+                figure=markets_figure(apply_selection(arrivals, initial)),
+                config=MARKETS_GRAPH_CONFIG,
+                responsive=True,
+            ),
+            html.Div(
+                html.P(
+                    markets_caption(initial, market_labels(arrivals)),
+                    id="market-caption",
+                    role="status",
+                ),
+                className="selection-bar",
+            ),
+            html.P(
+                "Fuente: INGUAT, boletines de turismo 2022–2024. Los porcentajes son la participación de cada origen en la suma de la selección. Los agregados (Resto de América Central, América del Sur, Europa y Resto del mundo) reúnen varios países y los cruceristas son un grupo aparte, por eso no se comparan como países individuales.",
+                className="note chart-source",
+            ),
+        ],
+        className="chart-card",
+        **{"aria-describedby": "markets-help"},
+    )
+
+
 def _arrivals_panel(arrivals: pd.DataFrame, initial: dict) -> html.Section:
     return html.Section(
         [
@@ -240,8 +285,13 @@ def _arrivals_panel(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 className="section-heading",
             ),
             _metrics(),
-            _timeline(arrivals, initial),
-            html.Div(id="market-breakdown"),
+            html.Div(
+                [
+                    _timeline(arrivals, initial),
+                    html.Div(_markets(arrivals, initial), id="market-breakdown"),
+                ],
+                className="chart-row",
+            ),
             html.P(
                 "Las cifras son llegadas de visitantes no residentes. Por sí solas no miden la ocupación hotelera ni la presión sobre un destino.",
                 className="note page-note",
