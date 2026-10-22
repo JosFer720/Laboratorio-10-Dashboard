@@ -3,8 +3,18 @@ from __future__ import annotations
 import pandas as pd
 import plotly.graph_objects as go
 
-from tourism_dashboard.exploration import aggregate_arrivals
+from tourism_dashboard.exploration import (
+    aggregate_arrivals,
+    aggregate_markets,
+    display_origin,
+)
 
+NO_DATA_MESSAGE = (
+    "No hay información para esta selección.<br>"
+    "Prueba con un periodo más amplio, elige «Todos los mercados» "
+    "o limpia la selección."
+)
+ORIGIN_TYPES = {"country": "País", "region": "Agregado", "segment": "Segmento"}
 OBSERVED = "#0B5C8E"
 CONTEXT = "#8A939E"
 TEXT = "#1F2933"
@@ -48,7 +58,7 @@ def arrivals_figure(filtered: pd.DataFrame, detail: str, revision: str) -> go.Fi
     )
     if totals.empty:
         figure.add_annotation(
-            text="No hay información para esta selección.<br>Revisa el periodo y el mercado de origen.",
+            text=NO_DATA_MESSAGE,
             x=0.5,
             y=0.5,
             xref="paper",
@@ -103,4 +113,82 @@ def arrivals_figure(filtered: pd.DataFrame, detail: str, revision: str) -> go.Fi
     figure.update_xaxes(
         tickmode="array", tickvals=ticks["date"].tolist(), ticktext=ticktext
     )
+    return figure
+
+
+def _spanish_number(value: float, decimals: int = 0) -> str:
+    text = f"{value:,.{decimals}f}"
+    return text.replace(",", "_").replace(".", ",").replace("_", ".")
+
+
+def markets_figure(rows: pd.DataFrame) -> go.Figure:
+    markets = aggregate_markets(rows)
+    figure = go.Figure()
+    figure.update_layout(
+        template="none",
+        font={"family": FONT_FAMILY, "size": 13, "color": TEXT},
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        margin={"l": 20, "r": 24, "t": 16, "b": 65},
+        height=400,
+        separators=",.",
+        hovermode="closest",
+        dragmode=False,
+        showlegend=False,
+        xaxis={
+            "title": "Llegadas de visitantes",
+            "gridcolor": GRID,
+            "zeroline": False,
+            "tickformat": ",.0f",
+            "automargin": True,
+        },
+        yaxis={
+            "autorange": "reversed",
+            "automargin": True,
+            "showgrid": False,
+            "tickfont": {"size": 13},
+        },
+    )
+    if markets.empty:
+        figure.add_annotation(
+            text=NO_DATA_MESSAGE,
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font={"size": 15, "color": SECONDARY},
+        )
+        figure.update_xaxes(visible=False)
+        figure.update_yaxes(visible=False)
+        return figure
+
+    names = [display_origin(origin) for origin in markets["origin"]]
+    figure.add_trace(
+        go.Bar(
+            x=markets["arrivals"].tolist(),
+            y=names,
+            orientation="h",
+            name="Llegadas observadas",
+            marker={"color": OBSERVED},
+            text=[
+                f"{_spanish_number(arrivals)} · {_spanish_number(share, 1)} %"
+                for arrivals, share in zip(markets["arrivals"], markets["share"])
+            ],
+            textposition="outside",
+            cliponaxis=False,
+            textfont={"size": 13, "color": TEXT},
+            customdata=[
+                [ORIGIN_TYPES[level], _spanish_number(share, 1)]
+                for level, share in zip(markets["origin_level"], markets["share"])
+            ],
+            hovertemplate=(
+                "<b>%{y}</b> (%{customdata[0]})<br>"
+                "Llegadas observadas: %{x:,.0f}<br>"
+                "Participación en la selección: %{customdata[1]} %<extra></extra>"
+            ),
+        )
+    )
+    # Deja espacio a la derecha para que la etiqueta de la barra más larga se lea completa.
+    figure.update_xaxes(range=[0, markets["arrivals"].max() * 1.32])
     return figure
