@@ -21,7 +21,7 @@ def _walk(component: object):
         yield from _walk(children)
 
 
-def test_create_app_loads_data_and_mounts_arrivals_timeline() -> None:
+def test_create_app_loads_data_and_mounts_timeline_and_markets() -> None:
     app = create_app(DATA_PATH)
 
     assert isinstance(app, Dash)
@@ -29,7 +29,7 @@ def test_create_app_loads_data_and_mounts_arrivals_timeline() -> None:
     graphs = [
         component for component in _walk(app.layout) if isinstance(component, dcc.Graph)
     ]
-    assert [graph.id for graph in graphs] == ["arrivals-timeline"]
+    assert [graph.id for graph in graphs] == ["arrivals-timeline", "market-chart"]
 
 
 def test_layout_has_unique_component_ids_and_shared_selection() -> None:
@@ -78,7 +78,7 @@ def test_callbacks_have_unique_outputs() -> None:
         for output in callback["output"]
     ]
 
-    assert len(app.callback_map) == 3
+    assert len(app.callback_map) == 4
     assert len(outputs) == len(set(outputs))
 
 

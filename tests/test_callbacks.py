@@ -14,6 +14,7 @@ DEFAULT_INPUTS = {
     "period-end.value": "2024-12-01",
     "origin-filter.value": "all",
     "time-detail.value": "month",
+    "v1-selection.data": None,
     "arrivals-timeline.selectedData": None,
     "arrivals-timeline.clickData": None,
     "clear-selection.n_clicks": 0,
@@ -160,3 +161,57 @@ def test_navigation_keeps_one_panel_visible_and_disables_inapplicable_filters(ap
         option["disabled"] is (tab != "arrivals")
         for option in result["time-detail"]["options"]
     )
+
+
+def market_state(result):
+    figure = result["market-chart"]["figure"]
+    bars = figure["data"][0] if figure["data"] else None
+    return figure, bars
+
+
+def test_markets_follow_the_period_selected_in_the_timeline(app):
+    selection = invoke(
+        app,
+        "v1-selection.data",
+        {"arrivals-timeline.clickData": {"points": [{"customdata": ["2024-07"]}]}},
+        ["arrivals-timeline.clickData"],
+    )["v1-selection"]["data"]
+    result = invoke(
+        app, "market-chart.figure", {"v1-selection.data": selection}, ["v1-selection.data"]
+    )
+    _, bars = market_state(result)
+    total = invoke(
+        app,
+        "arrivals-timeline.figure",
+        {"period-start.value": "2024-07-01", "period-end.value": "2024-07-01"},
+        ["period-start.value"],
+    )["arrivals-total"]["children"]
+
+    assert sum(bars["x"]) == int(total.replace(".", ""))
+    assert "Julio de 2024" in result["market-caption"]["children"]
+
+
+def test_markets_cover_the_whole_filter_when_nothing_is_selected(app):
+    full = invoke(app, "v1-selection.data")["v1-selection"]["data"]
+    _, bars = market_state(
+        invoke(app, "market-chart.figure", {"v1-selection.data": full})
+    )
+
+    assert len(bars["y"]) == 11
+    assert bars["x"] == sorted(bars["x"], reverse=True)
+
+
+def test_markets_show_a_message_when_the_selection_has_no_months(app):
+    empty = {"dates": [], "market": "all", "granularity": "month", "is_selected": False}
+    result = invoke(app, "market-chart.figure", {"v1-selection.data": empty})
+    figure, bars = market_state(result)
+
+    assert bars is None
+    assert "No hay información" in figure["layout"]["annotations"][0]["text"]
+    assert "No hay meses disponibles" in result["market-caption"]["children"]
+
+
+def test_markets_tolerate_a_missing_selection(app):
+    result = invoke(app, "market-chart.figure", {"v1-selection.data": None})
+
+    assert not result["market-chart"]["figure"]["data"]

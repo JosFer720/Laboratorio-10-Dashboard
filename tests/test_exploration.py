@@ -9,6 +9,7 @@ from tourism_dashboard.callbacks import summary_values
 from tourism_dashboard.data import load_arrivals
 from tourism_dashboard.exploration import (
     aggregate_arrivals,
+    aggregate_markets,
     apply_selection,
     filter_arrivals,
     make_selection,
@@ -193,3 +194,14 @@ def test_data_integrity_after_filter_aggregation_and_selection(arrivals):
     )
 
     pd.testing.assert_frame_equal(arrivals, original)
+
+
+def test_market_aggregation_keeps_the_selected_total_and_shares(arrivals):
+    selection = make_selection(arrivals, "region:America Central", "month")
+    rows = apply_selection(arrivals, selection)
+    markets = aggregate_markets(rows)
+
+    assert markets["arrivals"].sum() == rows["arrivals"].sum()
+    assert markets["share"].sum() == pytest.approx(100)
+    assert markets["arrivals"].is_monotonic_decreasing
+    assert aggregate_markets(arrivals.iloc[:0]).empty
