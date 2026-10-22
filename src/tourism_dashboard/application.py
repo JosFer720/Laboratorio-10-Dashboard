@@ -2,25 +2,23 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import dash_bootstrap_components as dbc
-from dash import Dash, html
+from dash import Dash
 
+from tourism_dashboard.callbacks import register_callbacks
 from tourism_dashboard.data import load_arrivals
+from tourism_dashboard.layout import build_layout
 
 
 def create_app(data_path: str | Path) -> Dash:
     arrivals = load_arrivals(data_path)
     app = Dash(
         __name__,
-        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        assets_folder=str(Path(__file__).resolve().parent / "assets"),
         title="Observatorio de turismo sostenible",
+        update_title="Actualizando…",
     )
+    app.index_string = app.index_string.replace("<html>", '<html lang="es">')
     app.server.config["TOURISM_DATA"] = arrivals
-    app.layout = dbc.Container(
-        [
-            html.H1("Observatorio de turismo sostenible"),
-            html.P("Tablero interactivo de indicadores turisticos de Guatemala."),
-        ],
-        fluid=True,
-    )
+    app.layout = build_layout(arrivals)
+    register_callbacks(app, arrivals)
     return app
