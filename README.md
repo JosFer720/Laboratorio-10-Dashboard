@@ -7,7 +7,7 @@ Tablero interactivo para consultar indicadores de turismo receptor en Guatemala.
 - Python 3.11 o posterior.
 - Acceso a una terminal.
 
-## Instalacion
+## Instalación
 
 En Windows PowerShell:
 
@@ -25,14 +25,14 @@ source .venv/bin/activate
 python -m pip install -r requirements.txt
 ```
 
-## Ejecucion
+## Ejecución
 
-Desde la raiz del proyecto:
+Desde la raíz del proyecto:
 
 ```bash
 python app.py
 ```
 
-El tablero estara disponible en `http://127.0.0.1:8050`.
+El tablero estará disponible en `http://127.0.0.1:8050`.
 
-La ruta del CSV puede cambiarse con la variable de entorno `TOURISM_DATA_PATH`. El archivo `.env.example` muestra las variables disponibles; deben establecerse en la terminal antes de iniciar la aplicacion.
+La ruta del CSV puede cambiarse con la variable de entorno `TOURISM_DATA_PATH`. El archivo `.env.example` muestra las variables disponibles; deben establecerse en la terminal antes de iniciar la aplicación.

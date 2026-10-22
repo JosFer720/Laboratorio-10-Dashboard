@@ -13,7 +13,9 @@ La aplicación se construye con `create_app(data_path)` y conserva el DataFrame 
 | `time-detail` | `value` | `month`, `quarter` o `year`. |
 | `clear-selection` | `n_clicks` | Restablece la selección al periodo completo del filtro. |
 | `v1-selection` | `data` | Meses y mercado efectivos para otra visualización. |
-| `market-breakdown` | `children` | Contenedor disponible para la gráfica de mercados. |
+| `market-breakdown` | `children` | Contenedor de la gráfica de mercados. |
+| `market-chart` | `figure` | Barras de llegadas por mercado de origen para la selección. |
+| `market-caption` | `children` | Mercado y periodo que muestra la gráfica de mercados. |
 | `main-tabs` | `active_tab` | `arrivals`, `seasons`, `models` o `data`. |
 
 Los mercados admiten `all`, `region:<origin_region>` y `origin:<origin>`, con los valores presentes en el DataFrame. `market_options()` genera las opciones y distingue país, agregado y segmento. Una región suma sus categorías existentes; no agrega nuevamente un subtotal. Los paneles permanecen montados al cambiar de pestaña. Los filtros conservan sus valores y se desactivan cuando no hay una gráfica que los utilice en la vista elegida.
@@ -41,7 +43,7 @@ Cada punto de la serie incluye `customdata = [period_key, label, months]`. Las c
 
 Una gráfica de mercados puede escuchar `Input("v1-selection", "data")` y recuperar las filas con `apply_selection(arrivals, selection)`, disponible en `tourism_dashboard.exploration`. Esa función aplica los meses exactos y el mercado indicado. Un contrato ausente o sin fechas devuelve un DataFrame vacío.
 
-Con esas filas, se puede agrupar `arrivals` por `origin` u `origin_region`. El contenedor `market-breakdown` está vacío y no tiene callbacks propios; permite incorporar esa gráfica sin cambiar el contrato ni duplicar los filtros. La visualización de mercados todavía no está implementada.
+`market-chart` escucha `v1-selection`, recupera las filas con `apply_selection` y las suma por `origin` con `aggregate_markets`. Cada barra muestra las llegadas y la participación de un origen dentro de la selección. Si la selección no tiene meses, la gráfica muestra un mensaje que sugiere ampliar el periodo, elegir todos los mercados o limpiar la selección.
 
 ## Agregación y datos ausentes
 
