@@ -93,7 +93,7 @@ main { padding: 28px 0 24px; }
 .chart-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .chart-help { margin: 8px 0 6px; font-size: 13px; color: var(--secondary); }
 .selection-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--border); }
-#selection-label { font-size: 13px; overflow-wrap: anywhere; }
+#selection-label, #market-caption { font-size: 13px; overflow-wrap: anywhere; }
 button { font-family: inherit; }
 #clear-selection { flex-shrink: 0; min-height: 40px; padding: 8px 12px; border: 1px solid var(--observed); border-radius: 5px; color: var(--observed); background: var(--surface); font-size: 13px; }
 #clear-selection:hover:not(:disabled) { background: var(--blue-100); }

@@ -129,7 +129,7 @@ def markets_figure(rows: pd.DataFrame) -> go.Figure:
         font={"family": FONT_FAMILY, "size": 13, "color": TEXT},
         paper_bgcolor="#FFFFFF",
         plot_bgcolor="#FFFFFF",
-        margin={"l": 20, "r": 24, "t": 16, "b": 65},
+        margin={"l": 20, "r": 24, "t": 40, "b": 65},
         height=400,
         separators=",.",
         hovermode="closest",
@@ -190,5 +190,5 @@ def markets_figure(rows: pd.DataFrame) -> go.Figure:
         )
     )
     # Deja espacio a la derecha para que la etiqueta de la barra más larga se lea completa.
-    figure.update_xaxes(range=[0, markets["arrivals"].max() * 1.32])
+    figure.update_xaxes(range=[0, markets["arrivals"].max() * 1.55])
     return figure

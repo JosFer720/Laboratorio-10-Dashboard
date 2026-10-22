@@ -207,6 +207,7 @@ def _timeline(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 figure=arrivals_figure(arrivals, "month", "initial"),
                 config=GRAPH_CONFIG,
                 responsive=True,
+                style={"height": "400px"},
             ),
             html.Div(
                 [
@@ -252,6 +253,7 @@ def _markets(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 figure=markets_figure(apply_selection(arrivals, initial)),
                 config=MARKETS_GRAPH_CONFIG,
                 responsive=True,
+                style={"height": "400px"},
             ),
             html.Div(
                 html.P(
