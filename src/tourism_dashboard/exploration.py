@@ -95,6 +95,24 @@ def aggregate_arrivals(arrivals: pd.DataFrame, detail: str) -> pd.DataFrame:
     return result
 
 
+def aggregate_markets(rows: pd.DataFrame) -> pd.DataFrame:
+    """Suma las llegadas de cada origen y calcula su participación."""
+    columns = ["origin", "origin_level", "arrivals", "share"]
+    if rows.empty:
+        return pd.DataFrame(columns=columns)
+    totals = (
+        rows.groupby(["origin", "origin_level"], sort=False)["arrivals"]
+        .sum()
+        .reset_index()
+    )
+    totals["arrivals"] = totals["arrivals"].astype("int64")
+    total = totals["arrivals"].sum()
+    totals["share"] = totals["arrivals"] / total * 100 if total else 0.0
+    return totals.sort_values("arrivals", ascending=False, kind="stable").reset_index(
+        drop=True
+    )
+
+
 def period_label(period: pd.Period, detail: str) -> str:
     if detail == "month":
         return month_label(period.start_time)
@@ -160,3 +178,12 @@ def selection_label(selection: Mapping[str, Any]) -> str:
     names = [month_label(date) for date in dates[:3]]
     suffix = f" y {len(dates) - 3} más" if len(dates) > 3 else ""
     return "Selección: " + "; ".join(names) + suffix
+
+
+def market_labels(arrivals: pd.DataFrame) -> dict[str, str]:
+    return {option["value"]: option["label"] for option in market_options(arrivals)}
+
+
+def markets_caption(selection: Mapping[str, Any], labels: Mapping[str, str]) -> str:
+    market = labels.get(selection.get("market"), "sin mercado válido")
+    return f"Mercado: {market} · {selection_label(selection)}"
