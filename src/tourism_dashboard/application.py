@@ -12,6 +12,7 @@ from tourism_dashboard.data import (
     load_arrivals,
     load_model_metrics,
     load_model_predictions,
+    validate_model_results,
 )
 from tourism_dashboard.layout import build_layout
 
@@ -30,6 +31,7 @@ def create_app(
     else:
         model_predictions = load_model_predictions(model_predictions_path)
         model_metrics = load_model_metrics(model_metrics_path)
+    validate_model_results(arrivals, model_predictions, model_metrics)
     app = Dash(
         __name__,
         assets_folder=str(Path(__file__).resolve().parent / "assets"),
@@ -40,6 +42,6 @@ def create_app(
     app.server.config["TOURISM_DATA"] = arrivals
     app.server.config["TOURISM_MODEL_PREDICTIONS"] = model_predictions
     app.server.config["TOURISM_MODEL_METRICS"] = model_metrics
-    app.layout = build_layout(arrivals)
-    register_callbacks(app, arrivals)
+    app.layout = build_layout(arrivals, model_predictions, model_metrics)
+    register_callbacks(app, arrivals, model_predictions, model_metrics)
     return app

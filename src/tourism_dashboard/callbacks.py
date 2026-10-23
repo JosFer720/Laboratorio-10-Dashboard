@@ -14,29 +14,44 @@ from tourism_dashboard.exploration import (
     month_label,
     selection_label,
 )
-from tourism_dashboard.figures import arrivals_figure, markets_figure
+from tourism_dashboard.figures import (
+    arrivals_figure,
+    markets_figure,
+    model_evaluation_figure,
+)
+from tourism_dashboard.models import (
+    metric_values,
+    model_status,
+    sanitize_model_selection,
+    selected_model_rows,
+)
 
 
-def _number(value: int) -> str:
-    return f"{value:,}".replace(",", ".")
+def _number(value: float) -> str:
+    return f"{value:,.0f}".replace(",", ".")
 
 
 def summary_values(filtered: pd.DataFrame) -> tuple[str, str, str, str]:
     if filtered.empty:
         return "—", "—", "Sin información en este periodo", "0"
     monthly = aggregate_arrivals(filtered, "month")
-    peak = int(monthly["arrivals"].max())
+    peak = float(monthly["arrivals"].max())
     peak_months = monthly.loc[monthly["arrivals"] == peak, "date"]
     label = "; ".join(month_label(date) for date in peak_months)
     return (
-        _number(int(monthly["arrivals"].sum())),
+        _number(float(monthly["arrivals"].sum())),
         _number(peak),
         label,
         str(len(monthly)),
     )
 
 
-def register_callbacks(app: Dash, arrivals: pd.DataFrame) -> None:
+def register_callbacks(
+    app: Dash,
+    arrivals: pd.DataFrame,
+    model_predictions: pd.DataFrame,
+    model_metrics: pd.DataFrame,
+) -> None:
     @app.callback(
         Output("arrivals-timeline", "figure"),
         Output("arrivals-timeline", "clickData"),
@@ -106,6 +121,36 @@ def register_callbacks(app: Dash, arrivals: pd.DataFrame) -> None:
             selection = {"dates": [], "market": None, "is_selected": False}
         rows = apply_selection(arrivals, selection)
         return markets_figure(rows), markets_caption(selection, labels)
+
+    @app.callback(
+        Output("v7-model-selection", "data"),
+        Input("model-selector", "value"),
+    )
+    def update_model_selection(model_id):
+        return sanitize_model_selection(
+            model_id, model_predictions, model_metrics
+        )
+
+    @app.callback(
+        Output("model-evaluation-chart", "figure"),
+        Output("model-mae", "children"),
+        Output("model-rmse", "children"),
+        Output("model-mape", "children"),
+        Output("model-status", "children"),
+        Input("v7-model-selection", "data"),
+    )
+    def update_model_evaluation(selection):
+        predictions, metrics = selected_model_rows(
+            model_predictions, model_metrics, selection
+        )
+        mae, rmse, mape = metric_values(metrics)
+        return (
+            model_evaluation_figure(predictions),
+            mae,
+            rmse,
+            mape,
+            model_status(metrics),
+        )
 
     @app.callback(
         Output("arrivals-panel", "hidden"),

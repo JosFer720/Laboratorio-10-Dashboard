@@ -183,6 +183,16 @@ def test_missing_months_are_gaps_and_never_zero(arrivals):
     assert figure.data[0].connectgaps is False
 
 
+def test_arrivals_figure_preserves_fractional_observations(arrivals):
+    filtered = arrivals.loc[arrivals["date"] == "2009-01-01"]
+    expected = filtered["arrivals"].sum()
+
+    figure = arrivals_figure(filtered, "month", "fractional")
+
+    assert figure.data[0].y[0] == pytest.approx(expected)
+    assert figure.data[0].y[0] != int(expected)
+
+
 def test_data_integrity_after_filter_aggregation_and_selection(arrivals):
     original = arrivals.copy(deep=True)
     filtered = filter_arrivals(

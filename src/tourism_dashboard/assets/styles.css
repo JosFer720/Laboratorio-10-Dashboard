@@ -100,6 +100,15 @@ button { font-family: inherit; }
 #clear-selection:disabled { color: var(--secondary); border-color: var(--border); cursor: default; }
 .chart-source { margin: 0 -24px; padding: 12px 24px; border-top: 1px solid var(--border); }
 .page-note { margin-top: 14px; }
+.models-panel { display: grid; gap: 20px; }
+.model-control { max-width: 520px; }
+#model-selector,
+#model-selector .Select-control,
+#model-selector .Select-value,
+#model-selector .Select-placeholder { min-height: 44px; }
+#model-selector .Select-value-label,
+#model-selector .Select-placeholder { line-height: 42px; }
+.model-metrics { margin: 0; }
 .information-panel { max-width: 980px; padding: 28px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
 .information-panel h3 { margin-top: 24px; }
 .information-panel p { margin-top: 10px; }

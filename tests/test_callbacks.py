@@ -9,6 +9,8 @@ from tourism_dashboard.application import create_app
 DATA_PATH = (
     Path(__file__).resolve().parents[1] / "data" / "arrivals_migration_2009_2026.csv"
 )
+MODEL_PREDICTIONS_PATH = DATA_PATH.with_name("model_predictions_s0.csv")
+MODEL_METRICS_PATH = DATA_PATH.with_name("model_metrics_s0.csv")
 DEFAULT_INPUTS = {
     "period-start.value": "2022-01-01",
     "period-end.value": "2024-12-01",
@@ -19,26 +21,33 @@ DEFAULT_INPUTS = {
     "arrivals-timeline.clickData": None,
     "clear-selection.n_clicks": 0,
     "main-tabs.active_tab": "arrivals",
+    "model-selector.value": "lstm-catch22-contexto-w24",
+    "v7-model-selection.data": {"model": "lstm-catch22-contexto-w24"},
 }
 
 
 @pytest.fixture
 def app():
-    return create_app(DATA_PATH)
+    return create_app(DATA_PATH, MODEL_PREDICTIONS_PATH, MODEL_METRICS_PATH)
 
 
 def invoke(app, target, changes=None, changed=None):
     values = DEFAULT_INPUTS | (changes or {})
     key = next(key for key in app.callback_map if target in key)
     callback = app.callback_map[key]
+    callback_outputs = callback["output"]
+    is_multi_output = isinstance(callback_outputs, (list, tuple))
+    if not is_multi_output:
+        callback_outputs = [callback_outputs]
+    output_spec = [
+        {"id": output.component_id, "property": output.component_property}
+        for output in callback_outputs
+    ]
     response = app.server.test_client().post(
         "/_dash-update-component",
         json={
             "output": key,
-            "outputs": [
-                {"id": output.component_id, "property": output.component_property}
-                for output in callback["output"]
-            ],
+            "outputs": output_spec if is_multi_output else output_spec[0],
             "inputs": [
                 dict(item, value=values[f"{item['id']}.{item['property']}"])
                 for item in callback["inputs"]
@@ -215,3 +224,53 @@ def test_markets_tolerate_a_missing_selection(app):
     result = invoke(app, "market-chart.figure", {"v1-selection.data": None})
 
     assert not result["market-chart"]["figure"]["data"]
+
+
+def test_model_selector_exposes_only_a_sanitized_id(app):
+    valid = invoke(
+        app,
+        "v7-model-selection.data",
+        {"model-selector.value": "prophet"},
+        ["model-selector.value"],
+    )
+    invalid = invoke(
+        app,
+        "v7-model-selection.data",
+        {"model-selector.value": "desconocido"},
+        ["model-selector.value"],
+    )
+
+    assert valid["v7-model-selection"]["data"] == {"model": "prophet"}
+    assert invalid["v7-model-selection"]["data"] == {"model": None}
+
+
+def test_model_panel_updates_figure_metrics_and_status(app):
+    result = invoke(
+        app,
+        "model-evaluation-chart.figure",
+        {"v7-model-selection.data": {"model": "arima-1-1-1"}},
+        ["v7-model-selection.data"],
+    )
+
+    traces = result["model-evaluation-chart"]["figure"]["data"]
+    assert [trace["name"] for trace in traces] == [
+        "Observado",
+        "Estimado · ARIMA(1,1,1)",
+    ]
+    assert result["model-mae"]["children"] == "154.873"
+    assert result["model-rmse"]["children"] == "169.524"
+    assert result["model-mape"]["children"] == "59,3 %"
+    assert "evaluación histórica" in result["model-status"]["children"]
+
+
+def test_model_panel_handles_an_invalid_shared_state(app):
+    result = invoke(
+        app,
+        "model-evaluation-chart.figure",
+        {"v7-model-selection.data": {"model": "desconocido"}},
+        ["v7-model-selection.data"],
+    )
+
+    assert not result["model-evaluation-chart"]["figure"]["data"]
+    assert result["model-mae"]["children"] == "—"
+    assert result["model-status"]["children"] == "No hay un modelo válido seleccionado."

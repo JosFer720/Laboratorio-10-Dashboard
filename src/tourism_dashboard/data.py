@@ -359,3 +359,42 @@ def load_model_metrics(path: str | Path) -> pd.DataFrame:
     data["_model_order"] = data["model_id"].map(order)
     data = data.sort_values("_model_order", kind="stable")
     return data.loc[:, MODEL_METRIC_COLUMNS].reset_index(drop=True)
+
+
+def validate_model_results(
+    arrivals: pd.DataFrame,
+    predictions: pd.DataFrame,
+    metrics: pd.DataFrame,
+) -> None:
+    if predictions.empty and metrics.empty:
+        return
+
+    monthly = arrivals.groupby("date", sort=True)["arrivals"].sum()
+    observed = predictions.drop_duplicates("date").set_index("date")["observed"]
+    expected = monthly.reindex(observed.index)
+    if expected.isna().any() or not np.allclose(
+        observed.to_numpy(dtype=float),
+        expected.to_numpy(dtype=float),
+        rtol=1e-10,
+        atol=1e-6,
+    ):
+        raise TourismDataError(
+            "Los valores observados de modelos no coinciden con la serie de llegadas."
+        )
+
+    for row in metrics.itertuples():
+        model_rows = predictions.loc[predictions["model_id"] == row.model_id]
+        error = model_rows["estimate"] - model_rows["observed"]
+        recalculated = np.array(
+            [
+                error.abs().mean(),
+                np.sqrt(error.pow(2).mean()),
+                (error.abs() / model_rows["observed"]).mean() * 100,
+            ],
+            dtype=float,
+        )
+        declared = np.array([row.mae, row.rmse, row.mape], dtype=float)
+        if not np.allclose(recalculated, declared, rtol=1e-10, atol=1e-6):
+            raise TourismDataError(
+                f"Las metricas recalculadas no coinciden para {row.model_id}."
+            )

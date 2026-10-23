@@ -16,6 +16,7 @@ NO_DATA_MESSAGE = (
 )
 ORIGIN_TYPES = {"country": "País", "region": "Agregado", "segment": "Segmento"}
 OBSERVED = "#0B5C8E"
+ESTIMATED = "#D55E00"
 CONTEXT = "#8A939E"
 TEXT = "#1F2933"
 SECONDARY = "#5B6573"
@@ -84,7 +85,8 @@ def arrivals_figure(filtered: pd.DataFrame, detail: str, revision: str) -> go.Fi
         go.Scatter(
             x=plotted.index.start_time.to_list(),
             y=[
-                int(value) if pd.notna(value) else None for value in plotted["arrivals"]
+                float(value) if pd.notna(value) else None
+                for value in plotted["arrivals"]
             ],
             name="Llegadas observadas",
             mode="lines+markers",
@@ -191,4 +193,64 @@ def markets_figure(rows: pd.DataFrame) -> go.Figure:
     )
     # Deja espacio a la derecha para que la etiqueta de la barra más larga se lea completa.
     figure.update_xaxes(range=[0, markets["arrivals"].max() * 1.55])
+    return figure
+
+
+def model_evaluation_figure(predictions: pd.DataFrame) -> go.Figure:
+    figure = go.Figure()
+    figure.update_layout(
+        template="none",
+        font={"family": FONT_FAMILY, "size": 13, "color": TEXT},
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        margin={"l": 70, "r": 24, "t": 32, "b": 65},
+        height=420,
+        separators=",.",
+        hovermode="x unified",
+        legend={"orientation": "h", "x": 0, "y": 1.12},
+        xaxis={"title": "Mes de evaluación", "showgrid": False, "automargin": True},
+        yaxis={
+            "title": "Turistas y excursionistas",
+            "gridcolor": GRID,
+            "rangemode": "tozero",
+            "tickformat": ",.0f",
+            "automargin": True,
+        },
+    )
+    if predictions.empty:
+        figure.add_annotation(
+            text="No hay resultados para el modelo seleccionado.",
+            x=0.5,
+            y=0.5,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font={"size": 15, "color": SECONDARY},
+        )
+        figure.update_xaxes(visible=False)
+        figure.update_yaxes(visible=False)
+        return figure
+
+    rows = predictions.sort_values("date", kind="stable")
+    label = str(rows.iloc[0]["model_label"])
+    figure.add_trace(
+        go.Scatter(
+            x=rows["date"].tolist(),
+            y=rows["observed"].astype(float).tolist(),
+            name="Observado",
+            mode="lines",
+            line={"color": OBSERVED, "width": 2.5, "dash": "solid"},
+            hovertemplate="Observado: %{y:,.0f}<extra></extra>",
+        )
+    )
+    figure.add_trace(
+        go.Scatter(
+            x=rows["date"].tolist(),
+            y=rows["estimate"].astype(float).tolist(),
+            name=f"Estimado · {label}",
+            mode="lines",
+            line={"color": ESTIMATED, "width": 2.5, "dash": "dash"},
+            hovertemplate="Estimado: %{y:,.0f}<extra></extra>",
+        )
+    )
     return figure

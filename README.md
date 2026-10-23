@@ -1,6 +1,6 @@
 # Observatorio de turismo sostenible
 
-Tablero interactivo para consultar indicadores de turismo receptor en Guatemala. Usa datos mensuales del Instituto Guatemalteco de Turismo (INGUAT) para 2022, 2023 y 2024: las llegadas de visitantes no residentes y la ocupación hotelera.
+Tablero interactivo para consultar turistas y excursionistas en Guatemala entre enero de 2009 y junio de 2026, comparar tres modelos sobre su evaluación histórica y explorar la ocupación hotelera de 2022 a 2024.
 
 ## Requisitos
 
@@ -35,4 +35,4 @@ python app.py
 
 El tablero estará disponible en `http://127.0.0.1:8050`.
 
-La ruta del CSV puede cambiarse con la variable de entorno `TOURISM_DATA_PATH`. El archivo `.env.example` muestra las variables disponibles; deben establecerse en la terminal antes de iniciar la aplicación.
+Las rutas de los CSV pueden cambiarse con las variables de entorno mostradas en `.env.example`; deben establecerse en la terminal antes de iniciar la aplicación.

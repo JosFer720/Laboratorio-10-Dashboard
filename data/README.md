@@ -1,10 +1,10 @@
-# Llegadas de visitantes no residentes a Guatemala
+# Turistas y excursionistas en Guatemala
 
 `arrivals_migration_2009_2026.csv` contiene la serie mensual de turistas y excursionistas entre enero de 2009 y junio de 2026. Cada fila representa un mes y conserva cantidades decimales cuando la fuente contiene estimaciones expandidas.
 
 ## Fuente
 
-La exportación se deriva de `Base_Migracion_2009-2026jun.xlsx`, la misma base preparada y validada en los laboratorios de series de tiempo. La fuente combina registros del Instituto Guatemalteco de Migración con estimaciones de flujos terrestres de INGUAT.
+La exportación se deriva de `Base_Migracion_2009-2026jun.xlsx`, la misma base preparada y validada en el repositorio [Laboratorio-1-Series-de-Tiempo](https://github.com/JosFer720/Laboratorio-1-Series-de-Tiempo): el Laboratorio 1 corresponde a `main` y el Laboratorio 2 a la rama `Lab2`. La fuente combina registros del Instituto Guatemalteco de Migración con estimaciones de flujos terrestres de INGUAT.
 
 ## Transformación
 
@@ -108,4 +108,4 @@ El índice de los boletines de cada año está en el [archivo de ocupación hote
 - En los 36 meses, ocupadas entre disponibles, redondeado a entero, coincide con el índice publicado.
 - El boletín 2024 muestra enero de 2023 con 63 %, mientras que el boletín 2023 lo publica con 62 %. El valor exacto es 62.5 %, así que la diferencia es de redondeo; se conserva el del boletín 2023.
 - Noviembre de 2023 tiene un índice de 41 %, muy por debajo de los meses vecinos. Es el valor oficial y se conserva sin ajustes.
-- La ocupación incluye huéspedes residentes en Guatemala, a diferencia de las llegadas, que cuentan solo visitantes no residentes.
+- La ocupación incluye huéspedes de establecimientos hoteleros y tiene un alcance distinto al de la serie migratoria de turistas y excursionistas.

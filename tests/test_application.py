@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pandas as pd
 import pytest
 from dash import Dash, dcc
 
 from tourism_dashboard.application import create_app
+from tourism_dashboard.data import TourismDataError
 
 DATA_PATH = (
     Path(__file__).resolve().parents[1]
@@ -34,7 +36,11 @@ def test_create_app_loads_data_and_mounts_timeline_and_markets() -> None:
     graphs = [
         component for component in _walk(app.layout) if isinstance(component, dcc.Graph)
     ]
-    assert [graph.id for graph in graphs] == ["arrivals-timeline", "market-chart"]
+    assert [graph.id for graph in graphs] == [
+        "arrivals-timeline",
+        "market-chart",
+        "model-evaluation-chart",
+    ]
 
 
 def test_create_app_exposes_validated_model_data() -> None:
@@ -45,6 +51,20 @@ def test_create_app_exposes_validated_model_data() -> None:
     assert len(predictions) == 189
     assert len(metrics) == 3
     assert set(predictions["model_id"]) == set(metrics["model_id"])
+
+    graphs = [
+        component for component in _walk(app.layout) if isinstance(component, dcc.Graph)
+    ]
+    assert [graph.id for graph in graphs] == [
+        "arrivals-timeline",
+        "market-chart",
+        "model-evaluation-chart",
+    ]
+    stores = [
+        component for component in _walk(app.layout) if isinstance(component, dcc.Store)
+    ]
+    model_store = next(store for store in stores if store.id == "v7-model-selection")
+    assert model_store.data == {"model": "lstm-catch22-contexto-w24"}
 
 
 def test_create_app_keeps_single_path_call_compatible() -> None:
@@ -57,6 +77,31 @@ def test_create_app_keeps_single_path_call_compatible() -> None:
 def test_create_app_rejects_only_one_model_artifact_path() -> None:
     with pytest.raises(ValueError, match="ambas rutas"):
         create_app(DATA_PATH, MODEL_PREDICTIONS_PATH)
+
+
+def test_create_app_rejects_model_observations_that_do_not_match_arrivals(
+    tmp_path: Path,
+) -> None:
+    predictions = pd.read_csv(MODEL_PREDICTIONS_PATH)
+    first_date = predictions.loc[0, "date"]
+    predictions.loc[predictions["date"] == first_date, "observed"] += 1
+    predictions_path = tmp_path / "predictions.csv"
+    predictions.to_csv(predictions_path, index=False)
+
+    with pytest.raises(TourismDataError, match="serie de llegadas"):
+        create_app(DATA_PATH, predictions_path, MODEL_METRICS_PATH)
+
+
+def test_create_app_rejects_metrics_that_do_not_match_predictions(
+    tmp_path: Path,
+) -> None:
+    metrics = pd.read_csv(MODEL_METRICS_PATH)
+    metrics.loc[0, "mae"] += 1
+    metrics_path = tmp_path / "metrics.csv"
+    metrics.to_csv(metrics_path, index=False)
+
+    with pytest.raises(TourismDataError, match="recalculadas"):
+        create_app(DATA_PATH, MODEL_PREDICTIONS_PATH, metrics_path)
 
 
 def test_layout_has_unique_component_ids_and_shared_selection() -> None:
@@ -99,13 +144,17 @@ def test_app_serves_layout_dependencies_and_local_styles() -> None:
 
 def test_callbacks_have_unique_outputs() -> None:
     app = create_app(DATA_PATH)
-    outputs = [
-        (output.component_id, output.component_property)
-        for callback in app.callback_map.values()
-        for output in callback["output"]
-    ]
+    outputs = []
+    for callback in app.callback_map.values():
+        callback_outputs = callback["output"]
+        if not isinstance(callback_outputs, (list, tuple)):
+            callback_outputs = [callback_outputs]
+        outputs.extend(
+            (output.component_id, output.component_property)
+            for output in callback_outputs
+        )
 
-    assert len(app.callback_map) == 4
+    assert len(app.callback_map) == 6
     assert len(outputs) == len(set(outputs))
 
 
@@ -118,3 +167,7 @@ def test_create_app_has_the_dashboard_title() -> None:
     )
 
     assert "Observatorio de turismo sostenible" in text
+    assert "predicciones evaluadas históricamente" in text
+    assert "No se muestra intervalo" in text
+    assert "visitantes no residentes" not in text
+    assert "cruceristas" not in text.lower()

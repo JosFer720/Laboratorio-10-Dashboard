@@ -14,7 +14,18 @@ from tourism_dashboard.exploration import (
     month_options,
     selection_label,
 )
-from tourism_dashboard.figures import arrivals_figure, markets_figure
+from tourism_dashboard.figures import (
+    arrivals_figure,
+    markets_figure,
+    model_evaluation_figure,
+)
+from tourism_dashboard.models import (
+    initial_model_selection,
+    metric_values,
+    model_options,
+    model_status,
+    selected_model_rows,
+)
 
 GRAPH_CONFIG = {
     "displaylogo": False,
@@ -25,6 +36,10 @@ GRAPH_CONFIG = {
 }
 MARKETS_GRAPH_CONFIG = GRAPH_CONFIG | {
     "toImageButtonOptions": {"filename": "llegadas_por_mercado", "scale": 2}
+}
+MODELS_GRAPH_CONFIG = GRAPH_CONFIG | {
+    "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+    "toImageButtonOptions": {"filename": "evaluacion_historica_modelo", "scale": 2},
 }
 DROPDOWN_LABELS = {
     "select_all": "Seleccionar todos",
@@ -95,7 +110,7 @@ def _filters(arrivals: pd.DataFrame, months: list[dict[str, str]]) -> html.Div:
                         labels=DROPDOWN_LABELS,
                     ),
                     html.P(
-                        "Países, regiones agregadas y cruceristas.",
+                        "Países y regiones agregadas.",
                         className="control-help",
                     ),
                 ]
@@ -118,7 +133,6 @@ def _filters(arrivals: pd.DataFrame, months: list[dict[str, str]]) -> html.Div:
 
 
 def _header(arrivals: pd.DataFrame, months: list[dict[str, str]]) -> html.Header:
-    period = f"{arrivals['year'].min()}–{arrivals['year'].max()}"
     return html.Header(
         [
             html.Div(
@@ -128,7 +142,7 @@ def _header(arrivals: pd.DataFrame, months: list[dict[str, str]]) -> html.Header
                             html.P("GUATEMALA · INGUAT", className="eyebrow"),
                             html.H1("Observatorio de turismo sostenible"),
                             html.P(
-                                f"Llegadas de visitantes no residentes y ocupación hotelera · {period}",
+                                f"Turistas y excursionistas · {months[0]['label']}–{months[-1]['label']} · ocupación hotelera 2022–2024",
                                 className="subtitle",
                             ),
                         ]
@@ -224,7 +238,7 @@ def _timeline(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 className="selection-bar",
             ),
             html.P(
-                "Fuente: INGUAT, boletines de turismo 2022–2024. Los años y trimestres suman únicamente los meses incluidos en el filtro. Los huecos indican meses sin información.",
+                "Fuente: base Migración usada en los Laboratorios 1 y 2. Los años y trimestres suman únicamente los meses incluidos en el filtro.",
                 className="note chart-source",
             ),
         ],
@@ -264,7 +278,7 @@ def _markets(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 className="selection-bar",
             ),
             html.P(
-                "Fuente: INGUAT, boletines de turismo 2022–2024. Los porcentajes son la participación de cada origen en la suma de la selección. Los agregados (Resto de América Central, América del Sur, Europa y Resto del mundo) reúnen varios países y los cruceristas son un grupo aparte, por eso no se comparan como países individuales.",
+                "Fuente: base Migración usada en los Laboratorios 1 y 2. Los porcentajes son la participación de cada origen en la suma de la selección; los agregados reúnen varios países.",
                 className="note chart-source",
             ),
         ],
@@ -295,7 +309,7 @@ def _arrivals_panel(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 className="chart-row",
             ),
             html.P(
-                "Las cifras son llegadas de visitantes no residentes. Por sí solas no miden la ocupación hotelera ni la presión sobre un destino.",
+                "Las cifras suman turistas y excursionistas. Por sí solas no miden la ocupación hotelera ni la presión sobre un destino.",
                 className="note page-note",
             ),
         ],
@@ -309,28 +323,21 @@ def _data_panel(months: list[dict[str, str]]) -> html.Section:
             html.H2("Sobre los datos"),
             html.H3("Qué representan las cifras"),
             html.P(
-                "Las llegadas mensuales corresponden a visitantes no residentes en Guatemala. Los orígenes combinan países individuales, regiones agregadas y un segmento de cruceristas. El filtro identifica cada tipo para evitar confundirlos."
+                "La serie mensual suma turistas y excursionistas. Los orígenes combinan países individuales y regiones agregadas; el filtro identifica cada tipo."
             ),
             html.H3("Cobertura y fuente"),
             html.P(
                 f"Periodo disponible en esta fuente de llegadas: {months[0]['label']} a {months[-1]['label']}."
             ),
             html.P(
-                [
-                    "INGUAT, tabla Visitantes no residentes por mes y país de residencia. ",
-                    html.A(
-                        "Consultar el catálogo de boletines de INGUAT",
-                        href="https://biblioteca.inguat.gob.gt/opac/record/8002",
-                    ),
-                    ".",
-                ]
+                "Base Migración preparada para los Laboratorios 1 y 2 de series de tiempo, con registros migratorios y estimaciones de flujos terrestres de INGUAT."
             ),
             html.H3("Límites de interpretación"),
             html.P(
-                "El tablero suma las categorías originales sin ajustar las cifras. En febrero, abril y octubre de 2024, esa suma difiere en una unidad del total publicado. No se completan meses ausentes con valores inventados."
+                "El tablero conserva los valores decimales de las estimaciones expandidas y no completa meses con valores inventados."
             ),
             html.P(
-                "La fuente de ocupación hotelera disponible cuenta huéspedes residentes y no residentes. Tiene un alcance distinto al de las llegadas. Una coincidencia entre ambas series no demuestra que una cause la otra ni mide la capacidad de un destino para recibir visitantes."
+                "La ocupación hotelera conserva su cobertura de 2022 a 2024 y tiene un alcance distinto al de las llegadas. Una coincidencia entre ambas series no demuestra causalidad."
             ),
             html.H3("Cómo leer la gráfica"),
             html.P(
@@ -343,12 +350,102 @@ def _data_panel(months: list[dict[str, str]]) -> html.Section:
     )
 
 
-def build_layout(arrivals: pd.DataFrame) -> dbc.Container:
+def _models_panel(
+    predictions: pd.DataFrame, metrics: pd.DataFrame
+) -> html.Section:
+    initial = initial_model_selection(predictions, metrics)
+    selected_predictions, selected_metrics = selected_model_rows(
+        predictions, metrics, initial
+    )
+    mae, rmse, mape = metric_values(selected_metrics)
+    options = model_options(predictions, metrics)
+    return html.Section(
+        [
+            html.Div(
+                [
+                    html.H2("Comparación histórica de modelos"),
+                    html.P(
+                        "Estas son predicciones evaluadas históricamente entre abril de 2021 y junio de 2026; no son un pronóstico futuro.",
+                        className="section-description",
+                    ),
+                ],
+                className="section-heading",
+            ),
+            html.Div(
+                [
+                    html.Label("Modelo", htmlFor="model-selector", className="filter-title"),
+                    dcc.Dropdown(
+                        id="model-selector",
+                        options=options,
+                        value=initial["model"],
+                        clearable=False,
+                        disabled=not options,
+                        labels=DROPDOWN_LABELS,
+                    ),
+                    html.P(model_status(selected_metrics), id="model-status", role="status", className="control-help"),
+                ],
+                className="model-control",
+            ),
+            html.Div(
+                [
+                    html.Div(
+                        [html.P("MAE", className="metric-label"), html.P(mae, id="model-mae", className="metric-value"), html.P("Error absoluto promedio, en viajeros.", className="note")],
+                        className="metric-card",
+                    ),
+                    html.Div(
+                        [html.P("RMSE", className="metric-label"), html.P(rmse, id="model-rmse", className="metric-value"), html.P("Da más peso a los errores grandes.", className="note")],
+                        className="metric-card",
+                    ),
+                    html.Div(
+                        [html.P("MAPE", className="metric-label"), html.P(mape, id="model-mape", className="metric-value"), html.P("Error porcentual medio.", className="note")],
+                        className="metric-card",
+                    ),
+                ],
+                className="metrics-grid model-metrics",
+                **{"aria-live": "polite"},
+            ),
+            html.Section(
+                [
+                    html.Div(
+                        [html.H3("Valores observados y estimados"), html.Span("Evaluación histórica", className="observed-badge")],
+                        className="chart-heading",
+                    ),
+                    dcc.Graph(
+                        id="model-evaluation-chart",
+                        figure=model_evaluation_figure(selected_predictions),
+                        config=MODELS_GRAPH_CONFIG,
+                        responsive=True,
+                        style={"height": "420px"},
+                    ),
+                    html.P(
+                        "No se muestra intervalo de confianza porque los resultados originales no incluyen uno.",
+                        className="note chart-source",
+                    ),
+                ],
+                className="chart-card",
+            ),
+        ],
+        id="models-panel",
+        hidden=True,
+        className="models-panel",
+    )
+
+
+def build_layout(
+    arrivals: pd.DataFrame,
+    model_predictions: pd.DataFrame,
+    model_metrics: pd.DataFrame,
+) -> dbc.Container:
     months = month_options(arrivals)
     initial = make_selection(arrivals, "all", "month")
     return dbc.Container(
         [
             dcc.Store(id="v1-selection", storage_type="memory", data=initial),
+            dcc.Store(
+                id="v7-model-selection",
+                storage_type="memory",
+                data=initial_model_selection(model_predictions, model_metrics),
+            ),
             html.A("Ir al contenido", href="#dashboard-content", className="skip-link"),
             _header(arrivals, months),
             html.Main(
@@ -363,15 +460,7 @@ def build_layout(arrivals: pd.DataFrame) -> dbc.Container:
                         hidden=True,
                         className="information-panel",
                     ),
-                    html.Section(
-                        _pending_panel(
-                            "Predicciones y modelos",
-                            "Aún no hay resultados de modelos disponibles para consultar. Las cifras de llegadas mostradas en el tablero son observadas.",
-                        ),
-                        id="models-panel",
-                        hidden=True,
-                        className="information-panel",
-                    ),
+                    _models_panel(model_predictions, model_metrics),
                     _data_panel(months),
                 ],
                 id="dashboard-content",
