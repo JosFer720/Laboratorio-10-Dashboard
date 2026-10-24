@@ -19,16 +19,23 @@ La aplicación se construye con `create_app(data_path, model_predictions_path, m
 | `model-selector` | `value` | Identificador del modelo que se desea consultar. |
 | `v7-model-selection` | `data` | Estado compartido mínimo del modelo elegido. |
 | `model-evaluation-chart` | `figure` | Observado frente a estimado en la evaluación histórica. |
+| `model-errors-chart` | `figure` | Error mensual del mismo modelo seleccionado en V7. |
+| `model-errors-status` | `children` | Modelo y periodo de evaluación correspondientes a los errores. |
+| `model-comparison-table` | `children` | Tabla de MAE, RMSE y MAPE originales de los tres modelos. |
 | `market-share-chart` | `figure`, `clickData` | Peso de cada región o país en las llegadas de cada periodo. |
 | `market-share-caption` | `children` | Nivel de mercado que muestra la gráfica de pesos. |
 | `market-share-back` | `n_clicks` | Regresa el filtro de origen a todos los mercados. |
 | `seasonality-chart` | `figure`, `clickData` | Mapa de calor de llegadas por año y mes, trimestre o año completo. |
 | `seasonality-mode` | `value` | `arrivals` para llegadas o `share` para el peso dentro del año. |
 | `occupancy-chart` | `figure`, `clickData` | Ocupación hotelera por periodo. |
+| `arrivals-occupancy-chart` | `figure` | Relación entre llegadas del mercado elegido y ocupación nacional. |
 | `season-selection` | `data` | Periodo elegido en la estacionalidad o en la ocupación. |
 | `season-selection-label` | `children` | Periodo que comparten ambas gráficas. |
 | `clear-season-selection` | `n_clicks` | Borra el periodo elegido. |
 | `main-tabs` | `active_tab` | `arrivals`, `seasons`, `models` o `data`. |
+| `visible-graphs` | `value` | Identificadores de las gráficas que se desea mostrar. |
+| `show-all-graphs` | `n_clicks` | Selecciona las ocho gráficas. |
+| `hide-all-graphs` | `n_clicks` | Vacía la selección de gráficas. |
 
 Los mercados admiten `all`, `region:<origin_region>` y `origin:<origin>`, con los valores presentes en el DataFrame. `market_options()` genera las opciones y distingue país y agregado. Una región suma sus categorías existentes; no agrega nuevamente un subtotal. Los paneles permanecen montados al cambiar de pestaña. Los filtros conservan sus valores y se desactivan cuando no hay una gráfica que los utilice en la vista elegida.
 
@@ -68,6 +75,33 @@ Una gráfica de mercados puede escuchar `Input("v1-selection", "data")` y recupe
 El selector ofrece LSTM catch22, Prophet y ARIMA(1,1,1). Un valor ajeno a los artefactos se transforma en `{"model": null}` y la vista muestra un estado vacío; nunca se guarda el DataFrame completo en el navegador. Este estado queda disponible para V8.
 
 `model-evaluation-chart` escucha el store y compara los valores observados con los estimados entre abril de 2021 y junio de 2026. Es una evaluación histórica, no un pronóstico futuro. Las tarjetas muestran MAE, RMSE y MAPE del modelo elegido. No se dibuja una banda de confianza porque los artefactos originales no incluyen intervalos.
+
+`model-errors-chart` escucha el mismo estado y recupera sus filas mediante `selected_model_rows()`. No hay otro selector. Sus barras muestran `estimate - observed`: un error positivo es una sobreestimación y uno negativo es una subestimación. La referencia de cero es gris y las barras son naranjas. `model_errors()` calcula esa diferencia en una copia; las predicciones originales permanecen intactas. Un modelo inválido produce una gráfica vacía y un mensaje, igual que en V7.
+
+La tabla `model-comparison-table` usa las filas de métricas validadas, sin volver a calcularlas ni ordenarlas por desempeño. Compara MAE y RMSE en viajeros y MAPE en porcentaje para los tres modelos, sobre los mismos 63 meses. Se muestran dos decimales y el atributo `title` de cada celda conserva el valor completo. Las definiciones explican cómo interpretar el error y por qué no basta una métrica para elegir un modelo.
+
+## Llegadas y ocupación
+
+`arrivals_occupancy()` aplica los filtros de periodo y mercado a las llegadas y conserva solo los meses presentes en ambas fuentes antes de agregar. Así, un trimestre o año parcial usa exactamente los mismos meses para las llegadas y para la ocupación. Las llegadas se suman; la ocupación se calcula con la suma de habitaciones ocupadas dividida entre la suma de disponibles, sin promediar porcentajes.
+
+`arrivals-occupancy-chart` muestra un punto por periodo. El eje horizontal usa las llegadas del mercado elegido y el vertical la ocupación hotelera nacional; el filtro de origen solo afecta al primero. `season-selection` resalta el punto del periodo elegido en V3 o V5 y deja los demás en gris. Fuera de la cobertura común aparece un mensaje; nunca se extrapola ocupación fuera de 2022–2024. Los textos aclaran que las poblaciones de ambas fuentes difieren, que la relación no demuestra causalidad y que el cambio de registro de Guatemala en 2023 limita la comparación.
+
+## Visibilidad de las ocho gráficas
+
+`visible-graphs` es una lista de identificadores y comienza con las ocho opciones seleccionadas. El control «Elegir gráficas» está disponible en todas las pestañas, con casillas individuales y botones para mostrar u ocultar todas. Una selección vacía muestra un mensaje que explica cómo restaurarlas.
+
+El callback cambia únicamente `hidden` en los contenedores. Los gráficos, los controles internos y los stores permanecen montados, por lo que siguen recibiendo cambios de modelo y filtros aunque estén ocultos. Al restaurarlos conservan el estado vigente. La navegación sigue determinando qué pestaña se ve y la tabla de modelos permanece como información complementaria.
+
+| Gráfica | Contenedor cuya visibilidad cambia |
+|---|---|
+| `arrivals-timeline` | `v1-container` |
+| `market-chart` | `market-breakdown` |
+| `seasonality-chart` | `v3-container` |
+| `market-share-chart` | `v4-container` |
+| `occupancy-chart` | `v5-container` |
+| `arrivals-occupancy-chart` | `v6-container` |
+| `model-evaluation-chart` | `v7-container` |
+| `model-errors-chart` | `v8-container` |
 
 ## Peso de los mercados
 
