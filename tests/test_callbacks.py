@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from tourism_dashboard.application import create_app
+from tourism_dashboard.layout import VISUALIZATIONS
 
 DATA_PATH = (
     Path(__file__).resolve().parents[1] / "data" / "arrivals_migration_2009_2026.csv"
@@ -31,6 +32,9 @@ DEFAULT_INPUTS = {
     "clear-season-selection.n_clicks": 0,
     "seasonality-mode.value": "arrivals",
     "season-selection.data": {"period": None, "detail": "month"},
+    "visible-graphs.value": [graph for graph, _, _ in VISUALIZATIONS],
+    "show-all-graphs.n_clicks": 0,
+    "hide-all-graphs.n_clicks": 0,
 }
 
 
@@ -428,4 +432,190 @@ def test_yearly_detail_disables_the_share_of_year_view(app):
 
     options = {item["value"]: item["disabled"] for item in result["seasonality-mode"]["options"]}
     assert options == {"arrivals": False, "share": True}
-    assert result["seasonality-chart"]["figure"]["data"][0]["colorbar"]["title"]["text"] == "Llegadas"
+    assert (
+        result["seasonality-chart"]["figure"]["data"][0]["colorbar"]["title"]["text"]
+        == "Llegadas"
+    )
+
+
+@pytest.mark.parametrize(
+    ("detail", "count"), [("month", 36), ("quarter", 12), ("year", 3)]
+)
+def test_relationship_callback_uses_common_observations_and_detail(app, detail, count):
+    result = invoke(
+        app, "arrivals-occupancy-chart.figure", {"time-detail.value": detail}
+    )
+    trace = result["arrivals-occupancy-chart"]["figure"]["data"][0]
+
+    assert len(trace["x"]) == count
+    assert len(trace["y"]) == count
+    assert sum(row[2] for row in trace["customdata"]) == 36
+
+
+def test_relationship_origin_filter_changes_arrivals_only(app):
+    full = invoke(app, "arrivals-occupancy-chart.figure")["arrivals-occupancy-chart"][
+        "figure"
+    ]["data"][0]
+    filtered = invoke(
+        app, "arrivals-occupancy-chart.figure", {"origin-filter.value": "origin:México"}
+    )["arrivals-occupancy-chart"]["figure"]["data"][0]
+
+    assert filtered["y"] == full["y"]
+    assert all(country < total for country, total in zip(filtered["x"], full["x"]))
+
+
+def test_occupancy_selection_highlights_the_same_period_in_relationship(app):
+    selection = invoke(
+        app,
+        "season-selection.data",
+        {
+            "occupancy-chart.clickData": {"points": [{"customdata": ["2023-07"]}]},
+        },
+        ["occupancy-chart.clickData"],
+    )["season-selection"]["data"]
+    trace = invoke(
+        app, "arrivals-occupancy-chart.figure", {"season-selection.data": selection}
+    )["arrivals-occupancy-chart"]["figure"]["data"][0]
+
+    selected = [
+        point[0]
+        for point, color in zip(trace["customdata"], trace["marker"]["color"])
+        if color == "#0B5C8E"
+    ]
+    assert selected == ["2023-07"]
+    assert len(trace["x"]) == 36
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"period-start.value": "2010-01-01", "period-end.value": "2011-12-01"},
+        {"period-start.value": "2024-12-01", "period-end.value": "2022-01-01"},
+        {"origin-filter.value": "origin:desconocido"},
+    ],
+)
+def test_relationship_handles_empty_filters(app, changes):
+    figure = invoke(app, "arrivals-occupancy-chart.figure", changes)[
+        "arrivals-occupancy-chart"
+    ]["figure"]
+
+    assert not figure["data"]
+    assert "ambas fuentes" in figure["layout"]["annotations"][0]["text"]
+
+
+@pytest.mark.parametrize(
+    "model_id", ["lstm-catch22-contexto-w24", "prophet", "arima-1-1-1"]
+)
+def test_model_selector_updates_both_evaluation_and_errors(app, model_id):
+    state = invoke(
+        app,
+        "v7-model-selection.data",
+        {"model-selector.value": model_id},
+        ["model-selector.value"],
+    )["v7-model-selection"]["data"]
+    changes = {"v7-model-selection.data": state}
+    evaluation = invoke(app, "model-evaluation-chart.figure", changes)
+    errors = invoke(app, "model-errors-chart.figure", changes)
+    predictions = app.server.config["TOURISM_MODEL_PREDICTIONS"]
+    source = predictions.loc[predictions["model_id"] == model_id]
+    trace = errors["model-errors-chart"]["figure"]["data"][0]
+
+    assert len(trace["y"]) == 63
+    assert trace["y"] == pytest.approx(
+        (source["estimate"] - source["observed"]).tolist()
+    )
+    assert source.iloc[0]["model_label"] in trace["name"]
+    assert (
+        evaluation["model-status"]["children"]
+        == errors["model-errors-status"]["children"]
+    )
+    assert trace["marker"]["color"] == "#D55E00"
+
+
+@pytest.mark.parametrize("state", [None, {}, {"model": None}, {"model": "desconocido"}])
+def test_model_errors_handle_invalid_selection(app, state):
+    result = invoke(
+        app, "model-errors-chart.figure", {"v7-model-selection.data": state}
+    )
+    assert not result["model-errors-chart"]["figure"]["data"]
+    assert (
+        result["model-errors-status"]["children"]
+        == "No hay un modelo válido seleccionado."
+    )
+
+
+@pytest.mark.parametrize("graph_id", [graph for graph, _, _ in VISUALIZATIONS])
+def test_each_graph_can_be_hidden_and_restored(app, graph_id):
+    all_graphs = [graph for graph, _, _ in VISUALIZATIONS]
+    hidden = invoke(
+        app,
+        "visible-graphs-status.children",
+        {"visible-graphs.value": [graph for graph in all_graphs if graph != graph_id]},
+    )
+    restored = invoke(
+        app, "visible-graphs-status.children", {"visible-graphs.value": all_graphs}
+    )
+
+    for graph, _, container in VISUALIZATIONS:
+        assert hidden[container]["hidden"] is (graph == graph_id)
+        assert restored[container]["hidden"] is False
+    assert hidden["visible-graphs-status"]["children"] == "7 de 8 seleccionadas"
+
+
+@pytest.mark.parametrize("value", [[], None, ["desconocido", None, {}]])
+def test_no_visible_graphs_has_clear_status_and_no_store_changes(app, value):
+    result = invoke(
+        app, "visible-graphs-status.children", {"visible-graphs.value": value}
+    )
+    assert all(result[container]["hidden"] for _, _, container in VISUALIZATIONS)
+    assert "Ninguna seleccionada" in result["visible-graphs-status"]["children"]
+    assert not {
+        "v1-selection",
+        "season-selection",
+        "v7-model-selection",
+        "model-selector",
+        "origin-filter",
+    }.intersection(result)
+
+
+def test_show_all_and_hide_all_buttons(app):
+    hidden = invoke(
+        app,
+        "visible-graphs.value",
+        {"hide-all-graphs.n_clicks": 1},
+        ["hide-all-graphs.n_clicks"],
+    )
+    shown = invoke(
+        app,
+        "visible-graphs.value",
+        {"show-all-graphs.n_clicks": 1},
+        ["show-all-graphs.n_clicks"],
+    )
+    assert hidden["visible-graphs"]["value"] == []
+    assert shown["visible-graphs"]["value"] == [graph for graph, _, _ in VISUALIZATIONS]
+
+
+def test_hidden_charts_keep_responding_to_shared_model_and_filters(app):
+    invoke(app, "visible-graphs-status.children", {"visible-graphs.value": []})
+    state = invoke(
+        app,
+        "v7-model-selection.data",
+        {"model-selector.value": "prophet"},
+        ["model-selector.value"],
+    )["v7-model-selection"]["data"]
+    errors = invoke(
+        app, "model-errors-chart.figure", {"v7-model-selection.data": state}
+    )
+    timeline = invoke(
+        app,
+        "arrivals-timeline.figure",
+        {"period-start.value": "2024-07-01", "period-end.value": "2024-07-01"},
+    )
+    restored = invoke(app, "visible-graphs-status.children")
+    assert (
+        errors["model-errors-chart"]["figure"]["data"][0]["name"] == "Error · Prophet"
+    )
+    assert len(timeline["arrivals-timeline"]["figure"]["data"][0]["x"]) == 1
+    assert all(
+        restored[container]["hidden"] is False for _, _, container in VISUALIZATIONS
+    )

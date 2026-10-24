@@ -9,6 +9,7 @@ from tourism_dashboard.exploration import (
     aggregate_arrivals,
     aggregate_occupancy,
     apply_selection,
+    arrivals_occupancy,
     drillable_regions,
     filter_arrivals,
     heatmap_event,
@@ -25,12 +26,15 @@ from tourism_dashboard.exploration import (
 )
 from tourism_dashboard.figures import (
     arrivals_figure,
+    arrivals_occupancy_figure,
     market_share_figure,
     markets_figure,
+    model_errors_figure,
     model_evaluation_figure,
     occupancy_figure,
     seasonality_figure,
 )
+from tourism_dashboard.layout import VISUALIZATIONS
 from tourism_dashboard.models import (
     metric_values,
     model_status,
@@ -242,6 +246,21 @@ def register_callbacks(
         return occupancy_figure(rows, detail, selected)
 
     @app.callback(
+        Output("arrivals-occupancy-chart", "figure"),
+        Input("period-start", "value"),
+        Input("period-end", "value"),
+        Input("origin-filter", "value"),
+        Input("time-detail", "value"),
+        Input("season-selection", "data"),
+    )
+    def update_arrivals_occupancy(start_date, end_date, market, detail, selection):
+        rows = arrivals_occupancy(
+            arrivals, occupancy, start_date, end_date, market, detail
+        )
+        selected = selection.get("period") if isinstance(selection, dict) else None
+        return arrivals_occupancy_figure(rows, detail, selected)
+
+    @app.callback(
         Output("v7-model-selection", "data"),
         Input("model-selector", "value"),
     )
@@ -270,6 +289,50 @@ def register_callbacks(
             mape,
             model_status(metrics),
         )
+
+    @app.callback(
+        Output("model-errors-chart", "figure"),
+        Output("model-errors-status", "children"),
+        Input("v7-model-selection", "data"),
+    )
+    def update_model_errors(selection):
+        predictions, metrics = selected_model_rows(
+            model_predictions, model_metrics, selection
+        )
+        return model_errors_figure(predictions), model_status(metrics)
+
+    @app.callback(
+        Output("visible-graphs", "value"),
+        Input("show-all-graphs", "n_clicks"),
+        Input("hide-all-graphs", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def select_all_graphs(_show, _hide):
+        if ctx.triggered_id == "show-all-graphs":
+            return [graph for graph, _, _ in VISUALIZATIONS]
+        if ctx.triggered_id == "hide-all-graphs":
+            return []
+        return no_update
+
+    @app.callback(
+        *[Output(container, "hidden") for _, _, container in VISUALIZATIONS],
+        Output("visible-graphs-status", "children"),
+        Input("visible-graphs", "value"),
+    )
+    def show_selected_graphs(values):
+        selected = (
+            {value for value in values if isinstance(value, str)}
+            if isinstance(values, list)
+            else set()
+        )
+        hidden = [graph not in selected for graph, _, _ in VISUALIZATIONS]
+        count = len(hidden) - sum(hidden)
+        status = (
+            f"{count} de {len(VISUALIZATIONS)} seleccionadas"
+            if count
+            else "Ninguna seleccionada. Marca una gráfica o usa «Mostrar todas»."
+        )
+        return *hidden, status
 
     @app.callback(
         Output("arrivals-panel", "hidden"),

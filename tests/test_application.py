@@ -23,7 +23,9 @@ GRAPH_IDS = [
     "market-share-chart",
     "seasonality-chart",
     "occupancy-chart",
+    "arrivals-occupancy-chart",
     "model-evaluation-chart",
+    "model-errors-chart",
 ]
 
 
@@ -66,6 +68,54 @@ def test_create_app_exposes_validated_model_data() -> None:
     ]
     model_store = next(store for store in stores if store.id == "v7-model-selection")
     assert model_store.data == {"model": "lstm-catch22-contexto-w24"}
+
+
+def test_comparison_displays_all_original_metrics_and_a_single_model_selector():
+    app = create_app(DATA_PATH, MODEL_PREDICTIONS_PATH, MODEL_METRICS_PATH)
+    components = list(_walk(app.layout))
+    table = next(
+        component
+        for component in components
+        if getattr(component, "id", None) == "model-comparison-table"
+    )
+    body = table.children[2]
+    assert [row.children[0].children for row in body.children] == [
+        "LSTM catch22 (ventana 24)",
+        "Prophet",
+        "ARIMA(1,1,1)",
+    ]
+    assert [[cell.children for cell in row.children[1:]] for row in body.children] == [
+        ["55.256,39", "67.734,70", "29,16"],
+        ["132.304,36", "139.548,64", "60,89"],
+        ["154.872,62", "169.524,19", "59,30"],
+    ]
+    source = app.server.config["TOURISM_MODEL_METRICS"]
+    for actual, expected in zip(body.children, source.to_dict("records")):
+        assert [cell.title for cell in actual.children[1:]] == [
+            str(expected[key]) for key in ("mae", "rmse", "mape")
+        ]
+    assert (
+        sum(
+            isinstance(component, dcc.Dropdown) and component.id == "model-selector"
+            for component in components
+        )
+        == 1
+    )
+
+
+def test_graph_selection_mounts_all_eight_graphs_without_replacing_shared_stores():
+    app = create_app(DATA_PATH)
+    components = list(_walk(app.layout))
+    selector = next(
+        component
+        for component in components
+        if getattr(component, "id", None) == "visible-graphs"
+    )
+    assert set(selector.value) == set(GRAPH_IDS)
+    assert len(selector.options) == 8
+    assert {
+        component.id for component in components if isinstance(component, dcc.Store)
+    } == {"v1-selection", "v7-model-selection", "season-selection"}
 
 
 def test_create_app_keeps_single_path_call_compatible() -> None:
@@ -163,7 +213,7 @@ def test_callbacks_have_unique_outputs() -> None:
             for output in callback_outputs
         )
 
-    assert len(app.callback_map) == 11
+    assert len(app.callback_map) == 15
     assert len(outputs) == len(set(outputs))
 
 

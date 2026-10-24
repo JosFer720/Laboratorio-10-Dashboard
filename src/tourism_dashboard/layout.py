@@ -9,11 +9,12 @@ from tourism_dashboard.exploration import (
     SEASONALITY_MODES,
     aggregate_occupancy,
     apply_selection,
+    arrivals_occupancy,
     drillable_regions,
     make_selection,
-    market_share,
     market_labels,
     market_options,
+    market_share,
     markets_caption,
     month_options,
     season_selection_label,
@@ -23,19 +24,34 @@ from tourism_dashboard.exploration import (
 )
 from tourism_dashboard.figures import (
     arrivals_figure,
+    arrivals_occupancy_figure,
     market_share_figure,
     markets_figure,
+    model_errors_figure,
     model_evaluation_figure,
     occupancy_figure,
     seasonality_figure,
 )
 from tourism_dashboard.models import (
+    _spanish_number,
+    comparison_rows,
     initial_model_selection,
     metric_values,
     model_options,
     model_status,
     selected_model_rows,
 )
+
+VISUALIZATIONS = [
+    ("arrivals-timeline", "Llegadas en el tiempo", "v1-container"),
+    ("market-chart", "Llegadas por mercado de origen", "market-breakdown"),
+    ("seasonality-chart", "Estacionalidad de las llegadas", "v3-container"),
+    ("market-share-chart", "Peso de los mercados", "v4-container"),
+    ("occupancy-chart", "Ocupación hotelera", "v5-container"),
+    ("arrivals-occupancy-chart", "Llegadas y ocupación hotelera", "v6-container"),
+    ("model-evaluation-chart", "Valores observados y estimados", "v7-container"),
+    ("model-errors-chart", "Errores del modelo", "v8-container"),
+]
 
 GRAPH_CONFIG = {
     "displaylogo": False,
@@ -260,7 +276,7 @@ def _timeline(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 className="note chart-source",
             ),
         ],
-        className="chart-card",
+        id="v1-container", className="chart-card",
         **{"aria-describedby": "timeline-help"},
     )
 
@@ -379,7 +395,7 @@ def _arrivals_panel(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 ],
                 className="chart-row",
             ),
-            html.Div(_market_share(arrivals), className="full-row"),
+            html.Div(_market_share(arrivals), id="v4-container", className="full-row"),
             html.P(
                 "Las cifras suman turistas y excursionistas. Por sí solas no miden la ocupación hotelera ni la presión sobre un destino.",
                 className="note page-note",
@@ -464,7 +480,7 @@ def _seasons_panel(arrivals: pd.DataFrame, occupancy: pd.DataFrame) -> html.Sect
                     ),
                 ],
                 className="chart-card",
-                **{"aria-describedby": "seasonality-help"},
+                id="v3-container", **{"aria-describedby": "seasonality-help"},
             ),
             html.Section(
                 [
@@ -497,12 +513,251 @@ def _seasons_panel(arrivals: pd.DataFrame, occupancy: pd.DataFrame) -> html.Sect
                     ),
                 ],
                 className="chart-card",
-                **{"aria-describedby": "occupancy-help"},
+                id="v5-container", **{"aria-describedby": "occupancy-help"},
             ),
+            _arrivals_occupancy_panel(arrivals, occupancy, start, end),
         ],
         id="seasons-panel",
         hidden=True,
         className="seasons-panel",
+    )
+
+
+def _arrivals_occupancy_panel(
+    arrivals: pd.DataFrame, occupancy: pd.DataFrame, start: str, end: str
+) -> html.Section:
+    rows = arrivals_occupancy(arrivals, occupancy, start, end, "all", "month")
+    return html.Section(
+        [
+            html.Div(
+                [
+                    html.H3("Llegadas y ocupación hotelera"),
+                    html.Span("Observado", className="observed-badge"),
+                ],
+                className="chart-heading",
+            ),
+            html.P(
+                "Cada punto compara las llegadas de un periodo con la ocupación hotelera nacional. "
+                "Ayuda a identificar periodos que conviene revisar al planificar servicios. "
+                "Cambia los filtros para explorar y haz clic en la estacionalidad o la ocupación "
+                "para resaltar ese periodo aquí. El mercado de origen cambia solo las llegadas.",
+                id="arrivals-occupancy-help",
+                className="chart-help",
+            ),
+            dcc.Graph(
+                id="arrivals-occupancy-chart",
+                figure=arrivals_occupancy_figure(rows, "month", None),
+                config=GRAPH_CONFIG
+                | {
+                    "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+                    "toImageButtonOptions": {
+                        "filename": "llegadas_y_ocupacion",
+                        "scale": 2,
+                    },
+                },
+                responsive=True,
+                style={"height": "420px"},
+            ),
+            html.P(
+                "Fuentes: base Migración y boletines de ocupación hotelera de INGUAT. Solo se cruzan meses "
+                "con información en ambas fuentes, de 2022 a 2024; en años y trimestres pueden ser periodos parciales. "
+                "Las fuentes tienen alcances distintos y su relación no demuestra causalidad ni mide presión turística. "
+                "La categoría Guatemala pasa a cero desde 2023 en la base migratoria, lo que afecta la comparación.",
+                className="note chart-source",
+            ),
+        ],
+        id="v6-container",
+        className="chart-card",
+        **{"aria-describedby": "arrivals-occupancy-help"},
+    )
+
+
+def _model_errors_panel(
+    predictions: pd.DataFrame, metrics: pd.DataFrame
+) -> html.Section:
+    return html.Section(
+        [
+            html.Div(
+                [
+                    html.H3("¿En qué meses se equivoca el modelo?"),
+                    html.Span("Error de estimación", className="estimated-badge"),
+                ],
+                className="chart-heading",
+            ),
+            html.P(
+                "Las barras muestran el valor estimado menos el observado. Por encima de cero, "
+                "el modelo calculó más viajeros de los que hubo; por debajo, calculó menos. "
+                "Permite reconocer cuándo conviene tomar sus estimaciones con más cautela. "
+                "Se actualiza con el mismo selector de modelo de esta vista.",
+                id="model-errors-help",
+                className="chart-help",
+            ),
+            html.P(
+                model_status(metrics),
+                id="model-errors-status",
+                role="status",
+                className="control-help",
+            ),
+            dcc.Graph(
+                id="model-errors-chart",
+                figure=model_errors_figure(predictions),
+                config=MODELS_GRAPH_CONFIG
+                | {
+                    "toImageButtonOptions": {
+                        "filename": "errores_del_modelo",
+                        "scale": 2,
+                    }
+                },
+                responsive=True,
+                style={"height": "420px"},
+            ),
+            html.P(
+                "Fuente: resultados originales de los Laboratorios 1 y 2 para S0_total. "
+                "Es una evaluación histórica, no una garantía del error futuro. "
+                "La línea gris marca el error cero; el naranja identifica los errores de las estimaciones.",
+                className="note chart-source",
+            ),
+        ],
+        id="v8-container",
+        className="chart-card",
+        **{"aria-describedby": "model-errors-help"},
+    )
+
+
+def _model_comparison(metrics: pd.DataFrame) -> html.Section:
+    rows = comparison_rows(metrics)
+    if not rows:
+        content = html.P(
+            "No hay métricas de modelos disponibles para comparar.", role="status"
+        )
+    else:
+        content = html.Div(
+            html.Table(
+                [
+                    html.Caption(
+                        "MAE y RMSE en viajeros; MAPE en porcentaje. Valores mostrados con dos decimales."
+                    ),
+                    html.Thead(
+                        html.Tr(
+                            [
+                                html.Th("Modelo", scope="col"),
+                                html.Th("MAE (viajeros)", scope="col"),
+                                html.Th("RMSE (viajeros)", scope="col"),
+                                html.Th("MAPE (%)", scope="col"),
+                            ]
+                        )
+                    ),
+                    html.Tbody(
+                        [
+                            html.Tr(
+                                [
+                                    html.Th(row["model_label"], scope="row"),
+                                    *[
+                                        html.Td(
+                                            _spanish_number(float(row[key]), 2),
+                                            title=str(row[key]),
+                                            className="metric-number",
+                                        )
+                                        for key in ("mae", "rmse", "mape")
+                                    ],
+                                ]
+                            )
+                            for row in rows
+                        ]
+                    ),
+                ],
+                id="model-comparison-table",
+                className="model-comparison-table",
+            ),
+            className="table-scroll",
+        )
+    return html.Section(
+        [
+            html.H3("Comparación de los tres modelos"),
+            html.P(
+                "Los modelos evalúan los mismos 63 meses, de abril de 2021 a junio de 2026, "
+                "con entrenamiento hasta marzo de 2021. La tabla conserva las métricas de sus archivos originales.",
+                className="chart-help",
+            ),
+            content,
+            html.P(
+                [
+                    html.Strong("MAE: "),
+                    "distancia media entre lo estimado y lo observado, en viajeros.",
+                ],
+                className="metric-explanation",
+            ),
+            html.P(
+                [
+                    html.Strong("RMSE: "),
+                    "error en viajeros que da más peso a los desaciertos grandes.",
+                ],
+                className="metric-explanation",
+            ),
+            html.P(
+                [
+                    html.Strong("MAPE: "),
+                    "error medio en porcentaje; puede aumentar mucho cuando hay pocos viajeros observados.",
+                ],
+                className="metric-explanation",
+            ),
+            html.P(
+                "Un valor menor indica menos error en este tramo. Compara las tres métricas y los meses "
+                "con mayores errores antes de elegir un modelo; este desempeño histórico no garantiza resultados futuros.",
+                className="note",
+            ),
+        ],
+        className="information-panel model-comparison",
+        **{"aria-label": "Comparación de modelos"},
+    )
+
+
+def _visualization_selector() -> html.Details:
+    return html.Details(
+        [
+            html.Summary(
+                [
+                    html.Span("Elegir gráficas"),
+                    html.Span(
+                        "8 de 8 seleccionadas",
+                        id="visible-graphs-status",
+                        role="status",
+                    ),
+                ]
+            ),
+            html.Fieldset(
+                [
+                    html.Legend("Gráficas para mostrar"),
+                    dcc.Checklist(
+                        id="visible-graphs",
+                        options=[
+                            {"label": label, "value": graph}
+                            for graph, label, _ in VISUALIZATIONS
+                        ],
+                        value=[graph for graph, _, _ in VISUALIZATIONS],
+                        className="graph-checklist",
+                    ),
+                ]
+            ),
+            html.Div(
+                [
+                    html.Button(
+                        "Mostrar todas",
+                        id="show-all-graphs",
+                        n_clicks=0,
+                        className="secondary-button",
+                    ),
+                    html.Button(
+                        "Ocultar todas",
+                        id="hide-all-graphs",
+                        n_clicks=0,
+                        className="secondary-button",
+                    ),
+                ],
+                className="graph-selection-actions",
+            ),
+        ],
+        className="visualization-selector",
     )
 
 
@@ -611,8 +866,10 @@ def _models_panel(
                         className="note chart-source",
                     ),
                 ],
-                className="chart-card",
+                id="v7-container", className="chart-card",
             ),
+            _model_errors_panel(selected_predictions, selected_metrics),
+            _model_comparison(metrics),
         ],
         id="models-panel",
         hidden=True,
@@ -645,6 +902,7 @@ def build_layout(
             _header(arrivals, months),
             html.Main(
                 [
+                    _visualization_selector(),
                     _arrivals_panel(arrivals, initial),
                     _seasons_panel(arrivals, occupancy),
                     _models_panel(model_predictions, model_metrics),
