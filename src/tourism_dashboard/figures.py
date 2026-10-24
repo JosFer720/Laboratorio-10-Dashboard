@@ -5,11 +5,13 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from tourism_dashboard.exploration import (
-    aggregate_arrivals,
     SUBPERIOD_LABELS,
+    aggregate_arrivals,
     aggregate_markets,
     display_origin,
+    month_label,
 )
+from tourism_dashboard.models import model_errors
 
 NO_DATA_MESSAGE = (
     "No hay información para esta selección.<br>"
@@ -565,4 +567,158 @@ def occupancy_figure(
             showarrow=False,
             font={"size": 13, "color": SECONDARY},
         )
+    return figure
+
+
+def arrivals_occupancy_figure(
+    rows: pd.DataFrame, detail: str, selected_key: str | None
+) -> go.Figure:
+    figure = go.Figure()
+    figure.update_layout(
+        template="none",
+        font={"family": FONT_FAMILY, "size": 13, "color": TEXT},
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        margin={"l": 70, "r": 24, "t": 40, "b": 65},
+        height=420,
+        separators=",.",
+        hovermode="closest",
+        dragmode="zoom",
+        showlegend=False,
+        xaxis={
+            "title": "Llegadas del mercado elegido (viajeros)",
+            "gridcolor": GRID,
+            "rangemode": "tozero",
+            "tickformat": ",.0f",
+            "automargin": True,
+        },
+        yaxis={
+            "title": "Ocupación hotelera nacional (%)",
+            "gridcolor": GRID,
+            "range": [0, 100],
+            "ticksuffix": " %",
+            "automargin": True,
+        },
+    )
+    if rows.empty:
+        return _show_no_data(
+            figure,
+            "No hay meses con información de ambas fuentes.<br>"
+            "Elige un periodo entre 2022 y 2024 y un mercado con datos.",
+        )
+    highlighted = selected_key in set(rows["period_key"])
+    colors = [
+        OBSERVED if not highlighted or key == selected_key else CONTEXT
+        for key in rows["period_key"]
+    ]
+    figure.add_trace(
+        go.Scatter(
+            x=rows["arrivals"].astype(float).tolist(),
+            y=rows["occupancy_rate"].astype(float).tolist(),
+            mode="markers",
+            name="Datos observados",
+            marker={"color": colors, "size": 11, "symbol": "circle"},
+            customdata=[
+                [key, label, int(months), float(occupied), float(available)]
+                for key, label, months, occupied, available in zip(
+                    rows["period_key"],
+                    rows["label"],
+                    rows["months"],
+                    rows["rooms_occupied"],
+                    rows["rooms_available"],
+                )
+            ],
+            hovertemplate=(
+                "<b>%{customdata[1]}</b><br>Llegadas observadas: %{x:,.0f}<br>"
+                "Ocupación nacional: %{y:.1f} %<br>Meses en común: %{customdata[2]}<br>"
+                "Habitaciones ocupadas: %{customdata[3]:,.0f} de %{customdata[4]:,.0f}<extra></extra>"
+            ),
+        )
+    )
+    if selected_key and not highlighted:
+        figure.add_annotation(
+            text="El periodo elegido no tiene datos comunes a ambas fuentes.",
+            x=0,
+            y=1.06,
+            xref="paper",
+            yref="paper",
+            xanchor="left",
+            showarrow=False,
+            font={"size": 13, "color": SECONDARY},
+        )
+    return figure
+
+
+def model_errors_figure(predictions: pd.DataFrame) -> go.Figure:
+    figure = go.Figure()
+    figure.update_layout(
+        template="none",
+        font={"family": FONT_FAMILY, "size": 13, "color": TEXT},
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        margin={"l": 80, "r": 24, "t": 45, "b": 65},
+        height=420,
+        separators=",.",
+        hovermode="closest",
+        dragmode="zoom",
+        showlegend=False,
+        xaxis={"title": "Mes evaluado", "showgrid": False, "automargin": True},
+        yaxis={
+            "title": "Error de estimación (viajeros)",
+            "gridcolor": GRID,
+            "zeroline": False,
+            "tickformat": ",.0f",
+            "automargin": True,
+        },
+    )
+    if predictions.empty:
+        return _show_no_data(
+            figure,
+            "No hay resultados para un modelo válido.<br>Elige un modelo en el selector de esta vista.",
+        )
+    rows = model_errors(predictions)
+    label = str(rows.iloc[0]["model_label"])
+    figure.add_trace(
+        go.Bar(
+            x=rows["date"].tolist(),
+            y=rows["error"].astype(float).tolist(),
+            name=f"Error · {label}",
+            marker={"color": ESTIMATED},
+            customdata=[
+                [
+                    month_label(date),
+                    float(observed),
+                    float(estimate),
+                    "Sobreestimación"
+                    if error > 0
+                    else "Subestimación"
+                    if error < 0
+                    else "Sin error",
+                ]
+                for date, observed, estimate, error in zip(
+                    rows["date"],
+                    rows["observed"],
+                    rows["estimate"],
+                    rows["error"],
+                )
+            ],
+            hovertemplate=(
+                "<b>%{customdata[0]}</b><br>Observado: %{customdata[1]:,.0f}<br>"
+                "Estimado: %{customdata[2]:,.0f}<br>Error: %{y:,.0f} viajeros<br>"
+                "%{customdata[3]}<extra></extra>"
+            ),
+        )
+    )
+    figure.add_hline(y=0, line_color=TEXT, line_width=1)
+    figure.update_xaxes(**_spanish_ticks(rows["date"], "month"))
+    figure.add_annotation(
+        text=f"Error = estimado − observado · {label}",
+        x=0,
+        y=1.08,
+        xref="paper",
+        yref="paper",
+        xanchor="left",
+        showarrow=False,
+        font={"size": 13, "color": SECONDARY},
+    )
     return figure

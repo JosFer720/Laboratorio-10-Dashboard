@@ -4,7 +4,6 @@ from collections.abc import Mapping
 
 import pandas as pd
 
-
 EMPTY_MODEL_STATUS = "No hay un modelo válido seleccionado."
 
 
@@ -60,6 +59,18 @@ def selected_model_rows(
         predictions.loc[predictions["model_id"] == valid].copy(),
         metrics.loc[metrics["model_id"] == valid].copy(),
     )
+
+
+def model_errors(predictions: pd.DataFrame) -> pd.DataFrame:
+    """Calcula el error con signo sin modificar las estimaciones originales."""
+    rows = predictions.sort_values("date", kind="stable").copy()
+    rows["error"] = rows["estimate"] - rows["observed"]
+    return rows
+
+
+def comparison_rows(metrics: pd.DataFrame) -> list[dict]:
+    columns = ["model_id", "model_label", "mae", "rmse", "mape"]
+    return metrics.loc[:, columns].to_dict("records")
 
 
 def _spanish_number(value: float, decimals: int = 0) -> str:

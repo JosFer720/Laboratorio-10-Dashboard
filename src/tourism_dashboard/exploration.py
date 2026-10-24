@@ -301,6 +301,31 @@ def aggregate_occupancy(
     return result.loc[:, columns]
 
 
+def arrivals_occupancy(
+    arrivals: pd.DataFrame,
+    occupancy: pd.DataFrame,
+    start_date: str | None,
+    end_date: str | None,
+    market: str | None,
+    detail: str,
+) -> pd.DataFrame:
+    """Compara ambas fuentes usando únicamente sus meses en común."""
+    filtered = filter_arrivals(arrivals, start_date, end_date, market)
+    dates = filtered.loc[
+        filtered["date"].isin(occupancy["date"]), "date"
+    ].drop_duplicates()
+    monthly_arrivals = filtered.loc[filtered["date"].isin(dates)]
+    monthly_occupancy = occupancy.loc[occupancy["date"].isin(dates)]
+    totals = aggregate_arrivals(monthly_arrivals, detail)
+    hotels = aggregate_occupancy(monthly_occupancy, start_date, end_date, detail)
+    return totals.merge(
+        hotels[["period_key", "occupancy_rate", "rooms_available", "rooms_occupied"]],
+        on="period_key",
+        how="inner",
+        validate="one_to_one",
+    )
+
+
 def make_season_selection(
     event: Mapping[str, Any] | None, detail: str
 ) -> dict[str, str | None]:

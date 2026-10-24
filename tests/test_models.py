@@ -3,17 +3,19 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from tourism_dashboard.data import load_model_metrics, load_model_predictions
-from tourism_dashboard.figures import model_evaluation_figure
+from tourism_dashboard.figures import model_errors_figure, model_evaluation_figure
 from tourism_dashboard.models import (
+    comparison_rows,
     metric_values,
+    model_errors,
     model_options,
     model_status,
     sanitize_model_selection,
     selected_model_rows,
 )
-
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
@@ -90,3 +92,41 @@ def test_model_figure_has_a_clear_empty_state() -> None:
 
     assert not figure.data
     assert "No hay resultados" in figure.layout.annotations[0].text
+
+
+@pytest.mark.parametrize(
+    "model_id", ["lstm-catch22-contexto-w24", "prophet", "arima-1-1-1"]
+)
+def test_errors_use_original_estimates_without_mutating_them(model_id):
+    predictions, metrics = _artifacts()
+    selected, _ = selected_model_rows(predictions, metrics, {"model": model_id})
+    original = selected.copy(deep=True)
+    rows = model_errors(selected)
+    figure = model_errors_figure(selected)
+
+    assert rows["error"].tolist() == pytest.approx(
+        (original["estimate"] - original["observed"]).tolist()
+    )
+    assert list(figure.data[0].y) == pytest.approx(rows["error"].tolist())
+    assert len(figure.data[0].x) == 63
+    assert figure.data[0].marker.color == "#D55E00"
+    assert figure.layout.shapes[0].y0 == 0
+    pd.testing.assert_frame_equal(selected, original)
+
+
+def test_comparison_keeps_all_three_original_metrics():
+    _, metrics = _artifacts()
+    rows = comparison_rows(metrics)
+    source = pd.read_csv(DATA_DIR / "model_metrics_s0.csv")
+    assert len(rows) == 3
+    for actual, expected in zip(rows, source.to_dict("records")):
+        assert actual["model_id"] == expected["model_id"]
+        assert actual["model_label"] == expected["model_label"]
+        for metric in ("mae", "rmse", "mape"):
+            assert actual[metric] == expected[metric]
+
+
+def test_comparison_and_error_chart_support_missing_artifacts():
+    predictions, metrics = _artifacts()
+    assert comparison_rows(metrics.iloc[:0]) == []
+    assert not model_errors_figure(predictions.iloc[:0]).data
