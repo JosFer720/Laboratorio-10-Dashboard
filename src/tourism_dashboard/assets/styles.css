@@ -98,6 +98,15 @@ button { font-family: inherit; }
 #clear-selection { flex-shrink: 0; min-height: 40px; padding: 8px 12px; border: 1px solid var(--observed); border-radius: 5px; color: var(--observed); background: var(--surface); font-size: 13px; }
 #clear-selection:hover:not(:disabled) { background: var(--blue-100); }
 #clear-selection:disabled { color: var(--secondary); border-color: var(--border); cursor: default; }
+.secondary-button { flex-shrink: 0; min-height: 40px; padding: 8px 12px; border: 1px solid var(--observed); border-radius: 5px; color: var(--observed); background: var(--surface); font-size: 13px; }
+.secondary-button:hover:not(:disabled) { background: var(--blue-100); }
+.secondary-button:disabled { color: var(--secondary); border-color: var(--border); cursor: default; }
+.breadcrumb-bar { padding: 10px 0; border-top: 0; border-bottom: 1px solid var(--border); }
+#market-share-caption, #season-selection-label { font-size: 13px; overflow-wrap: anywhere; }
+.full-row { margin-top: 16px; }
+.seasons-panel { display: grid; gap: 16px; }
+.inline-field { display: flex; align-items: center; gap: 12px; }
+.inline-legend { margin: 0; font-size: 13px; font-weight: 600; }
 .chart-source { margin: 0 -24px; padding: 12px 24px; border-top: 1px solid var(--border); }
 .page-note { margin-top: 14px; }
 .models-panel { display: grid; gap: 20px; }

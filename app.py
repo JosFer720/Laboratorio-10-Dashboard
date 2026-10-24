@@ -16,6 +16,7 @@ app = create_app(
     settings.data_path,
     settings.model_predictions_path,
     settings.model_metrics_path,
+    settings.occupancy_path,
 )
 server = app.server
 

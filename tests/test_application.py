@@ -16,6 +16,15 @@ DATA_PATH = (
 )
 MODEL_PREDICTIONS_PATH = DATA_PATH.with_name("model_predictions_s0.csv")
 MODEL_METRICS_PATH = DATA_PATH.with_name("model_metrics_s0.csv")
+OCCUPANCY_PATH = DATA_PATH.with_name("hotel_occupancy_inguat_2022_2024.csv")
+GRAPH_IDS = [
+    "arrivals-timeline",
+    "market-chart",
+    "market-share-chart",
+    "seasonality-chart",
+    "occupancy-chart",
+    "model-evaluation-chart",
+]
 
 
 def _walk(component: object):
@@ -36,11 +45,7 @@ def test_create_app_loads_data_and_mounts_timeline_and_markets() -> None:
     graphs = [
         component for component in _walk(app.layout) if isinstance(component, dcc.Graph)
     ]
-    assert [graph.id for graph in graphs] == [
-        "arrivals-timeline",
-        "market-chart",
-        "model-evaluation-chart",
-    ]
+    assert [graph.id for graph in graphs] == GRAPH_IDS
 
 
 def test_create_app_exposes_validated_model_data() -> None:
@@ -55,11 +60,7 @@ def test_create_app_exposes_validated_model_data() -> None:
     graphs = [
         component for component in _walk(app.layout) if isinstance(component, dcc.Graph)
     ]
-    assert [graph.id for graph in graphs] == [
-        "arrivals-timeline",
-        "market-chart",
-        "model-evaluation-chart",
-    ]
+    assert [graph.id for graph in graphs] == GRAPH_IDS
     stores = [
         component for component in _walk(app.layout) if isinstance(component, dcc.Store)
     ]
@@ -72,6 +73,14 @@ def test_create_app_keeps_single_path_call_compatible() -> None:
 
     assert app.server.config["TOURISM_MODEL_PREDICTIONS"].empty
     assert app.server.config["TOURISM_MODEL_METRICS"].empty
+
+
+def test_create_app_loads_optional_hotel_occupancy() -> None:
+    without_occupancy = create_app(DATA_PATH)
+    with_occupancy = create_app(DATA_PATH, occupancy_path=OCCUPANCY_PATH)
+
+    assert without_occupancy.server.config["TOURISM_OCCUPANCY"].empty
+    assert len(with_occupancy.server.config["TOURISM_OCCUPANCY"]) == 36
 
 
 def test_create_app_rejects_only_one_model_artifact_path() -> None:
@@ -154,7 +163,7 @@ def test_callbacks_have_unique_outputs() -> None:
             for output in callback_outputs
         )
 
-    assert len(app.callback_map) == 6
+    assert len(app.callback_map) == 11
     assert len(outputs) == len(set(outputs))
 
 

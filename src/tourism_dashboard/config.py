@@ -9,6 +9,7 @@ from pathlib import Path
 DEFAULT_DATA_PATH = Path("data/arrivals_migration_2009_2026.csv")
 DEFAULT_MODEL_PREDICTIONS_PATH = Path("data/model_predictions_s0.csv")
 DEFAULT_MODEL_METRICS_PATH = Path("data/model_metrics_s0.csv")
+DEFAULT_OCCUPANCY_PATH = Path("data/hotel_occupancy_inguat_2022_2024.csv")
 TRUE_VALUES = {"1", "true", "yes", "on"}
 FALSE_VALUES = {"", "0", "false", "no", "off"}
 
@@ -18,6 +19,7 @@ class Settings:
     data_path: Path
     model_predictions_path: Path
     model_metrics_path: Path
+    occupancy_path: Path
     host: str
     port: int
     debug: bool
@@ -52,6 +54,9 @@ def load_settings(env: Mapping[str, str] | None = None) -> Settings:
         ),
         model_metrics_path=Path(
             values.get("TOURISM_MODEL_METRICS_PATH", DEFAULT_MODEL_METRICS_PATH)
+        ),
+        occupancy_path=Path(
+            values.get("TOURISM_OCCUPANCY_PATH", DEFAULT_OCCUPANCY_PATH)
         ),
         host=values.get("DASH_HOST", "127.0.0.1"),
         port=port,

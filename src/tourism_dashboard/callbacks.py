@@ -1,23 +1,35 @@
 from __future__ import annotations
 
 import pandas as pd
-from dash import Dash, Input, Output, ctx
+from dash import Dash, Input, Output, ctx, no_update
 
 from tourism_dashboard.exploration import (
     DETAIL_OPTIONS,
+    SEASONALITY_MODES,
     aggregate_arrivals,
+    aggregate_occupancy,
     apply_selection,
+    drillable_regions,
     filter_arrivals,
+    heatmap_event,
+    make_season_selection,
     make_selection,
     market_labels,
+    market_share,
     markets_caption,
     month_label,
+    season_selection_label,
+    seasonal_cells,
     selection_label,
+    share_caption,
 )
 from tourism_dashboard.figures import (
     arrivals_figure,
+    market_share_figure,
     markets_figure,
     model_evaluation_figure,
+    occupancy_figure,
+    seasonality_figure,
 )
 from tourism_dashboard.models import (
     metric_values,
@@ -51,6 +63,7 @@ def register_callbacks(
     arrivals: pd.DataFrame,
     model_predictions: pd.DataFrame,
     model_metrics: pd.DataFrame,
+    occupancy: pd.DataFrame,
 ) -> None:
     @app.callback(
         Output("arrivals-timeline", "figure"),
@@ -122,6 +135,112 @@ def register_callbacks(
         rows = apply_selection(arrivals, selection)
         return markets_figure(rows), markets_caption(selection, labels)
 
+    drillable = drillable_regions(arrivals)
+
+    @app.callback(
+        Output("market-share-chart", "figure"),
+        Output("market-share-caption", "children"),
+        Output("market-share-back", "disabled"),
+        Input("period-start", "value"),
+        Input("period-end", "value"),
+        Input("origin-filter", "value"),
+        Input("time-detail", "value"),
+    )
+    def update_market_share(start_date, end_date, market, detail):
+        filtered = filter_arrivals(arrivals, start_date, end_date, market)
+        shares = market_share(filtered, market, detail)
+        return (
+            market_share_figure(shares, detail, drillable),
+            share_caption(market, labels),
+            market == "all",
+        )
+
+    @app.callback(
+        Output("origin-filter", "value"),
+        Output("market-share-chart", "clickData"),
+        Input("market-share-chart", "clickData"),
+        Input("market-share-back", "n_clicks"),
+        Input("origin-filter", "value"),
+    )
+    def drill_markets(click_data, _back_count, market):
+        # Bajar de nivel solo es posible desde las regiones con varios países.
+        if ctx.triggered_id == "market-share-back":
+            return "all", None
+        if ctx.triggered_id != "market-share-chart" or market != "all":
+            return no_update, None
+        points = click_data.get("points") if isinstance(click_data, dict) else None
+        for point in points or []:
+            custom = point.get("customdata") if isinstance(point, dict) else None
+            if isinstance(custom, list) and custom and custom[0] in drillable:
+                return f"region:{custom[0]}", None
+        return no_update, None
+
+    @app.callback(
+        Output("season-selection", "data"),
+        Output("seasonality-chart", "clickData"),
+        Output("occupancy-chart", "clickData"),
+        Output("season-selection-label", "children"),
+        Output("clear-season-selection", "disabled"),
+        Input("seasonality-chart", "clickData"),
+        Input("occupancy-chart", "clickData"),
+        Input("clear-season-selection", "n_clicks"),
+        Input("period-start", "value"),
+        Input("period-end", "value"),
+        Input("origin-filter", "value"),
+        Input("time-detail", "value"),
+    )
+    def update_season_selection(
+        seasonality_click, occupancy_click, _reset, _start, _end, _market, detail
+    ):
+        event = None
+        if ctx.triggered_id == "seasonality-chart":
+            event = heatmap_event(seasonality_click, detail)
+        elif ctx.triggered_id == "occupancy-chart":
+            event = occupancy_click
+        selection = make_season_selection(event, detail)
+        return (
+            selection,
+            None,
+            None,
+            season_selection_label(selection),
+            selection["period"] is None,
+        )
+
+    @app.callback(
+        Output("seasonality-chart", "figure"),
+        Output("seasonality-mode", "options"),
+        Input("period-start", "value"),
+        Input("period-end", "value"),
+        Input("origin-filter", "value"),
+        Input("time-detail", "value"),
+        Input("seasonality-mode", "value"),
+        Input("season-selection", "data"),
+    )
+    def update_seasonality(start_date, end_date, market, detail, mode, selection):
+        filtered = filter_arrivals(arrivals, start_date, end_date, market)
+        selected = selection.get("period") if isinstance(selection, dict) else None
+        # Con detalle anual cada año es el 100 % de sí mismo.
+        options = [
+            dict(option, disabled=detail == "year" and option["value"] == "share")
+            for option in SEASONALITY_MODES
+        ]
+        return (
+            seasonality_figure(seasonal_cells(filtered, detail), detail, mode, selected),
+            options,
+        )
+
+    @app.callback(
+        Output("occupancy-chart", "figure"),
+        Input("period-start", "value"),
+        Input("period-end", "value"),
+        Input("time-detail", "value"),
+        Input("season-selection", "data"),
+    )
+    def update_occupancy(start_date, end_date, detail, selection):
+        rows = aggregate_occupancy(occupancy, start_date, end_date, detail)
+        selected = selection.get("period") if isinstance(selection, dict) else None
+        return occupancy_figure(rows, detail, selected)
+
     @app.callback(
         Output("v7-model-selection", "data"),
         Input("model-selector", "value"),
@@ -165,11 +284,14 @@ def register_callbacks(
         Input("main-tabs", "active_tab"),
     )
     def switch_tab(active_tab):
-        disabled = active_tab != "arrivals"
+        disabled = active_tab not in {"arrivals", "seasons"}
         options = [dict(option, disabled=disabled) for option in DETAIL_OPTIONS]
-        note = (
-            "Los filtros se aplican a la vista Llegadas y mercados." if disabled else ""
-        )
+        if disabled:
+            note = "Los filtros se aplican a las vistas Llegadas y mercados y Temporadas y hospedaje."
+        elif active_tab == "seasons":
+            note = "El mercado de origen cambia la estacionalidad; la ocupación hotelera es nacional y no depende de él."
+        else:
+            note = ""
         hidden = tuple(
             active_tab != tab for tab in ("arrivals", "seasons", "models", "data")
         )

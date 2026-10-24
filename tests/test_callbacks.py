@@ -11,6 +11,7 @@ DATA_PATH = (
 )
 MODEL_PREDICTIONS_PATH = DATA_PATH.with_name("model_predictions_s0.csv")
 MODEL_METRICS_PATH = DATA_PATH.with_name("model_metrics_s0.csv")
+OCCUPANCY_PATH = DATA_PATH.with_name("hotel_occupancy_inguat_2022_2024.csv")
 DEFAULT_INPUTS = {
     "period-start.value": "2022-01-01",
     "period-end.value": "2024-12-01",
@@ -23,12 +24,21 @@ DEFAULT_INPUTS = {
     "main-tabs.active_tab": "arrivals",
     "model-selector.value": "lstm-catch22-contexto-w24",
     "v7-model-selection.data": {"model": "lstm-catch22-contexto-w24"},
+    "market-share-chart.clickData": None,
+    "market-share-back.n_clicks": 0,
+    "seasonality-chart.clickData": None,
+    "occupancy-chart.clickData": None,
+    "clear-season-selection.n_clicks": 0,
+    "seasonality-mode.value": "arrivals",
+    "season-selection.data": {"period": None, "detail": "month"},
 }
 
 
 @pytest.fixture
 def app():
-    return create_app(DATA_PATH, MODEL_PREDICTIONS_PATH, MODEL_METRICS_PATH)
+    return create_app(
+        DATA_PATH, MODEL_PREDICTIONS_PATH, MODEL_METRICS_PATH, OCCUPANCY_PATH
+    )
 
 
 def invoke(app, target, changes=None, changed=None):
@@ -165,9 +175,10 @@ def test_navigation_keeps_one_panel_visible_and_disables_inapplicable_filters(ap
 
     for panel in ("arrivals", "seasons", "models", "data"):
         assert result[f"{panel}-panel"]["hidden"] is (panel != tab)
-    assert result["origin-filter"]["disabled"] is (tab != "arrivals")
+    uses_filters = tab in {"arrivals", "seasons"}
+    assert result["origin-filter"]["disabled"] is not uses_filters
     assert all(
-        option["disabled"] is (tab != "arrivals")
+        option["disabled"] is not uses_filters
         for option in result["time-detail"]["options"]
     )
 
@@ -274,3 +285,147 @@ def test_model_panel_handles_an_invalid_shared_state(app):
     assert not result["model-evaluation-chart"]["figure"]["data"]
     assert result["model-mae"]["children"] == "—"
     assert result["model-status"]["children"] == "No hay un modelo válido seleccionado."
+
+
+def test_market_share_compares_regions_and_their_countries(app):
+    regions = invoke(app, "market-share-chart.figure", {"time-detail.value": "year"})
+    countries = invoke(
+        app,
+        "market-share-chart.figure",
+        {"origin-filter.value": "region:América Central", "time-detail.value": "year"},
+    )
+
+    region_titles = [item["text"] for item in regions["market-share-chart"]["figure"]["layout"]["annotations"]]
+    assert region_titles == [
+        "América del Norte",
+        "América Central",
+        "América del Sur",
+        "Europa",
+        "Resto del mundo",
+    ]
+    assert regions["market-share-back"]["disabled"] is True
+    assert countries["market-share-back"]["disabled"] is False
+    assert countries["market-share-caption"]["children"] == "Nivel: países de América Central"
+
+
+def test_market_share_explains_why_a_single_origin_has_no_comparison(app):
+    result = invoke(
+        app, "market-share-chart.figure", {"origin-filter.value": "origin:Belice"}
+    )
+
+    figure = result["market-share-chart"]["figure"]
+    assert not figure["data"]
+    assert "100 %" in figure["layout"]["annotations"][0]["text"]
+
+
+def test_clicking_a_region_drills_down_and_back_returns_to_all(app):
+    click = {"points": [{"customdata": ["América Central", "2024"]}]}
+    drilled = invoke(
+        app,
+        "origin-filter.value",
+        {"market-share-chart.clickData": click},
+        ["market-share-chart.clickData"],
+    )
+    back = invoke(
+        app,
+        "origin-filter.value",
+        {"origin-filter.value": "region:América Central", "market-share-back.n_clicks": 1},
+        ["market-share-back.n_clicks"],
+    )
+
+    assert drilled["origin-filter"]["value"] == "region:América Central"
+    assert drilled["market-share-chart"]["clickData"] is None
+    assert back["origin-filter"]["value"] == "all"
+
+
+def test_regions_without_countries_do_not_drill_down(app):
+    click = {"points": [{"customdata": ["Europa", "2024"]}]}
+    result = invoke(
+        app,
+        "origin-filter.value",
+        {"market-share-chart.clickData": click},
+        ["market-share-chart.clickData"],
+    )
+
+    assert "origin-filter" not in result
+
+
+@pytest.mark.parametrize(
+    ("source", "click"),
+    [
+        # El mapa de calor envía la columna y el año, sin customdata.
+        ("seasonality-chart", {"points": [{"curveNumber": 0, "x": 6, "y": 2023, "z": 1.0}]}),
+        ("occupancy-chart", {"points": [{"customdata": ["2023-07", "Julio de 2023"]}]}),
+    ],
+)
+def test_clicking_either_seasonal_chart_shares_the_period(app, source, click):
+    result = invoke(
+        app,
+        "season-selection.data",
+        {f"{source}.clickData": click},
+        [f"{source}.clickData"],
+    )
+
+    assert result["season-selection"]["data"] == {"period": "2023-07", "detail": "month"}
+    assert result["clear-season-selection"]["disabled"] is False
+    assert "Julio de 2023" in result["season-selection-label"]["children"]
+
+
+def test_filter_changes_discard_the_seasonal_selection(app):
+    click = {"points": [{"customdata": ["2023-07", "Julio de 2023"]}]}
+    result = invoke(
+        app,
+        "season-selection.data",
+        {"seasonality-chart.clickData": click, "time-detail.value": "quarter"},
+        ["time-detail.value"],
+    )
+
+    assert result["season-selection"]["data"] == {"period": None, "detail": "quarter"}
+    assert result["clear-season-selection"]["disabled"] is True
+
+
+def test_selected_period_is_highlighted_in_occupancy_and_seasonality(app):
+    selection = {"period": "2023-07", "detail": "month"}
+    occupancy = invoke(app, "occupancy-chart.figure", {"season-selection.data": selection})
+    seasonality = invoke(app, "seasonality-chart.figure", {"season-selection.data": selection})
+
+    bars = occupancy["occupancy-chart"]["figure"]["data"][0]
+    highlighted = [
+        custom[0]
+        for custom, color in zip(bars["customdata"], bars["marker"]["color"])
+        if color == "#0B5C8E"
+    ]
+    assert highlighted == ["2023-07"]
+    assert len(seasonality["seasonality-chart"]["figure"]["layout"]["shapes"]) == 1
+
+
+def test_occupancy_explains_periods_outside_its_coverage(app):
+    outside = invoke(
+        app,
+        "occupancy-chart.figure",
+        {"period-start.value": "2010-01-01", "period-end.value": "2012-12-01"},
+    )
+    unpublished = invoke(
+        app,
+        "occupancy-chart.figure",
+        {"season-selection.data": {"period": "2015-07", "detail": "month"}},
+    )
+
+    outside_figure = outside["occupancy-chart"]["figure"]
+    assert not outside_figure["data"]
+    assert "2022" in outside_figure["layout"]["annotations"][0]["text"]
+    bars = unpublished["occupancy-chart"]["figure"]["data"][0]
+    assert set(bars["marker"]["color"]) == {"#0B5C8E"}
+    assert "no tiene ocupación" in unpublished["occupancy-chart"]["figure"]["layout"]["annotations"][0]["text"]
+
+
+def test_yearly_detail_disables_the_share_of_year_view(app):
+    result = invoke(
+        app,
+        "seasonality-chart.figure",
+        {"time-detail.value": "year", "seasonality-mode.value": "share"},
+    )
+
+    options = {item["value"]: item["disabled"] for item in result["seasonality-mode"]["options"]}
+    assert options == {"arrivals": False, "share": True}
+    assert result["seasonality-chart"]["figure"]["data"][0]["colorbar"]["title"]["text"] == "Llegadas"

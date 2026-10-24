@@ -6,18 +6,28 @@ from dash import dcc, html
 
 from tourism_dashboard.exploration import (
     DETAIL_OPTIONS,
+    SEASONALITY_MODES,
+    aggregate_occupancy,
     apply_selection,
+    drillable_regions,
     make_selection,
+    market_share,
     market_labels,
     market_options,
     markets_caption,
     month_options,
+    season_selection_label,
+    seasonal_cells,
     selection_label,
+    share_caption,
 )
 from tourism_dashboard.figures import (
     arrivals_figure,
+    market_share_figure,
     markets_figure,
     model_evaluation_figure,
+    occupancy_figure,
+    seasonality_figure,
 )
 from tourism_dashboard.models import (
     initial_model_selection,
@@ -37,6 +47,18 @@ GRAPH_CONFIG = {
 MARKETS_GRAPH_CONFIG = GRAPH_CONFIG | {
     "toImageButtonOptions": {"filename": "llegadas_por_mercado", "scale": 2}
 }
+SHARE_GRAPH_CONFIG = GRAPH_CONFIG | {
+    "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+    "toImageButtonOptions": {"filename": "peso_de_mercados", "scale": 2},
+}
+SEASONALITY_GRAPH_CONFIG = GRAPH_CONFIG | {
+    "modeBarButtonsToRemove": ["lasso2d", "select2d", "zoom2d", "pan2d"],
+    "toImageButtonOptions": {"filename": "estacionalidad_llegadas", "scale": 2},
+}
+OCCUPANCY_GRAPH_CONFIG = GRAPH_CONFIG | {
+    "modeBarButtonsToRemove": ["lasso2d", "select2d"],
+    "toImageButtonOptions": {"filename": "ocupacion_hotelera", "scale": 2},
+}
 MODELS_GRAPH_CONFIG = GRAPH_CONFIG | {
     "modeBarButtonsToRemove": ["lasso2d", "select2d"],
     "toImageButtonOptions": {"filename": "evaluacion_historica_modelo", "scale": 2},
@@ -50,10 +72,6 @@ DROPDOWN_LABELS = {
     "clear_selection": "Limpiar selección",
     "no_options_found": "No se encontraron opciones",
 }
-
-
-def _pending_panel(title: str, description: str) -> list:
-    return [html.H2(title), html.P(description, className="muted")]
 
 
 def _filters(arrivals: pd.DataFrame, months: list[dict[str, str]]) -> html.Div:
@@ -287,6 +305,59 @@ def _markets(arrivals: pd.DataFrame, initial: dict) -> html.Section:
     )
 
 
+def _market_share(arrivals: pd.DataFrame) -> html.Section:
+    return html.Section(
+        [
+            html.Div(
+                [
+                    html.H3("Peso de cada mercado en el tiempo"),
+                    html.Span("Observado", className="observed-badge"),
+                ],
+                className="chart-heading",
+            ),
+            html.P(
+                "Muestra qué porcentaje de las llegadas aporta cada región en cada periodo. Sirve para ver si un mercado gana o pierde importancia y no depender de uno solo. Haz clic en América del Norte o América Central para ver sus países.",
+                id="market-share-help",
+                className="chart-help",
+            ),
+            html.Div(
+                [
+                    html.P(
+                        share_caption("all", market_labels(arrivals)),
+                        id="market-share-caption",
+                        role="status",
+                    ),
+                    html.Button(
+                        "← Todos los mercados",
+                        id="market-share-back",
+                        n_clicks=0,
+                        disabled=True,
+                        className="secondary-button",
+                    ),
+                ],
+                className="selection-bar breadcrumb-bar",
+            ),
+            dcc.Graph(
+                id="market-share-chart",
+                figure=market_share_figure(
+                    market_share(arrivals, "all", "month"),
+                    "month",
+                    drillable_regions(arrivals),
+                ),
+                config=SHARE_GRAPH_CONFIG,
+                responsive=True,
+                style={"height": "360px"},
+            ),
+            html.P(
+                "Fuente: base Migración usada en los Laboratorios 1 y 2. Cada panel resalta un grupo en azul y deja los demás en gris; todos comparten la misma escala. El peso se calcula sobre los mercados del filtro. Desde enero de 2023 la fuente registra cero viajeros en la categoría Guatemala, por lo que el peso de los demás orígenes de América Central sube ese año; ese salto debe leerse con cautela.",
+                className="note chart-source",
+            ),
+        ],
+        className="chart-card",
+        **{"aria-describedby": "market-share-help"},
+    )
+
+
 def _arrivals_panel(arrivals: pd.DataFrame, initial: dict) -> html.Section:
     return html.Section(
         [
@@ -308,12 +379,130 @@ def _arrivals_panel(arrivals: pd.DataFrame, initial: dict) -> html.Section:
                 ],
                 className="chart-row",
             ),
+            html.Div(_market_share(arrivals), className="full-row"),
             html.P(
                 "Las cifras suman turistas y excursionistas. Por sí solas no miden la ocupación hotelera ni la presión sobre un destino.",
                 className="note page-note",
             ),
         ],
         id="arrivals-panel",
+    )
+
+
+def _seasons_panel(arrivals: pd.DataFrame, occupancy: pd.DataFrame) -> html.Section:
+    empty_selection = {"period": None, "detail": "month"}
+    start = arrivals["date"].min().strftime("%Y-%m-%d")
+    end = arrivals["date"].max().strftime("%Y-%m-%d")
+    return html.Section(
+        [
+            html.Div(
+                [
+                    html.H2("¿Cómo cambian las temporadas y qué tan llenos están los hoteles?"),
+                    html.P(
+                        "Compara los meses de cada año para ver si las temporadas altas y bajas se repiten, y revisa la ocupación hotelera para saber cuándo la oferta de hospedaje está más cerca de su límite.",
+                        className="section-description",
+                    ),
+                ],
+                className="section-heading",
+            ),
+            html.Section(
+                [
+                    html.Div(
+                        [
+                            html.H3("Estacionalidad de las llegadas"),
+                            html.Span("Observado", className="observed-badge"),
+                        ],
+                        className="chart-heading",
+                    ),
+                    html.P(
+                        "Cada fila es un año y cada columna un mes, un trimestre o el año completo, según el detalle temporal; el azul más oscuro indica más llegadas. Sirve para reconocer las temporadas altas y comprobar si se repiten cada año. Con «% del año» se compara la forma de la temporada aunque el volumen total cambie. Haz clic en una celda para ver ese periodo en la ocupación hotelera.",
+                        id="seasonality-help",
+                        className="chart-help",
+                    ),
+                    html.Fieldset(
+                        [
+                            html.Legend("Mostrar", className="inline-legend"),
+                            dcc.RadioItems(
+                                id="seasonality-mode",
+                                options=SEASONALITY_MODES,
+                                value="arrivals",
+                                inline=True,
+                                className="detail-control",
+                            ),
+                        ],
+                        className="inline-field",
+                    ),
+                    dcc.Graph(
+                        id="seasonality-chart",
+                        figure=seasonality_figure(
+                            seasonal_cells(arrivals, "month"), "month", "arrivals", None
+                        ),
+                        config=SEASONALITY_GRAPH_CONFIG,
+                        responsive=True,
+                        style={"height": "460px"},
+                    ),
+                    html.Div(
+                        [
+                            html.P(
+                                season_selection_label(empty_selection),
+                                id="season-selection-label",
+                                role="status",
+                            ),
+                            html.Button(
+                                "Limpiar selección",
+                                id="clear-season-selection",
+                                n_clicks=0,
+                                disabled=True,
+                                className="secondary-button",
+                            ),
+                        ],
+                        className="selection-bar",
+                    ),
+                    html.P(
+                        "Fuente: base Migración usada en los Laboratorios 1 y 2. Las celdas en blanco son meses sin datos. El porcentaje compara cada periodo con la suma de los meses disponibles de su año; en esa vista los valores más extremos, como los primeros meses de 2020, comparten el tono más oscuro.",
+                        className="note chart-source",
+                    ),
+                ],
+                className="chart-card",
+                **{"aria-describedby": "seasonality-help"},
+            ),
+            html.Section(
+                [
+                    html.Div(
+                        [
+                            html.H3("Ocupación hotelera"),
+                            html.Span("Observado", className="observed-badge"),
+                        ],
+                        className="chart-heading",
+                    ),
+                    html.P(
+                        "Muestra qué porcentaje de las habitaciones de hotel disponibles se ocupó en cada periodo. Sirve para saber cuándo la oferta de hospedaje está cerca de llenarse y cuándo tiene capacidad libre. Haz clic en una barra para ubicar ese periodo en la estacionalidad.",
+                        id="occupancy-help",
+                        className="chart-help",
+                    ),
+                    dcc.Graph(
+                        id="occupancy-chart",
+                        figure=occupancy_figure(
+                            aggregate_occupancy(occupancy, start, end, "month"),
+                            "month",
+                            None,
+                        ),
+                        config=OCCUPANCY_GRAPH_CONFIG,
+                        responsive=True,
+                        style={"height": "400px"},
+                    ),
+                    html.P(
+                        "Fuente: boletines anuales de ocupación hotelera de INGUAT, 2022 a 2024. Es una cifra nacional: no cambia con el mercado de origen e incluye huéspedes que viven en Guatemala.",
+                        className="note chart-source",
+                    ),
+                ],
+                className="chart-card",
+                **{"aria-describedby": "occupancy-help"},
+            ),
+        ],
+        id="seasons-panel",
+        hidden=True,
+        className="seasons-panel",
     )
 
 
@@ -435,12 +624,18 @@ def build_layout(
     arrivals: pd.DataFrame,
     model_predictions: pd.DataFrame,
     model_metrics: pd.DataFrame,
+    occupancy: pd.DataFrame,
 ) -> dbc.Container:
     months = month_options(arrivals)
     initial = make_selection(arrivals, "all", "month")
     return dbc.Container(
         [
             dcc.Store(id="v1-selection", storage_type="memory", data=initial),
+            dcc.Store(
+                id="season-selection",
+                storage_type="memory",
+                data={"period": None, "detail": "month"},
+            ),
             dcc.Store(
                 id="v7-model-selection",
                 storage_type="memory",
@@ -451,15 +646,7 @@ def build_layout(
             html.Main(
                 [
                     _arrivals_panel(arrivals, initial),
-                    html.Section(
-                        _pending_panel(
-                            "Temporadas y hospedaje",
-                            "La exploración de estacionalidad y ocupación hotelera aún no está disponible en esta vista.",
-                        ),
-                        id="seasons-panel",
-                        hidden=True,
-                        className="information-panel",
-                    ),
+                    _seasons_panel(arrivals, occupancy),
                     _models_panel(model_predictions, model_metrics),
                     _data_panel(months),
                 ],
