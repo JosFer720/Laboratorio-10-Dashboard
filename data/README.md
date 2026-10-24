@@ -36,6 +36,8 @@ La exportación se deriva de `Base_Migracion_2009-2026jun.xlsx`, la misma base p
 
 La exportación contiene 210 meses consecutivos. Para cada mes, la suma de las once categorías coincide con `reported_total` y con `S0_total.csv` de los laboratorios de series de tiempo dentro de una tolerancia de `1e-6`.
 
+Desde enero de 2023 la base de los laboratorios registra cero viajeros en la categoría `guatemala`; hasta diciembre de 2022 la categoría tenía valores positivos, con 1,410,620 viajeros en 2022. El dato se conserva sin ajustes. Por eso, a partir de 2023 los demás orígenes de América Central concentran una parte mayor del total, y ese cambio no debe interpretarse por sí solo como una variación real de los mercados.
+
 # Resultados de modelos para S0
 
 `model_predictions_s0.csv` y `model_metrics_s0.csv` conservan resultados ya generados para `S0_total`; no vuelven a entrenar modelos. Los tres modelos comparten el mismo tramo de entrenamiento, de enero de 2009 a marzo de 2021, y el mismo tramo de evaluación, de abril de 2021 a junio de 2026.
