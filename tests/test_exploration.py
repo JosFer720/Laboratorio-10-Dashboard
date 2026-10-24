@@ -6,15 +6,21 @@ import pandas as pd
 import pytest
 
 from tourism_dashboard.callbacks import summary_values
-from tourism_dashboard.data import load_arrivals
+from tourism_dashboard.data import load_arrivals, load_occupancy
 from tourism_dashboard.exploration import (
     aggregate_arrivals,
     aggregate_markets,
+    aggregate_occupancy,
     apply_selection,
     filter_arrivals,
+    filter_market,
+    heatmap_event,
+    make_season_selection,
     make_selection,
     market_options,
+    market_share,
     month_options,
+    seasonal_cells,
 )
 from tourism_dashboard.figures import arrivals_figure
 
@@ -215,3 +221,73 @@ def test_market_aggregation_keeps_the_selected_total_and_shares(arrivals):
     assert markets["share"].sum() == pytest.approx(100)
     assert markets["arrivals"].is_monotonic_decreasing
     assert aggregate_markets(arrivals.iloc[:0]).empty
+
+
+OCCUPANCY_PATH = DATA_PATH.with_name("hotel_occupancy_inguat_2022_2024.csv")
+
+
+@pytest.mark.parametrize(("detail", "columns"), [("month", 12), ("quarter", 4)])
+def test_seasonal_cells_share_adds_to_one_hundred_per_year(arrivals, detail, columns):
+    cells = seasonal_cells(arrivals, detail)
+
+    assert cells["subperiod"].max() == columns
+    assert cells.groupby("year")["share"].sum().round(6).eq(100).all()
+    assert cells["arrivals"].sum() == pytest.approx(arrivals["arrivals"].sum())
+
+
+def test_seasonal_cells_leave_months_without_data_out(arrivals):
+    cells = seasonal_cells(arrivals, "month")
+
+    assert len(cells.loc[cells["year"] == 2026]) == 6
+    assert cells["period_key"].is_unique
+
+
+def test_market_share_uses_regions_then_countries(arrivals):
+    regions = market_share(arrivals, "all", "year")
+    central = filter_market(arrivals, "region:América Central")
+    countries = market_share(central, "region:América Central", "year")
+
+    assert regions["group"].nunique() == 5
+    assert regions.groupby("period_key")["share"].sum().round(6).eq(100).all()
+    assert set(countries["group"]) == set(central["origin"])
+    assert countries.groupby("period_key")["share"].sum().round(6).eq(100).all()
+    assert market_share(arrivals, "origin:Belice", "year").empty
+
+
+def test_occupancy_aggregation_divides_room_totals():
+    occupancy = load_occupancy(OCCUPANCY_PATH)
+    quarters = aggregate_occupancy(occupancy, "2009-01-01", "2026-06-01", "quarter")
+    first = occupancy.loc[occupancy["date"] < "2022-04-01"]
+
+    assert len(quarters) == 12
+    assert quarters.iloc[0]["occupancy_rate"] == pytest.approx(
+        first["rooms_occupied"].sum() / first["rooms_available"].sum() * 100
+    )
+    assert aggregate_occupancy(occupancy, "2010-01-01", "2012-12-01", "month").empty
+
+
+@pytest.mark.parametrize(
+    ("event", "detail", "expected"),
+    [
+        ({"points": [{"customdata": ["2023Q3"]}]}, "quarter", "2023Q3"),
+        ({"points": [{"customdata": ["2023-07"]}]}, "quarter", None),
+        ({"points": [{"customdata": [""]}]}, "month", None),
+        ({"points": "invalido"}, "month", None),
+        (None, "year", None),
+    ],
+)
+def test_season_selection_only_accepts_keys_of_the_current_detail(event, detail, expected):
+    assert make_season_selection(event, detail) == {"period": expected, "detail": detail}
+
+
+@pytest.mark.parametrize(
+    ("detail", "expected"), [("month", "2023-07"), ("quarter", "2023Q7"), ("year", "2023")]
+)
+def test_heatmap_clicks_become_period_keys(detail, expected):
+    event = heatmap_event({"points": [{"x": 6, "y": 2023}]}, detail)
+
+    assert event == {"points": [{"customdata": [expected]}]}
+    # Una clave imposible, como el trimestre 7, no llega al estado compartido.
+    assert make_season_selection(event, detail)["period"] == (
+        None if detail == "quarter" else expected
+    )
