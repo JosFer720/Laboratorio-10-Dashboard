@@ -1,6 +1,6 @@
 # Exploración de llegadas
 
-La aplicación se construye con `create_app(data_path, model_predictions_path, model_metrics_path)` y conserva los DataFrames validados en la configuración del servidor. Los callbacks los consultan sin modificarlos. `layout.py` define los componentes, `figures.py` construye las gráficas, `exploration.py` y `models.py` contienen helpers puros, y `callbacks.py` conecta las interacciones.
+La aplicación se construye con `create_app(data_path, model_predictions_path, model_metrics_path, occupancy_path)` y conserva los DataFrames validados en la configuración del servidor. Los callbacks los consultan sin modificarlos. `layout.py` define los componentes, `figures.py` construye las gráficas, `exploration.py` y `models.py` contienen helpers puros, y `callbacks.py` conecta las interacciones.
 
 ## Componentes
 
@@ -19,6 +19,15 @@ La aplicación se construye con `create_app(data_path, model_predictions_path, m
 | `model-selector` | `value` | Identificador del modelo que se desea consultar. |
 | `v7-model-selection` | `data` | Estado compartido mínimo del modelo elegido. |
 | `model-evaluation-chart` | `figure` | Observado frente a estimado en la evaluación histórica. |
+| `market-share-chart` | `figure`, `clickData` | Peso de cada región o país en las llegadas de cada periodo. |
+| `market-share-caption` | `children` | Nivel de mercado que muestra la gráfica de pesos. |
+| `market-share-back` | `n_clicks` | Regresa el filtro de origen a todos los mercados. |
+| `seasonality-chart` | `figure`, `clickData` | Mapa de calor de llegadas por año y mes, trimestre o año completo. |
+| `seasonality-mode` | `value` | `arrivals` para llegadas o `share` para el peso dentro del año. |
+| `occupancy-chart` | `figure`, `clickData` | Ocupación hotelera por periodo. |
+| `season-selection` | `data` | Periodo elegido en la estacionalidad o en la ocupación. |
+| `season-selection-label` | `children` | Periodo que comparten ambas gráficas. |
+| `clear-season-selection` | `n_clicks` | Borra el periodo elegido. |
 | `main-tabs` | `active_tab` | `arrivals`, `seasons`, `models` o `data`. |
 
 Los mercados admiten `all`, `region:<origin_region>` y `origin:<origin>`, con los valores presentes en el DataFrame. `market_options()` genera las opciones y distingue país y agregado. Una región suma sus categorías existentes; no agrega nuevamente un subtotal. Los paneles permanecen montados al cambiar de pestaña. Los filtros conservan sus valores y se desactivan cuando no hay una gráfica que los utilice en la vista elegida.
@@ -59,6 +68,28 @@ Una gráfica de mercados puede escuchar `Input("v1-selection", "data")` y recupe
 El selector ofrece LSTM catch22, Prophet y ARIMA(1,1,1). Un valor ajeno a los artefactos se transforma en `{"model": null}` y la vista muestra un estado vacío; nunca se guarda el DataFrame completo en el navegador. Este estado queda disponible para V8.
 
 `model-evaluation-chart` escucha el store y compara los valores observados con los estimados entre abril de 2021 y junio de 2026. Es una evaluación histórica, no un pronóstico futuro. Las tarjetas muestran MAE, RMSE y MAPE del modelo elegido. No se dibuja una banda de confianza porque los artefactos originales no incluyen intervalos.
+
+## Peso de los mercados
+
+`market-share-chart` usa los filtros de periodo, origen y detalle temporal. Con `all` compara regiones; con `region:<origin_region>`, los orígenes de esa región. Cada panel comparte el eje vertical, resalta un grupo y deja los demás como contexto. Con un solo origen la gráfica explica que no hay comparación posible. El peso se calcula con `market_share()` sobre los mercados filtrados, de modo que los pesos de cada periodo suman 100 %.
+
+Un clic en América del Norte o América Central cambia `origin-filter` a esa región; las regiones sin países individuales no cambian el filtro. `market-share-back` vuelve a `all`. Como el filtro es global, el cambio también actualiza la serie de llegadas, la gráfica de mercados y la estacionalidad. El mismo callback limpia `clickData` para que un segundo clic sobre el mismo punto vuelva a funcionar.
+
+## Estacionalidad y ocupación
+
+`seasonality-chart` muestra un año por fila. Las columnas siguen el detalle temporal: meses, trimestres o el año completo. `seasonal_cells()` suma las llegadas y calcula el peso de cada celda dentro de los meses disponibles de su año; con detalle anual la vista `share` se desactiva porque siempre valdría 100 %. Las celdas sin meses quedan vacías.
+
+`occupancy-chart` divide las habitaciones ocupadas entre las disponibles de cada periodo con `aggregate_occupancy()`; no promedia porcentajes mensuales. Usa el periodo y el detalle temporal, pero no el mercado de origen, porque la fuente es nacional.
+
+`season-selection` es un `dcc.Store` en memoria con este contrato:
+
+```json
+{"period": "2023-07", "detail": "month"}
+```
+
+Las claves usan el mismo formato que `period_key`: `2023-07`, `2023Q3` o `2023`. El clic en una barra de ocupación trae la clave en `customdata`. El clic en el mapa de calor solo trae la columna y el año, y `heatmap_event()` los traduce a la clave. `make_season_selection()` acepta únicamente claves válidas para el detalle vigente. Cualquier cambio de filtro o `clear-season-selection` deja `period` en `null`.
+
+Con un periodo elegido, la estacionalidad lo enmarca y la ocupación pinta su barra en azul y las demás en gris. Si el periodo no tiene ocupación publicada, las barras conservan su color y la gráfica lo explica. Si el filtro no incluye 2022 a 2024, la ocupación muestra un mensaje que sugiere ampliar el periodo.
 
 ## Agregación y datos ausentes
 
