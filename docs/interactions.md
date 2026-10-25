@@ -132,3 +132,7 @@ El detalle temporal suma llegadas de los meses disponibles. Los trimestres y añ
 ## Recursos locales
 
 Dash sirve los recursos desde `src/tourism_dashboard/assets`. Inter Variable 4.1 procede de [Inter](https://rsms.me/inter/) y conserva la licencia SIL Open Font License en `fonts/OFL.txt`. La hoja de Bootstrap 5.3.6 corresponde a la que proporciona `dash-bootstrap-components`; está almacenada localmente con su licencia MIT en `vendor/BOOTSTRAP-LICENSE.txt`. El archivo de idioma español corresponde a Plotly.js 3.7.0 y procede de su distribución oficial. Los recursos de estilos, tipografía e idioma se cargan desde la aplicación.
+
+## Etiquetas de cada gráfica
+
+Cada tarjeta lleva una etiqueta junto al título. `observed-badge` marca cifras publicadas por la fuente y usa el azul. `interpreted-badge` marca cifras que el tablero calcula a partir de datos observados, como el peso de cada mercado y la comparación entre llegadas y ocupación, y usa un borde gris. `estimated-badge` marca lo que calculó un modelo y usa el naranja. Cada tarjeta tiene un texto de ayuda con el identificador referido en `aria-describedby`.
