@@ -241,7 +241,7 @@ def model_evaluation_figure(predictions: pd.DataFrame) -> go.Figure:
     )
     if predictions.empty:
         figure.add_annotation(
-            text="No hay resultados para el modelo seleccionado.",
+            text="No hay resultados para este modelo.<br>Elige uno de los tres modelos en el selector de arriba.",
             x=0.5,
             y=0.5,
             xref="paper",
@@ -479,13 +479,20 @@ def market_share_figure(
             row=1,
             col=column,
         )
-    figure.update_xaxes(showgrid=False, tickformat="%Y", nticks=4, automargin=True)
+    figure.update_xaxes(
+        showgrid=False,
+        tickformat="%Y",
+        nticks=4,
+        automargin=True,
+        ticklabelstandoff=8,
+    )
     figure.update_yaxes(
         gridcolor=GRID,
         zeroline=False,
         range=[0, maximum * 1.1],
         ticksuffix=" %",
         tickformat=",.0f",
+        ticklabelstandoff=8,
     )
     figure.update_yaxes(title="% de las llegadas", row=1, col=1)
     return figure
@@ -506,7 +513,12 @@ def occupancy_figure(
         hovermode="closest",
         dragmode=False,
         showlegend=False,
-        xaxis={"title": "Periodo", "showgrid": False, "automargin": True},
+        xaxis={
+            "title": "Periodo",
+            "showgrid": False,
+            "automargin": True,
+            "ticklabelstandoff": 8,
+        },
         yaxis={
             "title": "Habitaciones ocupadas (%)",
             "gridcolor": GRID,
@@ -515,6 +527,7 @@ def occupancy_figure(
             "ticksuffix": " %",
             "automargin": True,
             "fixedrange": True,
+            "ticklabelstandoff": 10,
         },
     )
     if rows.empty:
@@ -587,6 +600,7 @@ def arrivals_occupancy_figure(
         showlegend=False,
         xaxis={
             "title": "Llegadas del mercado elegido (viajeros)",
+            "ticklabelstandoff": 8,
             "gridcolor": GRID,
             "rangemode": "tozero",
             "tickformat": ",.0f",
@@ -598,6 +612,7 @@ def arrivals_occupancy_figure(
             "range": [0, 100],
             "ticksuffix": " %",
             "automargin": True,
+            "ticklabelstandoff": 10,
         },
     )
     if rows.empty:
