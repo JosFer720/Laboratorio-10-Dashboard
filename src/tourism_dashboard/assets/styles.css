@@ -119,6 +119,7 @@ button { font-family: inherit; }
 #model-selector .Select-placeholder { line-height: 42px; }
 .model-metrics { margin: 0; }
 .estimated-badge { flex-shrink: 0; padding: 5px 10px; border: 1px solid var(--estimated); border-radius: 5px; color: var(--estimated-text); background: var(--uncertainty); font-size: 12px; }
+.interpreted-badge { flex-shrink: 0; padding: 5px 10px; border: 1px solid var(--context); border-radius: 5px; color: var(--text); background: var(--background); font-size: 12px; }
 .chart-row:has(> [hidden]) { grid-template-columns: minmax(0, 1fr); }
 .visualization-selector { margin-bottom: 24px; padding: 14px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
 .visualization-selector summary { cursor: pointer; font-weight: 600; }
@@ -128,7 +129,7 @@ button { font-family: inherit; }
 .graph-checklist label { display: flex; align-items: center; gap: 8px; min-height: 40px; cursor: pointer; }
 .graph-checklist input { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--observed); }
 .graph-selection-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
-.information-panel.model-comparison { max-width: 100%; min-width: 0; }
+.information-panel.model-limits, .information-panel.model-comparison { max-width: 100%; min-width: 0; }
 .table-scroll { max-width: 100%; overflow-x: auto; margin: 16px 0; }
 .model-comparison-table { width: 100%; font-size: 13px; border-collapse: collapse; }
 .model-comparison-table th, .model-comparison-table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }

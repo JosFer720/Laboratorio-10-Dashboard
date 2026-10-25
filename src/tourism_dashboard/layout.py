@@ -327,7 +327,7 @@ def _market_share(arrivals: pd.DataFrame) -> html.Section:
             html.Div(
                 [
                     html.H3("Peso de cada mercado en el tiempo"),
-                    html.Span("Observado", className="observed-badge"),
+                    html.Span("Interpretado", className="interpreted-badge"),
                 ],
                 className="chart-heading",
             ),
@@ -532,13 +532,14 @@ def _arrivals_occupancy_panel(
             html.Div(
                 [
                     html.H3("Llegadas y ocupación hotelera"),
-                    html.Span("Observado", className="observed-badge"),
+                    html.Span("Interpretado", className="interpreted-badge"),
                 ],
                 className="chart-heading",
             ),
             html.P(
                 "Cada punto compara las llegadas de un periodo con la ocupación hotelera nacional. "
                 "Ayuda a identificar periodos que conviene revisar al planificar servicios. "
+                "Que dos cifras suban juntas no significa que una cause la otra. "
                 "Cambia los filtros para explorar y haz clic en la estacionalidad o la ocupación "
                 "para resaltar ese periodo aquí. El mercado de origen cambia solo las llegadas.",
                 id="arrivals-occupancy-help",
@@ -612,7 +613,7 @@ def _model_errors_panel(
                 style={"height": "420px"},
             ),
             html.P(
-                "Fuente: resultados originales de los Laboratorios 1 y 2 para S0_total. "
+                "Fuente: resultados originales de los Laboratorios 1 y 2 sobre el total mensual de turistas y excursionistas. "
                 "Es una evaluación histórica, no una garantía del error futuro. "
                 "La línea gris marca el error cero; el naranja identifica los errores de las estimaciones.",
                 className="note chart-source",
@@ -712,6 +713,32 @@ def _model_comparison(metrics: pd.DataFrame) -> html.Section:
     )
 
 
+def _model_limits() -> html.Section:
+    return html.Section(
+        [
+            html.H3("Qué son estos modelos y qué límites tienen"),
+            html.P(
+                "Los tres modelos aprendieron de la serie mensual de turistas y excursionistas hasta marzo de 2021 y calcularon los 63 meses siguientes. "
+                "ARIMA y Prophet son modelos estadísticos que buscan patrones de crecimiento y de temporada en el historial. "
+                "LSTM catch22 es una red neuronal que mira los 24 meses anteriores para calcular el siguiente.",
+                className="metric-explanation",
+            ),
+            html.P(
+                "Los tres aprendieron de un historial que termina en plena pandemia, y su error cambia mucho de un año a otro, como se ve en la gráfica de errores. "
+                "Las estimaciones no traen un margen de error y no son una garantía de lo que ocurrirá. "
+                "Úsalas como una referencia para comparar escenarios, junto con las cifras observadas.",
+                className="metric-explanation",
+            ),
+            html.P(
+                "Lo estimado se marca en naranja y lo observado en azul en todo el tablero.",
+                className="note",
+            ),
+        ],
+        className="information-panel model-limits",
+        **{"aria-label": "Límites de las predicciones"},
+    )
+
+
 def _visualization_selector() -> html.Details:
     return html.Details(
         [
@@ -783,9 +810,19 @@ def _data_panel(months: list[dict[str, str]]) -> html.Section:
             html.P(
                 "La ocupación hotelera conserva su cobertura de 2022 a 2024 y tiene un alcance distinto al de las llegadas. Una coincidencia entre ambas series no demuestra causalidad."
             ),
-            html.H3("Cómo leer la gráfica"),
+            html.H3("Cómo leer las etiquetas"),
             html.P(
-                "El azul y la línea continua representan datos observados. El gris deja en segundo plano los puntos fuera de una selección. Al cambiar el detalle, se suman las llegadas de los meses disponibles; no se generan datos diarios."
+                "Observado es una cifra publicada por la fuente, sin cambios, y se dibuja en azul. Interpretado es una cifra que el tablero calcula a partir de datos observados, como un porcentaje o una comparación entre dos fuentes. Estimado es lo que calculó un modelo y se dibuja en naranja. El gris deja en segundo plano lo que no está elegido."
+            ),
+            html.P(
+                "Las relaciones entre cifras se muestran para explorar y no para explicar. Que dos series cambien al mismo tiempo no demuestra que una cause la otra."
+            ),
+            html.P(
+                "Al cambiar el detalle, se suman las llegadas de los meses disponibles. No se generan datos diarios."
+            ),
+            html.H3("Términos que aparecen en el tablero"),
+            html.P(
+                "Turista es el visitante que pasa al menos una noche en el país y excursionista es el que no pernocta. Estacionalidad es la forma en que las llegadas suben y bajan con el mes del año. Agregado es un grupo de países que la fuente reúne en una sola cifra. Ocupación hotelera es el porcentaje de habitaciones ocupadas sobre las disponibles."
             ),
         ],
         id="data-panel",
@@ -851,8 +888,18 @@ def _models_panel(
             html.Section(
                 [
                     html.Div(
-                        [html.H3("Valores observados y estimados"), html.Span("Evaluación histórica", className="observed-badge")],
+                        [
+                            html.H3("Valores observados y estimados"),
+                            html.Span("Estimado", className="estimated-badge"),
+                        ],
                         className="chart-heading",
+                    ),
+                    html.P(
+                        "La línea azul continua son las llegadas que hubo y la naranja discontinua es lo que el modelo calculó para esos mismos meses. "
+                        "Sirve para ver qué tan cerca estuvo el modelo de la realidad antes de confiar en él para planificar. "
+                        "Cambia el modelo en el selector de arriba para comparar.",
+                        id="model-evaluation-help",
+                        className="chart-help",
                     ),
                     dcc.Graph(
                         id="model-evaluation-chart",
@@ -862,14 +909,17 @@ def _models_panel(
                         style={"height": "420px"},
                     ),
                     html.P(
+                        "Fuente: resultados originales de los Laboratorios 1 y 2 sobre el total mensual de turistas y excursionistas. "
                         "No se muestra intervalo de confianza porque los resultados originales no incluyen uno.",
                         className="note chart-source",
                     ),
                 ],
                 id="v7-container", className="chart-card",
+                **{"aria-describedby": "model-evaluation-help"},
             ),
             _model_errors_panel(selected_predictions, selected_metrics),
             _model_comparison(metrics),
+            _model_limits(),
         ],
         id="models-panel",
         hidden=True,
