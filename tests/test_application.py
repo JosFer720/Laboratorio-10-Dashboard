@@ -230,3 +230,57 @@ def test_create_app_has_the_dashboard_title() -> None:
     assert "No se muestra intervalo" in text
     assert "visitantes no residentes" not in text
     assert "cruceristas" not in text.lower()
+
+
+def _text(component: object) -> str:
+    return " ".join(
+        str(part.children)
+        for part in _walk(component)
+        if isinstance(getattr(part, "children", None), str)
+    )
+
+
+def test_every_graph_card_explains_what_it_shows() -> None:
+    app = create_app(
+        DATA_PATH, MODEL_PREDICTIONS_PATH, MODEL_METRICS_PATH, OCCUPANCY_PATH
+    )
+    described = {
+        getattr(component, "aria-describedby", None)
+        for component in _walk(app.layout)
+        if getattr(component, "className", None) == "chart-card"
+    }
+    helps = {
+        component.id
+        for component in _walk(app.layout)
+        if getattr(component, "className", None) == "chart-help"
+        and getattr(component, "id", None)
+    }
+
+    assert described <= helps
+    assert len(described) == 8
+
+
+def test_badges_separate_observed_interpreted_and_estimated() -> None:
+    app = create_app(
+        DATA_PATH, MODEL_PREDICTIONS_PATH, MODEL_METRICS_PATH, OCCUPANCY_PATH
+    )
+    badges = {
+        (component.className, component.children)
+        for component in _walk(app.layout)
+        if getattr(component, "className", None)
+        in {"observed-badge", "interpreted-badge", "estimated-badge"}
+    }
+
+    assert ("interpreted-badge", "Interpretado") in badges
+    assert ("estimated-badge", "Estimado") in badges
+    assert ("observed-badge", "Observado") in badges
+
+
+def test_model_panel_states_limits_of_the_estimates() -> None:
+    app = create_app(
+        DATA_PATH, MODEL_PREDICTIONS_PATH, MODEL_METRICS_PATH, OCCUPANCY_PATH
+    )
+    text = _text(app.layout)
+
+    assert "no son una garantía" in text
+    assert "margen de error" in text
