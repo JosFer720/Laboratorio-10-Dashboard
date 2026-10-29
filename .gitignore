@@ -14,3 +14,17 @@ htmlcov/
 Thumbs.db
 
 decisiones.md
+decisiones_lab11.md
+
+# Datos institucionales: no se versionan
+Datos Inguat/
+datos_institucionales/
+*.xlsx
+*.xlsm
+*.xls
+*.parquet
+*.pdf
+
+# Salidas del pipeline
+output/
+mlruns/
