@@ -26,6 +26,9 @@ class PathsConfig:
     migration_sheet: str
     output_dir: Path
     results_file: str
+    factors_file: str
+    national_series_file: str
+    coverage_file: str
 
     @property
     def mobility_path(self) -> Path:
@@ -54,6 +57,7 @@ class MigrationConfig:
 @dataclass(frozen=True)
 class ParametersConfig:
     procedure_version: str
+    unit: str
     seed: int
     reparto_factor: str
     migration: MigrationConfig
@@ -136,6 +140,9 @@ def _build_paths(raw: Mapping[str, Any], env: Mapping[str, str]) -> PathsConfig:
         migration_sheet=str(raw["migration_sheet"]),
         output_dir=Path(env.get("PIPELINE_OUTPUT_DIR") or raw["output_dir"]),
         results_file=str(raw["results_file"]),
+        factors_file=str(raw["factors_file"]),
+        national_series_file=str(raw["national_series_file"]),
+        coverage_file=str(raw["coverage_file"]),
     )
 
 
@@ -153,6 +160,7 @@ def _build_parameters(raw: Mapping[str, Any]) -> ParametersConfig:
     migration = raw["migration"]
     return ParametersConfig(
         procedure_version=str(raw["procedure_version"]),
+        unit=str(raw["unit"]),
         seed=int(raw["seed"]),
         reparto_factor=str(raw["reparto_factor"]),
         migration=MigrationConfig(

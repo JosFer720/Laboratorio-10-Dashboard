@@ -24,6 +24,9 @@ def test_default_config_loads_with_data_dir_from_environment(tmp_path: Path) -> 
     assert config.paths.results_file == "estimates.csv"
     assert config.parameters.procedure_version == "1"
     assert config.parameters.migration.traveler_types == ("Turista", "Excursionista")
+    assert config.parameters.migration.first_year == 2023
+    assert config.parameters.unit == "visitantes únicos del mes"
+    assert config.paths.factors_file == "reparto_factors.csv"
 
 
 def test_default_periods_match_observed_coverage(tmp_path: Path) -> None:

@@ -16,6 +16,10 @@ paths:
   migration_sheet: Datos
   output_dir: output
   results_file: estimates.csv
+  # Archivos que acompañan a las estimaciones para poder reproducirlas.
+  factors_file: reparto_factors.csv
+  national_series_file: national_entries.csv
+  coverage_file: coverage.csv
 
 # Los períodos se expresan como rangos de meses inclusivos (AAAA-MM).
 periods:
@@ -42,14 +46,20 @@ periods:
 
 parameters:
   procedure_version: "1"
+  unit: visitantes únicos del mes
   seed: 7
   # Factor de reparto: cociente entre los visitantes del subdestino y las
   # entradas nacionales del mismo mes, promediado sobre los meses de ajuste.
   reparto_factor: mean_of_monthly_ratios
   migration:
+    # La hoja Notas de la base indica usar Turista + Excursionista para
+    # visitantes; el tipo Viajero no es visitante y Cruceristas solo existe
+    # hasta 2022.
     traveler_types:
       - Turista
       - Excursionista
+    # Desde 2023 la base proviene del sistema depurado de INGUAT y sus niveles
+    # no son comparables con 2022 hacia atrás.
     first_year: 2023
 
 quality:
