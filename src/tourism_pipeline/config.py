@@ -67,8 +67,16 @@ class ParametersConfig:
 class QualityConfig:
     mobility_columns: tuple[str, ...]
     mobility_key: tuple[str, ...]
+    migration_key: tuple[str, ...]
     mobility_segments: tuple[str, ...]
     migration_columns: tuple[str, ...]
+    mobility_numeric_columns: tuple[str, ...]
+    migration_numeric_columns: tuple[str, ...]
+    required_non_null_mobility: tuple[str, ...]
+    required_non_null_migration: tuple[str, ...]
+    optional_migration_columns: tuple[str, ...]
+    max_optional_missing_fraction: float
+    zero_count_warning_fraction: float
 
 
 @dataclass(frozen=True)
@@ -123,6 +131,7 @@ def load_config(
     except KeyError as exc:
         raise ConfigError(f"Falta la clave {exc} en la configuración.") from exc
     _check_periods(config.periods)
+    _check_quality(config.quality)
     return config
 
 
@@ -171,11 +180,20 @@ def _build_parameters(raw: Mapping[str, Any]) -> ParametersConfig:
 
 
 def _build_quality(raw: Mapping[str, Any]) -> QualityConfig:
+    thresholds = raw["thresholds"]
     return QualityConfig(
         mobility_columns=tuple(raw["mobility_columns"]),
         mobility_key=tuple(raw["mobility_key"]),
+        migration_key=tuple(raw["migration_key"]),
         mobility_segments=tuple(raw["mobility_segments"]),
         migration_columns=tuple(raw["migration_columns"]),
+        mobility_numeric_columns=tuple(raw["mobility_numeric_columns"]),
+        migration_numeric_columns=tuple(raw["migration_numeric_columns"]),
+        required_non_null_mobility=tuple(raw["required_non_null_mobility"]),
+        required_non_null_migration=tuple(raw["required_non_null_migration"]),
+        optional_migration_columns=tuple(raw["optional_migration_columns"]),
+        max_optional_missing_fraction=float(thresholds["max_optional_missing_fraction"]),
+        zero_count_warning_fraction=float(thresholds["zero_count_warning_fraction"]),
     )
 
 
@@ -197,3 +215,12 @@ def _check_periods(periods: PeriodsConfig) -> None:
         raise ConfigError(
             "Los meses a estimar necesitan entradas nacionales para calcular la estimación."
         )
+
+
+def _check_quality(quality: QualityConfig) -> None:
+    thresholds = (
+        quality.max_optional_missing_fraction,
+        quality.zero_count_warning_fraction,
+    )
+    if any(value < 0 or value > 1 for value in thresholds):
+        raise ConfigError("Los umbrales de calidad deben ser fracciones entre 0 y 1.")

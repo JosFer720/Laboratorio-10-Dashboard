@@ -80,6 +80,13 @@ quality:
     - fecha
     - pais
     - es_consecutivo
+  migration_key:
+    - Año
+    - Mes cod
+    - Vía
+    - Frontera
+    - País
+    - Tipo de Viajero
   mobility_segments:
     - mayor a 1 dia
     - menor a 1 dia
@@ -97,3 +104,35 @@ quality:
     - Agrupación Residencia
     - Tipo de Viajero
     - Viajero
+  mobility_numeric_columns:
+    - anio
+    - mes
+    - visitantes
+    - dias_persona
+    - permanencia_prom
+  migration_numeric_columns:
+    - Año
+    - Mes cod
+    - Viajero
+  required_non_null_mobility:
+    - sheet
+    - destino
+    - sub_grupo
+    - fecha
+    - pais
+    - es_consecutivo
+    - visitantes
+  required_non_null_migration:
+    - Año
+    - Mes cod
+    - Tipo de Viajero
+    - Viajero
+  optional_migration_columns:
+    - Región
+    - Región dos
+    - Regiones OMT
+    - MCEO
+    - Agrupación Residencia
+  thresholds:
+    max_optional_missing_fraction: 0.05
+    zero_count_warning_fraction: 0.0

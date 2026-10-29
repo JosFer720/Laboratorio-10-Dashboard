@@ -122,3 +122,17 @@ def test_missing_section_names_the_key(tmp_path: Path) -> None:
 def test_unreadable_config_is_an_error(tmp_path: Path) -> None:
     with pytest.raises(ConfigError, match="No se pudo leer"):
         load_config(tmp_path / "no-existe.yaml", env={"INGUAT_DATA_DIR": str(tmp_path)})
+
+
+@pytest.mark.parametrize(
+    ("name", "value"),
+    [("max_optional_missing_fraction", -0.1), ("zero_count_warning_fraction", 1.1)],
+)
+def test_quality_thresholds_must_be_fractions(tmp_path: Path, name: str, value: float) -> None:
+    raw = yaml.safe_load(DEFAULT_CONFIG_PATH.read_text(encoding="utf-8"))
+    raw["quality"]["thresholds"][name] = value
+    custom = tmp_path / "custom.yaml"
+    custom.write_text(yaml.safe_dump(raw), encoding="utf-8")
+
+    with pytest.raises(ConfigError, match="umbrales de calidad"):
+        load_config(custom, env={"INGUAT_DATA_DIR": str(tmp_path)})
