@@ -1,0 +1,89 @@
+# Configuración del pipeline de estimación.
+# La carpeta con los datos institucionales no se escribe aquí: se toma de la
+# variable de entorno INGUAT_DATA_DIR para que los datos nunca entren al repositorio.
+
+paths:
+  data_dir: null
+  mobility_file: BD_moviidad_mensual.xlsx
+  mobility_sheets:
+    - Antigua
+    - Peten
+    - Atitlan
+    - Izabal
+    - Alta Verapaz
+    - Playas Pacifico
+  migration_file: Base_Migracion_2009-2026jun.xlsx
+  migration_sheet: Datos
+  output_dir: output
+  results_file: estimates.csv
+
+# Los períodos se expresan como rangos de meses inclusivos (AAAA-MM).
+periods:
+  # Meses con cobertura de la base mensual de movilidad. Entre los dos bloques
+  # no hay datos, y esos meses nunca se rellenan con cero.
+  mobility_coverage:
+    - {start: "2025-09", end: "2025-12"}
+    - {start: "2026-03", end: "2026-08"}
+  # Meses con cobertura de la base de migración.
+  migration_coverage:
+    - {start: "2009-01", end: "2026-06"}
+  # Meses con movilidad observada y entradas nacionales a la vez: con ellos se
+  # calcula el factor de reparto.
+  fit:
+    - {start: "2025-09", end: "2025-12"}
+    - {start: "2026-03", end: "2026-06"}
+  # Meses que se ocultan para evaluar. Cada mes se estima con los meses de
+  # ajuste anteriores a él.
+  evaluation:
+    - {start: "2026-03", end: "2026-06"}
+  # Meses sin cobertura de movilidad que se estiman.
+  estimate:
+    - {start: "2026-01", end: "2026-02"}
+
+parameters:
+  procedure_version: "1"
+  seed: 7
+  # Factor de reparto: cociente entre los visitantes del subdestino y las
+  # entradas nacionales del mismo mes, promediado sobre los meses de ajuste.
+  reparto_factor: mean_of_monthly_ratios
+  migration:
+    traveler_types:
+      - Turista
+      - Excursionista
+    first_year: 2023
+
+quality:
+  mobility_columns:
+    - destino
+    - sub_grupo
+    - anio
+    - mes
+    - pais
+    - es_consecutivo
+    - fecha
+    - visitantes
+    - dias_persona
+    - permanencia_prom
+  mobility_key:
+    - destino
+    - sub_grupo
+    - fecha
+    - pais
+    - es_consecutivo
+  mobility_segments:
+    - mayor a 1 dia
+    - menor a 1 dia
+  migration_columns:
+    - Año
+    - Mes cod
+    - Mes
+    - Vía
+    - Frontera
+    - País
+    - Región
+    - Región dos
+    - Regiones OMT
+    - MCEO
+    - Agrupación Residencia
+    - Tipo de Viajero
+    - Viajero
