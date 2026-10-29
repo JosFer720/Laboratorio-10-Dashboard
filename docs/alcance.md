@@ -87,6 +87,16 @@ El pipeline escribe un archivo `estimates.csv` en la carpeta de salida (`paths.o
 | `generated_at` | Fecha y hora de generación. |
 | `procedure_version` | Versión del procedimiento. |
 
+### Archivos que acompañan a las estimaciones
+
+Junto a `estimates.csv` se escriben tres archivos para poder reproducir cada cifra:
+
+| Archivo | Contenido |
+|---|---|
+| `reparto_factors.csv` | Factor de cada subdestino para cada mes estimado, con cuántos meses de ajuste usó y cuáles fueron el primero y el último. |
+| `national_entries.csv` | Entradas nacionales de los meses de ajuste y de los meses estimados, con su uso (`ajuste` o `estimación`). |
+| `coverage.csv` | Para cada mes de la ventana de trabajo, si tiene movilidad, entradas nacionales, ambas o ninguna. |
+
 ## Reglas metodológicas que respeta el flujo
 
 - Un período sin cobertura se presenta como sin dato, nunca como cero.
