@@ -56,6 +56,13 @@ def _jsonable(value: Any) -> Any:
     return value
 
 
+def effective_config(config: PipelineConfig) -> dict[str, Any]:
+    """Configuración usada en la ejecución, sin la ruta de los datos institucionales."""
+    effective = _jsonable(config)
+    effective["paths"]["data_dir"] = "<configured outside the repository>"
+    return effective
+
+
 def git_commit() -> str:
     completed = subprocess.run(
         ["git", "-c", f"safe.directory={REPOSITORY_ROOT.as_posix()}", "rev-parse", "HEAD"],
@@ -111,9 +118,9 @@ class RunTracker:
         }
         for key, value in params.items():
             self.client.log_param(self.run_id, key, value)
-        effective = _jsonable(self.config)
-        effective["paths"]["data_dir"] = "<configured outside the repository>"
-        self.client.log_dict(self.run_id, effective, "config/effective_config.json")
+        self.client.log_dict(
+            self.run_id, effective_config(self.config), "config/effective_config.json"
+        )
 
     def log_sources(self, sources: Mapping[str, FileFingerprint]) -> None:
         records = {}
@@ -140,6 +147,20 @@ class RunTracker:
         for path in files.values():
             self.client.log_artifact(self.run_id, str(path), artifact_path="outputs")
 
+    def log_acceptance(self, decision: Mapping[str, Any], evaluated_months: str) -> None:
+        self.client.log_param(self.run_id, "evaluation.months", evaluated_months)
+        for name, value in decision["thresholds"].items():
+            self.client.log_param(self.run_id, f"acceptance.{name}", value)
+        self.client.set_tag(self.run_id, "acceptance.verdict", decision["verdict"])
+        if decision["reasons"]:
+            self.client.set_tag(self.run_id, "acceptance.reasons", " | ".join(decision["reasons"]))
+        self.client.log_dict(self.run_id, dict(decision), "acceptance/acceptance.json")
+
+    def log_publication(self, published_version: str | None, current_version: str | None) -> None:
+        outcome = "published" if published_version else "not_published"
+        self.client.set_tag(self.run_id, "publication.outcome", outcome)
+        self.client.set_tag(self.run_id, "publication.current_version", current_version or "none")
+
     def finish(self) -> None:
         self.client.set_tag(self.run_id, "pipeline.outcome", "success")
         self.client.set_terminated(self.run_id, status="FINISHED", end_time=int(time.time() * 1000))
@@ -156,6 +177,13 @@ def record_evaluation_metrics(
     client = MlflowClient(tracking_uri=normalize_tracking_uri(config.tracking.uri))
     for name, value in metrics.items():
         client.log_metric(tracking_run_id, name, float(value))
+
+
+def record_restoration(
+    config: PipelineConfig, tracking_run_id: str, restored_at: str
+) -> None:
+    client = MlflowClient(tracking_uri=normalize_tracking_uri(config.tracking.uri))
+    client.set_tag(tracking_run_id, "publication.restored_at", restored_at)
 
 
 def _artifact_paths(client: MlflowClient, run_id: str, path: str = "") -> list[str]:

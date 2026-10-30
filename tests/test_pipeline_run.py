@@ -46,7 +46,14 @@ def test_healthy_run_writes_results_report_and_leaves_no_staging(workspace) -> N
     run = run_pipeline(config)
 
     output = workspace["output"]
-    assert set(run.files) == {"results", "factors", "national_series", "coverage"}
+    assert set(run.files) == {
+        "results",
+        "factors",
+        "national_series",
+        "coverage",
+        "evaluation",
+        "evaluation_summary",
+    }
     assert all((output / name).is_file() for name in RESULT_FILES)
     assert (output / "reports" / f"quality_{run.run_id}.json").is_file()
     assert not _staging_leftovers(output)

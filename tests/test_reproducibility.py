@@ -32,6 +32,8 @@ def test_reproducibility_runs_twice_and_registers_equivalence(tmp_path: Path) ->
         "reparto_factors.csv",
         "national_entries.csv",
         "coverage.csv",
+        "evaluation.csv",
+        "evaluation_by_destination.csv",
     }
     client = MlflowClient(tracking_uri=normalize_tracking_uri(config.tracking.uri))
     for run_id in result.tracking_run_ids:

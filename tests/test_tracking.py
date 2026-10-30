@@ -53,8 +53,16 @@ def test_successful_pipeline_run_is_fully_registered(tmp_path: Path) -> None:
     assert tracked.data.params["periods.fit"] == "2025-09,2025-10,2025-11,2025-12,2026-03,2026-04,2026-05,2026-06"
     assert tracked.data.params["periods.evaluation"] == "2026-03,2026-04,2026-05,2026-06"
     assert tracked.data.params["procedure.reparto_factor"] == "mean_of_monthly_ratios"
-    assert tracked.data.metrics == {}
+    assert {
+        "evaluation.candidate.mae",
+        "evaluation.candidate.rmse",
+        "evaluation.candidate.mape",
+        "evaluation.last_observed.mae",
+        "evaluation.historical_mean.mae",
+        "evaluation.evaluated_months",
+    } <= set(tracked.data.metrics)
     assert tracked.data.tags["pipeline.outcome"] == "success"
+    assert tracked.data.tags["acceptance.verdict"] in {"aprobada", "rechazada"}
     artifacts = _artifact_paths(client, pipeline_run.tracking_run_id)
     assert {
         "config/effective_config.json",
@@ -64,6 +72,9 @@ def test_successful_pipeline_run_is_fully_registered(tmp_path: Path) -> None:
         "outputs/reparto_factors.csv",
         "outputs/national_entries.csv",
         "outputs/coverage.csv",
+        "outputs/evaluation.csv",
+        "outputs/evaluation_by_destination.csv",
+        "acceptance/acceptance.json",
     } <= artifacts
     assert all(f"quality.{name}.status" in tracked.data.params for name in (
         "columns_and_types",
@@ -100,7 +111,8 @@ def test_evaluation_metrics_hook_logs_only_supplied_values(tmp_path: Path) -> No
 
     client = MlflowClient(tracking_uri=normalize_tracking_uri(config.tracking.uri))
     metrics = client.get_run(pipeline_run.tracking_run_id).data.metrics
-    assert metrics == {"mae": 12.5, "rmse": 18.0}
+    assert metrics["mae"] == 12.5
+    assert metrics["rmse"] == 18.0
 
 
 def test_run_query_includes_status_parameters_metrics_and_artifacts(tmp_path: Path) -> None:
@@ -114,5 +126,5 @@ def test_run_query_includes_status_parameters_metrics_and_artifacts(tmp_path: Pa
     record = records[0]
     assert record["status"] == "FINISHED"
     assert record["parameters"]["pipeline_run_id"] == pipeline_run.run_id
-    assert record["metrics"] == {"mae": 1.0}
+    assert record["metrics"]["mae"] == 1.0
     assert "outputs/estimates.csv" in record["artifacts"]

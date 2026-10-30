@@ -54,8 +54,8 @@ def check_reproducibility(config: PipelineConfig) -> ReproducibilityResult:
         root = Path(temporary)
         first_config = replace(config, paths=replace(config.paths, output_dir=root / "first"))
         second_config = replace(config, paths=replace(config.paths, output_dir=root / "second"))
-        first_run = run_pipeline(first_config)
-        second_run = run_pipeline(second_config)
+        first_run = run_pipeline(first_config, publish=False)
+        second_run = run_pipeline(second_config, publish=False)
         equivalent = True
         maximum = 0.0
         compared_files = tuple(path.name for path in first_run.files.values())
