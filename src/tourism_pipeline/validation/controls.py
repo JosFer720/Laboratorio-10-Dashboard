@@ -74,23 +74,23 @@ def validate_columns_and_types(
     detail = {"missing": missing, "incompatible": incompatible, "unexpected": unexpected}
     if any(missing.values()) or incompatible:
         return _result(
-            "columns_and_types", "Required columns and compatible source types", ControlStatus.FAILED,
-            "Missing required columns or incompatible values were found.", detail,
-            "Unexpected extra columns are present.",
-            "A required column is absent or a required type is incompatible.",
+            "columns_and_types", "Columnas indispensables y tipos compatibles en las fuentes", ControlStatus.FAILED,
+            "Falta una columna indispensable o hay valores de un tipo incompatible.", detail,
+            "Hay columnas adicionales no esperadas.",
+            "Falta una columna indispensable o un tipo es incompatible.",
         )
     if any(unexpected.values()):
         return _result(
-            "columns_and_types", "Required columns and compatible source types", ControlStatus.WARNING,
-            "The required structure is valid, with extra columns.", detail,
-            "Unexpected extra columns are present.",
-            "A required column is absent or a required type is incompatible.",
+            "columns_and_types", "Columnas indispensables y tipos compatibles en las fuentes", ControlStatus.WARNING,
+            "La estructura indispensable es válida, pero hay columnas adicionales.", detail,
+            "Hay columnas adicionales no esperadas.",
+            "Falta una columna indispensable o un tipo es incompatible.",
         )
     return _result(
-        "columns_and_types", "Required columns and compatible source types", ControlStatus.PASSED,
-        "All required columns and types are valid.", detail,
-        "Unexpected extra columns are present.",
-        "A required column is absent or a required type is incompatible.",
+        "columns_and_types", "Columnas indispensables y tipos compatibles en las fuentes", ControlStatus.PASSED,
+        "Todas las columnas indispensables y sus tipos son válidos.", detail,
+        "Hay columnas adicionales no esperadas.",
+        "Falta una columna indispensable o un tipo es incompatible.",
     )
 
 
@@ -139,23 +139,23 @@ def validate_dates_and_coverage(
     }
     if any(invalid.values()) or missing_required_mobility or missing_required_migration:
         return _result(
-            "dates_and_coverage", "Valid dates and coverage required for fitting and estimation", ControlStatus.FAILED,
-            "Invalid dates or missing required fit periods were found.", detail,
-            "Configured uncovered mobility periods are absent and remain unfilled.",
-            "A date is invalid or a period required for fitting is missing.",
+            "dates_and_coverage", "Fechas válidas y cobertura necesaria para el ajuste y la estimación", ControlStatus.FAILED,
+            "Hay fechas inválidas o faltan meses necesarios para el ajuste o la estimación.", detail,
+            "Los meses sin cobertura de movilidad configurados están ausentes y se dejan sin dato.",
+            "Una fecha es inválida o falta un mes necesario para el ajuste o la estimación.",
         )
     if expected_gaps:
         return _result(
-            "dates_and_coverage", "Valid dates and coverage required for fitting and estimation", ControlStatus.WARNING,
-            "Expected mobility gaps are present and were not filled with zero.", detail,
-            "Configured uncovered mobility periods are absent and remain unfilled.",
-            "A date is invalid or a period required for fitting is missing.",
+            "dates_and_coverage", "Fechas válidas y cobertura necesaria para el ajuste y la estimación", ControlStatus.WARNING,
+            "Hay meses sin cobertura de movilidad esperados y no se rellenaron con cero.", detail,
+            "Los meses sin cobertura de movilidad configurados están ausentes y se dejan sin dato.",
+            "Una fecha es inválida o falta un mes necesario para el ajuste o la estimación.",
         )
     return _result(
-        "dates_and_coverage", "Valid dates and coverage required for fitting and estimation", ControlStatus.PASSED,
-        "Dates and required coverage are valid.", detail,
-        "Configured uncovered mobility periods are absent and remain unfilled.",
-        "A date is invalid or a period required for fitting is missing.",
+        "dates_and_coverage", "Fechas válidas y cobertura necesaria para el ajuste y la estimación", ControlStatus.PASSED,
+        "Las fechas y la cobertura necesaria son válidas.", detail,
+        "Los meses sin cobertura de movilidad configurados están ausentes y se dejan sin dato.",
+        "Una fecha es inválida o falta un mes necesario para el ajuste o la estimación.",
     )
 
 
@@ -190,23 +190,23 @@ def validate_uniqueness(
     }
     if any(missing_keys.values()) or mobility_duplicates or migration_duplicates:
         return _result(
-            "uniqueness", "Unique rows at each source's declared granularity", ControlStatus.FAILED,
-            "Duplicate rows or an incomplete uniqueness key were found.", detail,
-            "Duplicates only occur before the configured migration methodology window.",
-            "Duplicates occur in mobility or in the migration window used by the pipeline.",
+            "uniqueness", "Filas únicas según la granularidad declarada de cada fuente", ControlStatus.FAILED,
+            "Hay filas duplicadas o la clave de unicidad está incompleta.", detail,
+            "Los duplicados solo ocurren antes del primer año de migración que se usa.",
+            "Hay duplicados en la movilidad o en los años de migración que usa el pipeline.",
         )
     if ignored_duplicates:
         return _result(
-            "uniqueness", "Unique rows at each source's declared granularity", ControlStatus.WARNING,
-            "Duplicates exist only outside the configured migration window.", detail,
-            "Duplicates only occur before the configured migration methodology window.",
-            "Duplicates occur in mobility or in the migration window used by the pipeline.",
+            "uniqueness", "Filas únicas según la granularidad declarada de cada fuente", ControlStatus.WARNING,
+            "Los duplicados están solo fuera de los años de migración que se usan.", detail,
+            "Los duplicados solo ocurren antes del primer año de migración que se usa.",
+            "Hay duplicados en la movilidad o en los años de migración que usa el pipeline.",
         )
     return _result(
-        "uniqueness", "Unique rows at each source's declared granularity", ControlStatus.PASSED,
-        "No duplicate source rows were found.", detail,
-        "Duplicates only occur before the configured migration methodology window.",
-        "Duplicates occur in mobility or in the migration window used by the pipeline.",
+        "uniqueness", "Filas únicas según la granularidad declarada de cada fuente", ControlStatus.PASSED,
+        "No se encontraron filas duplicadas.", detail,
+        "Los duplicados solo ocurren antes del primer año de migración que se usa.",
+        "Hay duplicados en la movilidad o en los años de migración que usa el pipeline.",
     )
 
 
@@ -242,23 +242,23 @@ def validate_missing_values(
     }
     if required_missing or optional_fraction > quality.max_optional_missing_fraction:
         return _result(
-            "missing_values", "Missing values distinguished by modeling impact", ControlStatus.FAILED,
-            "Missing values prevent estimation or exceed the configured optional-data threshold.", detail,
-            "Optional descriptive values are missing within the configured threshold.",
-            "A required modeling value is missing or optional missingness exceeds the threshold.",
+            "missing_values", "Valores faltantes según si impiden estimar o solo son descriptivos", ControlStatus.FAILED,
+            "Faltan valores indispensables para estimar o los faltantes opcionales superan el umbral.", detail,
+            "Faltan valores descriptivos opcionales, dentro del umbral configurado.",
+            "Falta un valor indispensable para estimar o los faltantes opcionales superan el umbral.",
         )
     if optional_missing:
         return _result(
-            "missing_values", "Missing values distinguished by modeling impact", ControlStatus.WARNING,
-            "Only optional descriptive values are missing.", detail,
-            "Optional descriptive values are missing within the configured threshold.",
-            "A required modeling value is missing or optional missingness exceeds the threshold.",
+            "missing_values", "Valores faltantes según si impiden estimar o solo son descriptivos", ControlStatus.WARNING,
+            "Solo faltan valores descriptivos opcionales.", detail,
+            "Faltan valores descriptivos opcionales, dentro del umbral configurado.",
+            "Falta un valor indispensable para estimar o los faltantes opcionales superan el umbral.",
         )
     return _result(
-        "missing_values", "Missing values distinguished by modeling impact", ControlStatus.PASSED,
-        "No cell-level missing values affect the pipeline.", detail,
-        "Optional descriptive values are missing within the configured threshold.",
-        "A required modeling value is missing or optional missingness exceeds the threshold.",
+        "missing_values", "Valores faltantes según si impiden estimar o solo son descriptivos", ControlStatus.PASSED,
+        "Ningún valor faltante afecta al pipeline.", detail,
+        "Faltan valores descriptivos opcionales, dentro del umbral configurado.",
+        "Falta un valor indispensable para estimar o los faltantes opcionales superan el umbral.",
     )
 
 
@@ -307,25 +307,25 @@ def validate_values_and_denominators(
     }
     if negative_counts or non_finite_counts or invalid_denominators:
         return _result(
-            "values_and_denominators", "Finite non-negative counts and positive national denominators", ControlStatus.FAILED,
-            "Negative, non-finite, or invalid denominator values were found.", detail,
-            "Zero counts are present but no fitting denominator is zero.",
-            "A count is negative/non-finite or a national fitting denominator is not positive.",
+            "values_and_denominators", "Conteos finitos y no negativos y denominadores nacionales positivos", ControlStatus.FAILED,
+            "Hay conteos negativos, valores no finitos o denominadores inválidos.", detail,
+            "Hay conteos en cero, pero ningún denominador de ajuste es cero.",
+            "Un conteo es negativo o no finito, o un denominador nacional de ajuste no es positivo.",
         )
     row_count = max(len(mobility) + len(migration), 1)
     zero_fraction = sum(zero_counts.values()) / row_count
     if zero_fraction > config.quality.zero_count_warning_fraction:
         return _result(
-            "values_and_denominators", "Finite non-negative counts and positive national denominators", ControlStatus.WARNING,
-            "Zero counts were found without invalidating a fitting denominator.", detail,
-            "Zero counts are present but no fitting denominator is zero.",
-            "A count is negative/non-finite or a national fitting denominator is not positive.",
+            "values_and_denominators", "Conteos finitos y no negativos y denominadores nacionales positivos", ControlStatus.WARNING,
+            "Hay conteos en cero que no invalidan ningún denominador de ajuste.", detail,
+            "Hay conteos en cero, pero ningún denominador de ajuste es cero.",
+            "Un conteo es negativo o no finito, o un denominador nacional de ajuste no es positivo.",
         )
     return _result(
-        "values_and_denominators", "Finite non-negative counts and positive national denominators", ControlStatus.PASSED,
-        "Counts and fitting denominators are valid.", detail,
-        "Zero counts are present but no fitting denominator is zero.",
-        "A count is negative/non-finite or a national fitting denominator is not positive.",
+        "values_and_denominators", "Conteos finitos y no negativos y denominadores nacionales positivos", ControlStatus.PASSED,
+        "Los conteos y los denominadores de ajuste son válidos.", detail,
+        "Hay conteos en cero, pero ningún denominador de ajuste es cero.",
+        "Un conteo es negativo o no finito, o un denominador nacional de ajuste no es positivo.",
     )
 
 
@@ -338,13 +338,13 @@ def validate_methodology(
     del migration
     violations: list[str] = []
     if context.mobility_source != "monthly":
-        violations.append("monthly mobility source")
+        violations.append("la movilidad no viene de la base mensual")
     if context.aggregates_subdestinations:
-        violations.append("subdestination aggregation")
+        violations.append("se suman subdestinos")
     if "destino" in mobility and mobility["destino"].astype(str).str.fullmatch(
         r"\s*total\s*", case=False, na=False
     ).any():
-        violations.append("total rows")
+        violations.append("hay filas de total")
     dates = (
         pd.to_datetime(mobility["fecha"], errors="coerce", format="mixed")
         if "fecha" in mobility
@@ -354,9 +354,9 @@ def validate_methodology(
     if uncovered.any():
         values = pd.to_numeric(mobility.loc[uncovered, "visitantes"], errors="coerce") if "visitantes" in mobility else pd.Series(dtype=float)
         if values.empty or (values.fillna(0) == 0).any():
-            violations.append("zero-filled uncovered periods")
+            violations.append("meses sin cobertura rellenados con cero")
         else:
-            violations.append("observed rows in configured uncovered periods")
+            violations.append("hay datos observados en meses configurados sin cobertura")
     configured = set(config.periods.mobility_coverage) | set(config.periods.estimate)
     observed = set(dates.dropna().dt.to_period("M").dt.to_timestamp())
     unexpected = sorted(observed - configured)
@@ -368,23 +368,23 @@ def validate_methodology(
     }
     if violations:
         return _result(
-            "methodology", "Monthly-source, subdestination-level, non-zero-fill methodology", ControlStatus.FAILED,
-            "One or more methodological rules were violated.", detail,
-            "Mobility contains periods outside the configured coverage window.",
-            "Daily data is used, subdestinations are aggregated, totals are constructed, or gaps are zero-filled.",
+            "methodology", "Regla metodológica: fuente mensual, nivel de subdestino y sin rellenar con cero", ControlStatus.FAILED,
+            "Se incumplió una o más reglas metodológicas.", detail,
+            "La movilidad tiene meses fuera de la cobertura configurada.",
+            "Se usa la base diaria, se suman subdestinos, se arman totales o se rellenan con cero los meses sin cobertura.",
         )
     if unexpected:
         return _result(
-            "methodology", "Monthly-source, subdestination-level, non-zero-fill methodology", ControlStatus.WARNING,
-            "The methodology is valid, but mobility has unexpected periods.", detail,
-            "Mobility contains periods outside the configured coverage window.",
-            "Daily data is used, subdestinations are aggregated, totals are constructed, or gaps are zero-filled.",
+            "methodology", "Regla metodológica: fuente mensual, nivel de subdestino y sin rellenar con cero", ControlStatus.WARNING,
+            "La metodología es válida, pero la movilidad tiene meses inesperados.", detail,
+            "La movilidad tiene meses fuera de la cobertura configurada.",
+            "Se usa la base diaria, se suman subdestinos, se arman totales o se rellenan con cero los meses sin cobertura.",
         )
     return _result(
-        "methodology", "Monthly-source, subdestination-level, non-zero-fill methodology", ControlStatus.PASSED,
-        "The automated methodological rules are satisfied.", detail,
-        "Mobility contains periods outside the configured coverage window.",
-        "Daily data is used, subdestinations are aggregated, totals are constructed, or gaps are zero-filled.",
+        "methodology", "Regla metodológica: fuente mensual, nivel de subdestino y sin rellenar con cero", ControlStatus.PASSED,
+        "Se cumplen las reglas metodológicas automáticas.", detail,
+        "La movilidad tiene meses fuera de la cobertura configurada.",
+        "Se usa la base diaria, se suman subdestinos, se arman totales o se rellenan con cero los meses sin cobertura.",
     )
 
 

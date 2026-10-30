@@ -183,7 +183,7 @@ def test_methodology_pass_warn_and_stop(config, sources):
     assert healthy.status is ControlStatus.PASSED
     assert warning.status is ControlStatus.WARNING
     assert failed.status is ControlStatus.FAILED
-    assert "monthly mobility source" in failed.detail["violations"]
+    assert "la movilidad no viene de la base mensual" in failed.detail["violations"]
 
 
 def test_methodology_rejects_totals_and_zero_filled_uncovered_months(config, sources):
@@ -203,9 +203,9 @@ def test_methodology_rejects_totals_and_zero_filled_uncovered_months(config, sou
     )
 
     assert result.status is ControlStatus.FAILED
-    assert "subdestination aggregation" in result.detail["violations"]
-    assert "zero-filled uncovered periods" in result.detail["violations"]
-    assert "total rows" in result.detail["violations"]
+    assert "se suman subdestinos" in result.detail["violations"]
+    assert "meses sin cobertura rellenados con cero" in result.detail["violations"]
+    assert "hay filas de total" in result.detail["violations"]
 
 
 def test_runner_writes_report_and_raises_after_critical_failure(config, tmp_path):
