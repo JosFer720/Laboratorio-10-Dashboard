@@ -213,7 +213,7 @@ def test_callbacks_have_unique_outputs() -> None:
             for output in callback_outputs
         )
 
-    assert len(app.callback_map) == 15
+    assert len(app.callback_map) == 16
     assert len(outputs) == len(set(outputs))
 
 

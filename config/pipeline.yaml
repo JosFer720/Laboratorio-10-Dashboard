@@ -1,0 +1,186 @@
+# Configuración del pipeline de estimación.
+# La carpeta con los datos institucionales no se escribe aquí: se toma de la
+# variable de entorno INGUAT_DATA_DIR para que los datos nunca entren al repositorio.
+
+paths:
+  data_dir: null
+  mobility_file: BD_moviidad_mensual.xlsx
+  mobility_sheets:
+    - Antigua
+    - Peten
+    - Atitlan
+    - Izabal
+    - Alta Verapaz
+    - Playas Pacifico
+  migration_file: Base_Migracion_2009-2026jun.xlsx
+  migration_sheet: Datos
+  output_dir: output
+  # Carpeta, dentro de output_dir, donde queda el reporte de controles de cada ejecución.
+  reports_dir: reports
+  results_file: estimates.csv
+  # Archivos que acompañan a las estimaciones para poder reproducirlas.
+  factors_file: reparto_factors.csv
+  national_series_file: national_entries.csv
+  coverage_file: coverage.csv
+  # Evaluación temporal: estimaciones de los meses ocultos y errores por subdestino.
+  evaluation_file: evaluation.csv
+  evaluation_summary_file: evaluation_by_destination.csv
+
+# Los períodos se expresan como rangos de meses inclusivos (AAAA-MM).
+periods:
+  # Meses con cobertura de la base mensual de movilidad. Entre los dos bloques
+  # no hay datos, y esos meses nunca se rellenan con cero.
+  mobility_coverage:
+    - {start: "2025-09", end: "2025-12"}
+    - {start: "2026-03", end: "2026-08"}
+  # Meses con cobertura de la base de migración.
+  migration_coverage:
+    - {start: "2009-01", end: "2026-06"}
+  # Meses con movilidad observada y entradas nacionales a la vez: con ellos se
+  # calcula el factor de reparto.
+  fit:
+    - {start: "2025-09", end: "2025-12"}
+    - {start: "2026-03", end: "2026-06"}
+  # Meses que se ocultan para evaluar. Cada mes se estima con los meses de
+  # ajuste anteriores a él.
+  evaluation:
+    - {start: "2026-03", end: "2026-06"}
+  # Meses sin cobertura de movilidad que se estiman.
+  estimate:
+    - {start: "2026-01", end: "2026-02"}
+
+parameters:
+  procedure_version: "1"
+  unit: visitantes únicos del mes
+  seed: 7
+  # Factor de reparto: cociente entre los visitantes del subdestino y las
+  # entradas nacionales del mismo mes, promediado sobre los meses de ajuste.
+  reparto_factor: mean_of_monthly_ratios
+  migration:
+    # La hoja Notas de la base indica usar Turista + Excursionista para
+    # visitantes; el tipo Viajero no es visitante y Cruceristas solo existe
+    # hasta 2022.
+    traveler_types:
+      - Turista
+      - Excursionista
+    # Desde 2023 la base proviene del sistema depurado de INGUAT y sus niveles
+    # no son comparables con 2022 hacia atrás.
+    first_year: 2023
+
+quality:
+  mobility_columns:
+    - destino
+    - sub_grupo
+    - anio
+    - mes
+    - pais
+    - es_consecutivo
+    - fecha
+    - visitantes
+    - dias_persona
+    - permanencia_prom
+  mobility_key:
+    - destino
+    - sub_grupo
+    - fecha
+    - pais
+    - es_consecutivo
+  migration_key:
+    - Año
+    - Mes cod
+    - Vía
+    - Frontera
+    - País
+    - Tipo de Viajero
+  mobility_segments:
+    - mayor a 1 dia
+    - menor a 1 dia
+  migration_columns:
+    - Año
+    - Mes cod
+    - Mes
+    - Vía
+    - Frontera
+    - País
+    - Región
+    - Región dos
+    - Regiones OMT
+    - MCEO
+    - Agrupación Residencia
+    - Tipo de Viajero
+    - Viajero
+  mobility_numeric_columns:
+    - anio
+    - mes
+    - visitantes
+    - dias_persona
+    - permanencia_prom
+  migration_numeric_columns:
+    - Año
+    - Mes cod
+    - Viajero
+  required_non_null_mobility:
+    - sheet
+    - destino
+    - sub_grupo
+    - fecha
+    - es_consecutivo
+    - visitantes
+  required_non_null_migration:
+    - Año
+    - Mes cod
+    - Tipo de Viajero
+    - Viajero
+  # Columnas descriptivas: la estimación suma los visitantes de todas las filas
+  # de un subdestino y mes, así que un país vacío no impide estimar.
+  optional_mobility_columns:
+    - pais
+    - dias_persona
+    - permanencia_prom
+  optional_migration_columns:
+    - Región
+    - Región dos
+    - Regiones OMT
+    - MCEO
+    - Agrupación Residencia
+  thresholds:
+    max_optional_missing_fraction: 0.05
+    zero_count_warning_fraction: 0.0
+
+# Regla de aceptación de una versión candidata. Se fija antes de evaluar y no se
+# cambia después para aprobar una versión. Una candidata se aprueba solo si:
+# 1. ningún control de calidad crítico falló;
+# 2. las salidas están íntegras: columnas completas, valores finitos y positivos,
+#    y una estimación por subdestino para cada mes a estimar (enero y febrero sin
+#    cero ni faltantes);
+# 3. la evaluación cubre al menos `min_evaluated_months` meses con todos los
+#    subdestinos, y
+# 4. el MAPE del procedimiento en esos meses no supera `max_mape`.
+# El umbral es relativo porque los subdestinos van de unos miles a cerca de un
+# millón de visitantes al mes: un umbral en personas sería laxo para los grandes
+# e imposible para los pequeños. Con a lo sumo siete meses de ajuste, un factor
+# que traslada la estacionalidad nacional no puede exigir más precisión que una
+# desviación media de una cuarta parte del valor observado; más allá de eso la
+# estimación ya no distingue un mes alto de uno bajo, porque las entradas
+# nacionales varían cerca de 70 % entre los meses de ajuste. No es obligatorio
+# superar a las referencias sencillas: se reportan para comparar.
+acceptance:
+  max_mape: 25.0
+  min_evaluated_months: 4
+
+# Almacén de versiones aprobadas. Por defecto vive dentro de output_dir; la
+# variable PIPELINE_VERSIONS_DIR lo cambia, por ejemplo a un volumen persistente.
+publication:
+  versions_dir: versions
+
+tracking:
+  directory: mlflow
+  experiment_name: Nivel Nacional
+  reproducibility_tolerance: 1.0e-9
+
+monitoring:
+  # Cambiar más de la mitad del valor publicado amerita revisión operativa;
+  # no mide precisión ni altera la regla de aceptación.
+  max_estimate_change_fraction: 0.5
+  # Un punto porcentual de cambio en faltantes amerita revisar la fuente.
+  max_missing_fraction_change: 0.01
