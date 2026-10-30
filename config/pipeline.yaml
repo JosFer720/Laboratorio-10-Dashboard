@@ -119,7 +119,6 @@ quality:
     - destino
     - sub_grupo
     - fecha
-    - pais
     - es_consecutivo
     - visitantes
   required_non_null_migration:
@@ -127,6 +126,12 @@ quality:
     - Mes cod
     - Tipo de Viajero
     - Viajero
+  # Columnas descriptivas: la estimación suma los visitantes de todas las filas
+  # de un subdestino y mes, así que un país vacío no impide estimar.
+  optional_mobility_columns:
+    - pais
+    - dias_persona
+    - permanencia_prom
   optional_migration_columns:
     - Región
     - Región dos

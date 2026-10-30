@@ -135,6 +135,28 @@ def test_missing_values_pass_warn_and_stop(config, sources):
     assert failed.detail["required_missing"]["mobility.visitantes"] == 5
 
 
+def test_missing_country_is_descriptive_and_does_not_stop(config, sources):
+    mobility, migration = sources
+    mobility.loc[:29, "pais"] = np.nan
+
+    result = validate_missing_values(mobility, migration, config)
+
+    assert result.status is ControlStatus.WARNING
+    assert result.detail["optional_missing"]["mobility.pais"] == 30
+    assert "mobility.pais" not in result.detail["required_missing"]
+
+
+def test_missing_country_does_not_hide_missing_visitors(config, sources):
+    mobility, migration = sources
+    mobility.loc[:29, "pais"] = np.nan
+    mobility.loc[0, "visitantes"] = np.nan
+
+    result = validate_missing_values(mobility, migration, config)
+
+    assert result.status is ControlStatus.FAILED
+    assert result.detail["required_missing"] == {"mobility.visitantes": 1}
+
+
 def test_values_and_denominators_pass_warn_and_stop(config, sources):
     mobility, migration = sources
     healthy = validate_values_and_denominators(mobility, migration, config)

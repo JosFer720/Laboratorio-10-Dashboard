@@ -74,6 +74,7 @@ class QualityConfig:
     migration_numeric_columns: tuple[str, ...]
     required_non_null_mobility: tuple[str, ...]
     required_non_null_migration: tuple[str, ...]
+    optional_mobility_columns: tuple[str, ...]
     optional_migration_columns: tuple[str, ...]
     max_optional_missing_fraction: float
     zero_count_warning_fraction: float
@@ -191,6 +192,7 @@ def _build_quality(raw: Mapping[str, Any]) -> QualityConfig:
         migration_numeric_columns=tuple(raw["migration_numeric_columns"]),
         required_non_null_mobility=tuple(raw["required_non_null_mobility"]),
         required_non_null_migration=tuple(raw["required_non_null_migration"]),
+        optional_mobility_columns=tuple(raw["optional_mobility_columns"]),
         optional_migration_columns=tuple(raw["optional_migration_columns"]),
         max_optional_missing_fraction=float(thresholds["max_optional_missing_fraction"]),
         zero_count_warning_fraction=float(thresholds["zero_count_warning_fraction"]),

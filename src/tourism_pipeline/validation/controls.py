@@ -224,16 +224,18 @@ def validate_missing_values(
             if count:
                 required_missing[f"{source}.{column}"] = count
     optional_missing: dict[str, int] = {}
-    optional_fraction = 0.0
-    for column in quality.optional_migration_columns:
-        if column in migration:
-            count = int(migration[column].isna().sum())
-            if count:
-                optional_missing[f"migration.{column}"] = count
-    if len(migration) and quality.optional_migration_columns:
-        optional_fraction = sum(optional_missing.values()) / (
-            len(migration) * len(quality.optional_migration_columns)
-        )
+    optional_cells = 0
+    for source, frame, columns in (
+        ("mobility", mobility, quality.optional_mobility_columns),
+        ("migration", migration, quality.optional_migration_columns),
+    ):
+        for column in columns:
+            if column in frame:
+                optional_cells += len(frame)
+                count = int(frame[column].isna().sum())
+                if count:
+                    optional_missing[f"{source}.{column}"] = count
+    optional_fraction = sum(optional_missing.values()) / optional_cells if optional_cells else 0.0
     detail = {
         "required_missing": required_missing,
         "optional_missing": optional_missing,
