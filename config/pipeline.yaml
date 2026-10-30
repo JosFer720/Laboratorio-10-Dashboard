@@ -177,3 +177,10 @@ tracking:
   directory: mlflow
   experiment_name: Nivel Nacional
   reproducibility_tolerance: 1.0e-9
+
+monitoring:
+  # Cambiar más de la mitad del valor publicado amerita revisión operativa;
+  # no mide precisión ni altera la regla de aceptación.
+  max_estimate_change_fraction: 0.5
+  # Un punto porcentual de cambio en faltantes amerita revisar la fuente.
+  max_missing_fraction_change: 0.01

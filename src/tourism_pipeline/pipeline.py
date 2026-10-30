@@ -9,7 +9,10 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pandas as pd
+
 from tourism_pipeline.config import PipelineConfig
+from tourism_pipeline.monitoring import ExecutionRecord, check_monitoring, source_snapshot
 from tourism_pipeline.estimation import (
     EstimationOutputs,
     EvaluationResult,
@@ -72,14 +75,22 @@ def run_pipeline(
     generated_at = now or datetime.now(timezone.utc)
     run_id = new_run_id(generated_at)
     logger.info("Ejecución %s", run_id)
-    tracker = RunTracker(config, run_id, generated_at)
+    execution = ExecutionRecord(config, run_id, generated_at)
+    tracker = None
+    outputs = None
+    snapshot = None
 
     try:
+        tracker = RunTracker(config, run_id, generated_at)
+        execution.data["tracking_run_id"] = tracker.run_id
         logger.info("Etapa 1/7: lectura de las fuentes")
         mobility = read_mobility(config)
         migration = read_migration(config)
         sources = {source.name: source.fingerprint for source in (mobility, migration)}
         tracker.log_sources(sources)
+        execution.completed("reading")
+        snapshot = source_snapshot(mobility.data, migration.data, config)
+        execution.data["source_snapshot"] = snapshot
 
         logger.info("Etapa 2/7: controles de calidad")
         report = run_quality_controls(
@@ -94,15 +105,32 @@ def run_pipeline(
             ),
         )
         tracker.log_quality(report)
+        execution.completed("quality")
+        execution.data["warnings"].extend(result.message for result in report.results if result.status.value == "warning")
 
         logger.info("Etapa 3/7: preparación de las series y cobertura")
         prepared = prepare(mobility.data, migration.data, config)
+        execution.completed("preparation")
 
         logger.info("Etapa 4/7: factor de reparto y estimación de los meses sin cobertura")
         outputs = estimate_uncovered_months(prepared, config, run_id, generated_at)
+        execution.completed("estimation")
+        previous = current_version(config.publication.versions_dir)
+        previous_results = None
+        if previous:
+            previous_config = json.loads(previous.file(CONFIG_DOCUMENT).read_text(encoding="utf-8"))
+            previous_results = pd.read_csv(previous.file(previous_config["paths"]["results_file"]))
+        execution.data["monitoring"] = check_monitoring(
+            snapshot, outputs.results, config, execution.previous, previous_results
+        )
+        execution.data["warnings"].extend(
+            alert for check in execution.data["monitoring"].values() for alert in check["alerts"]
+        )
+        execution.completed("monitoring")
 
         logger.info("Etapa 5/7: evaluación temporal con meses ocultos")
         evaluation = evaluate_procedure(prepared, config)
+        execution.completed("evaluation")
 
         logger.info("Etapa 6/7: regla de aceptación")
         decision = decide_acceptance(
@@ -113,6 +141,7 @@ def run_pipeline(
             config,
         )
         _write_acceptance_report(decision, evaluation, config, run_id)
+        execution.completed("acceptance")
 
         logger.info("Etapa 7/7: almacenamiento y publicación")
         files = _store(outputs, evaluation, config)
@@ -124,10 +153,13 @@ def run_pipeline(
         )
         published = None
         if publish and decision.approved:
+            observed_path = config.paths.output_dir / "observed.csv"
+            prepared.visitors.to_csv(observed_path, index=False, date_format="%Y-%m-%d")
+            tracker.log_outputs({"observed": observed_path})
             published = publish_version(
                 config.publication.versions_dir,
                 run_id,
-                files,
+                {**files, "observed": observed_path},
                 _version_metadata(run_id, generated_at, tracker.run_id, sources, evaluation, decision, config),
                 documents={CONFIG_DOCUMENT: effective_config(config)},
             )
@@ -136,6 +168,10 @@ def run_pipeline(
             published.version_id if published else None,
             current.version_id if current else None,
         )
+        execution.data["publication"] = "published" if published else ("rejected" if not decision.approved else "disabled")
+        execution.data["current_version"] = current.version_id if current else None
+        execution.completed("publication")
+        tracker.client.log_artifact(tracker.run_id, str(execution.write()), artifact_path="monitoring")
         tracker.finish()
         return PipelineRun(
             run_id,
@@ -151,9 +187,16 @@ def run_pipeline(
         )
     except Exception as exc:
         report = getattr(exc, "report", None)
-        if report is not None:
-            tracker.log_quality(report)
-        tracker.fail(str(exc))
+        execution.data["errors"].append(str(exc))
+        if snapshot is not None and "monitoring" not in execution.data:
+            execution.data["monitoring"] = check_monitoring(snapshot, None, config, execution.previous)
+            execution.data["warnings"].extend(alert for check in execution.data["monitoring"].values() for alert in check["alerts"])
+        execution.write()
+        if tracker is not None:
+            if report is not None:
+                tracker.log_quality(report)
+            tracker.client.log_artifact(tracker.run_id, str(execution.path), artifact_path="monitoring")
+            tracker.fail(str(exc))
         raise
 
 

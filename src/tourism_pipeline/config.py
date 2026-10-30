@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -106,6 +107,12 @@ class TrackingConfig:
 
 
 @dataclass(frozen=True)
+class MonitoringConfig:
+    max_estimate_change_fraction: float = 0.5
+    max_missing_fraction_change: float = 0.01
+
+
+@dataclass(frozen=True)
 class PipelineConfig:
     paths: PathsConfig
     periods: PeriodsConfig
@@ -114,6 +121,7 @@ class PipelineConfig:
     tracking: TrackingConfig
     acceptance: AcceptanceConfig
     publication: PublicationConfig
+    monitoring: MonitoringConfig = MonitoringConfig()
 
 
 def expand_months(ranges: list[Mapping[str, str]] | None, name: str) -> tuple[pd.Timestamp, ...]:
@@ -160,6 +168,7 @@ def load_config(
             tracking=_build_tracking(raw["tracking"], values, paths),
             acceptance=_build_acceptance(raw["acceptance"]),
             publication=_build_publication(raw["publication"], values, paths),
+            monitoring=MonitoringConfig(**raw.get("monitoring", {})),
         )
     except KeyError as exc:
         raise ConfigError(f"Falta la clave {exc} en la configuración.") from exc
@@ -168,6 +177,11 @@ def load_config(
     if config.tracking.reproducibility_tolerance < 0:
         raise ConfigError("La tolerancia de reproducibilidad no puede ser negativa.")
     _check_acceptance(config.acceptance, config.periods)
+    if any(not math.isfinite(value) or value < 0 for value in (
+        config.monitoring.max_estimate_change_fraction,
+        config.monitoring.max_missing_fraction_change,
+    )):
+        raise ConfigError("Los umbrales de monitoreo deben ser finitos y no negativos.")
     return config
 
 
