@@ -86,11 +86,19 @@ class QualityConfig:
 
 
 @dataclass(frozen=True)
+class TrackingConfig:
+    uri: str
+    experiment_name: str
+    reproducibility_tolerance: float
+
+
+@dataclass(frozen=True)
 class PipelineConfig:
     paths: PathsConfig
     periods: PeriodsConfig
     parameters: ParametersConfig
     quality: QualityConfig
+    tracking: TrackingConfig
 
 
 def expand_months(ranges: list[Mapping[str, str]] | None, name: str) -> tuple[pd.Timestamp, ...]:
@@ -128,16 +136,20 @@ def load_config(
         raise ConfigError("El archivo de configuración debe ser un mapa YAML.")
 
     try:
+        paths = _build_paths(raw["paths"], values)
         config = PipelineConfig(
-            paths=_build_paths(raw["paths"], values),
+            paths=paths,
             periods=_build_periods(raw["periods"]),
             parameters=_build_parameters(raw["parameters"]),
             quality=_build_quality(raw["quality"]),
+            tracking=_build_tracking(raw["tracking"], values, paths),
         )
     except KeyError as exc:
         raise ConfigError(f"Falta la clave {exc} en la configuración.") from exc
     _check_periods(config.periods)
     _check_quality(config.quality)
+    if config.tracking.reproducibility_tolerance < 0:
+        raise ConfigError("La tolerancia de reproducibilidad no puede ser negativa.")
     return config
 
 
@@ -202,6 +214,20 @@ def _build_quality(raw: Mapping[str, Any]) -> QualityConfig:
         optional_migration_columns=tuple(raw["optional_migration_columns"]),
         max_optional_missing_fraction=float(thresholds["max_optional_missing_fraction"]),
         zero_count_warning_fraction=float(thresholds["zero_count_warning_fraction"]),
+    )
+
+
+def _build_tracking(
+    raw: Mapping[str, Any], values: Mapping[str, str], paths: PathsConfig
+) -> TrackingConfig:
+    uri = values.get("MLFLOW_TRACKING_URI") or str(paths.output_dir / str(raw["directory"]))
+    tolerance = values.get("PIPELINE_REPRODUCIBILITY_TOLERANCE")
+    return TrackingConfig(
+        uri=uri,
+        experiment_name=values.get("MLFLOW_EXPERIMENT_NAME") or str(raw["experiment_name"]),
+        reproducibility_tolerance=float(
+            tolerance if tolerance is not None else raw["reproducibility_tolerance"]
+        ),
     )
 
 

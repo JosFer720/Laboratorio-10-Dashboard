@@ -17,7 +17,9 @@ from tourism_pipeline.synthetic import PROBLEMS, write_synthetic_sources
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULT_FILES = ("estimates.csv", "reparto_factors.csv", "national_entries.csv", "coverage.csv")
-ENVIRONMENT_KEYS = ("SYSTEMROOT", "PATH", "TEMP", "TMP", "HOME", "USERPROFILE", "LANG")
+ENVIRONMENT_KEYS = (
+    "SYSTEMROOT", "PATH", "TEMP", "TMP", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "LANG"
+)
 
 
 def _env(data_dir: Path, output_dir: Path) -> dict[str, str]:

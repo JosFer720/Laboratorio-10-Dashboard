@@ -143,3 +143,8 @@ quality:
   thresholds:
     max_optional_missing_fraction: 0.05
     zero_count_warning_fraction: 0.0
+
+tracking:
+  directory: mlflow
+  experiment_name: Nivel Nacional
+  reproducibility_tolerance: 1.0e-9

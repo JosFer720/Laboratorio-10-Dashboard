@@ -28,6 +28,23 @@ def test_default_config_loads_with_data_dir_from_environment(tmp_path: Path) -> 
     assert config.parameters.migration.first_year == 2023
     assert config.parameters.unit == "visitantes únicos del mes"
     assert config.paths.factors_file == "reparto_factors.csv"
+    assert config.tracking.experiment_name == "Nivel Nacional"
+    assert config.tracking.reproducibility_tolerance == 1e-9
+
+
+def test_tracking_settings_can_come_from_environment(tmp_path: Path) -> None:
+    config = load_config(
+        env={
+            "INGUAT_DATA_DIR": str(tmp_path),
+            "MLFLOW_TRACKING_URI": str(tmp_path / "tracking"),
+            "MLFLOW_EXPERIMENT_NAME": "Prueba local",
+            "PIPELINE_REPRODUCIBILITY_TOLERANCE": "0.0001",
+        }
+    )
+
+    assert config.tracking.uri == str(tmp_path / "tracking")
+    assert config.tracking.experiment_name == "Prueba local"
+    assert config.tracking.reproducibility_tolerance == 0.0001
 
 
 def test_default_periods_match_observed_coverage(tmp_path: Path) -> None:

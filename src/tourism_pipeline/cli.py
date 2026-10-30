@@ -63,6 +63,7 @@ def main(argv: Sequence[str] | None = None, env: Mapping[str, str] | None = None
     logger.info("Reporte de controles: %s", run.quality_report.path)
     for name, path in run.files.items():
         logger.info("Resultado %s: %s", name, path)
+    logger.info("Registro MLflow: %s", run.tracking_run_id)
     logger.info("Ejecución %s terminada.", run.run_id)
     return EXIT_OK
 

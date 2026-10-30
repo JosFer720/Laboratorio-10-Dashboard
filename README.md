@@ -89,6 +89,28 @@ Los períodos, los parámetros, los umbrales de calidad y los nombres de los arc
 
 El procedimiento no tiene componentes aleatorios. La semilla (`parameters.seed`) solo se usa para generar los datos sintéticos.
 
+### Registro y reproducibilidad
+
+Cada ejecución se registra en MLflow con el commit de Git, las huellas de las fuentes, los períodos, parámetros, seis controles y artefactos de configuración y resultados. Las ejecuciones detenidas por un control crítico quedan con estado `FAILED` y su causa, sin métricas de evaluación inventadas.
+
+El almacén local queda por defecto en `output/mlflow/`. Puede cambiarse con `MLFLOW_TRACKING_URI`, y el nombre del experimento con `MLFLOW_EXPERIMENT_NAME`.
+
+Para comprobar que dos ejecuciones con los mismos datos y configuración producen resultados equivalentes:
+
+```bash
+python scripts/check_reproducibility.py
+```
+
+La comparación cubre los cuatro CSV, ignora únicamente el identificador y la fecha variables de cada corrida y usa la tolerancia `tracking.reproducibility_tolerance` de la configuración. El procedimiento actual es determinista, por lo que la diferencia esperada es cero.
+
+Para consultar estados, métricas, parámetros y artefactos registrados:
+
+```bash
+python scripts/query_mlflow.py --limit 20
+```
+
+Las métricas predictivas se registrarán cuando se ejecute la etapa de evaluación; una corrida que se detiene antes no contiene métricas.
+
 ## Tablero
 
 Desde la raíz del proyecto:
