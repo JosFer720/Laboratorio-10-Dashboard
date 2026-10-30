@@ -1,0 +1,232 @@
+{
+  "synthetic_only": true,
+  "events": [
+    {
+      "step": "without_approved_version",
+      "estimates_available": false
+    },
+    {
+      "step": "published",
+      "version": "20261030T221034Z-cca1de37",
+      "mape": 1.796335441049597
+    },
+    {
+      "step": "detected_failure",
+      "run": "20261030T221037Z-3de69b01",
+      "tracking_run_id": "1960589eaa6d4bc0ba0e167d2a72e133",
+      "status": "FAILED",
+      "cause": "Fallaron controles críticos: uniqueness",
+      "approved_version_preserved": "20261030T221034Z-cca1de37",
+      "dashboard_available": true
+    },
+    {
+      "step": "recovered_and_published",
+      "version": "20261030T221038Z-d860a588"
+    },
+    {
+      "step": "restored_and_read_by_dashboard",
+      "version": "20261030T221034Z-cca1de37"
+    }
+  ],
+  "runs": [
+    {
+      "tracking_run_id": "33626ea5366445fbba896c34bde322e0",
+      "status": "FINISHED",
+      "parameters": {
+        "pipeline_run_id": "20261030T221038Z-d860a588",
+        "generated_at": "2026-10-30T22:10:38+00:00",
+        "git_commit": "b98efce1967e818f53ea2cbc609c27f5a35134f9",
+        "procedure.version": "1",
+        "procedure.unit": "visitantes únicos del mes",
+        "procedure.seed": "7",
+        "procedure.reparto_factor": "mean_of_monthly_ratios",
+        "migration.traveler_types": "Turista,Excursionista",
+        "migration.first_year": "2023",
+        "periods.fit": "2025-09,2025-10,2025-11,2025-12,2026-03,2026-04,2026-05,2026-06",
+        "periods.evaluation": "2026-03,2026-04,2026-05,2026-06",
+        "periods.estimate": "2026-01,2026-02",
+        "reproducibility.tolerance": "1e-09",
+        "source.mobility.file_name": "BD_moviidad_mensual.xlsx",
+        "source.mobility.size_bytes": "63595",
+        "source.mobility.sha256": "94468184ee12d01cc07099297895bf4bc12ca9d2ad791748b4fdf0bcb9344bb4",
+        "source.migration.file_name": "Base_Migracion_2009-2026jun.xlsx",
+        "source.migration.size_bytes": "30632",
+        "source.migration.sha256": "0c4775eb6b27d1b0fa28615b3c6ad7b9570dbec4ac759895d3e1c736cdb2146c",
+        "quality.columns_and_types.status": "passed",
+        "quality.dates_and_coverage.status": "warning",
+        "quality.uniqueness.status": "passed",
+        "quality.missing_values.status": "passed",
+        "quality.values_and_denominators.status": "passed",
+        "quality.methodology.status": "passed",
+        "evaluation.months": "2026-03,2026-04,2026-05,2026-06",
+        "acceptance.max_mape": "25.0",
+        "acceptance.min_evaluated_months": "4.0"
+      },
+      "metrics": {
+        "evaluation.candidate.mae": 15.983922235585908,
+        "evaluation.candidate.rmse": 20.979102411138673,
+        "evaluation.candidate.mape": 1.796335441049597,
+        "evaluation.candidate.n": 72.0,
+        "evaluation.candidate.zero_observed_excluded": 0.0,
+        "evaluation.last_observed.mae": 217.40277777777777,
+        "evaluation.last_observed.rmse": 271.42542970195126,
+        "evaluation.last_observed.mape": 26.723022296090516,
+        "evaluation.last_observed.n": 72.0,
+        "evaluation.last_observed.zero_observed_excluded": 0.0,
+        "evaluation.historical_mean.mae": 158.45737433862433,
+        "evaluation.historical_mean.rmse": 195.1843742638595,
+        "evaluation.historical_mean.mape": 18.732793714600326,
+        "evaluation.historical_mean.n": 72.0,
+        "evaluation.historical_mean.zero_observed_excluded": 0.0,
+        "evaluation.evaluated_months": 4.0
+      },
+      "tags": {
+        "pipeline.run_id": "20261030T221038Z-d860a588",
+        "pipeline.generated_at": "2026-10-30T22:10:38+00:00",
+        "mlflow.runName": "20261030T221038Z-d860a588",
+        "quality.has_critical_failures": "false",
+        "acceptance.verdict": "aprobada",
+        "publication.outcome": "published",
+        "publication.current_version": "20261030T221038Z-d860a588",
+        "pipeline.outcome": "success"
+      },
+      "artifacts": [
+        "acceptance/acceptance.json",
+        "config/effective_config.json",
+        "metadata/sources.json",
+        "monitoring/execution_20261030T221038Z-d860a588.json",
+        "outputs/coverage.csv",
+        "outputs/estimates.csv",
+        "outputs/evaluation.csv",
+        "outputs/evaluation_by_destination.csv",
+        "outputs/national_entries.csv",
+        "outputs/observed.csv",
+        "outputs/reparto_factors.csv",
+        "quality/quality_20261030T221038Z-d860a588.json"
+      ]
+    },
+    {
+      "tracking_run_id": "1960589eaa6d4bc0ba0e167d2a72e133",
+      "status": "FAILED",
+      "parameters": {
+        "pipeline_run_id": "20261030T221037Z-3de69b01",
+        "generated_at": "2026-10-30T22:10:37+00:00",
+        "git_commit": "b98efce1967e818f53ea2cbc609c27f5a35134f9",
+        "procedure.version": "1",
+        "procedure.unit": "visitantes únicos del mes",
+        "procedure.seed": "7",
+        "procedure.reparto_factor": "mean_of_monthly_ratios",
+        "migration.traveler_types": "Turista,Excursionista",
+        "migration.first_year": "2023",
+        "periods.fit": "2025-09,2025-10,2025-11,2025-12,2026-03,2026-04,2026-05,2026-06",
+        "periods.evaluation": "2026-03,2026-04,2026-05,2026-06",
+        "periods.estimate": "2026-01,2026-02",
+        "reproducibility.tolerance": "1e-09",
+        "source.mobility.file_name": "BD_moviidad_mensual.xlsx",
+        "source.mobility.size_bytes": "63701",
+        "source.mobility.sha256": "c9f7e7a1868521404c9af3dd3044b572ddc8bf399de8b79262389bc36e276762",
+        "source.migration.file_name": "Base_Migracion_2009-2026jun.xlsx",
+        "source.migration.size_bytes": "30632",
+        "source.migration.sha256": "028e06d97988ec808106507e6c5fa473e1e03ec8b85118ee082dfb8fb0817f9b",
+        "quality.columns_and_types.status": "passed",
+        "quality.dates_and_coverage.status": "warning",
+        "quality.uniqueness.status": "failed",
+        "quality.missing_values.status": "passed",
+        "quality.values_and_denominators.status": "passed",
+        "quality.methodology.status": "passed"
+      },
+      "metrics": {},
+      "tags": {
+        "pipeline.run_id": "20261030T221037Z-3de69b01",
+        "pipeline.generated_at": "2026-10-30T22:10:37+00:00",
+        "mlflow.runName": "20261030T221037Z-3de69b01",
+        "quality.has_critical_failures": "true",
+        "pipeline.outcome": "failed",
+        "pipeline.failure_cause": "Fallaron controles críticos: uniqueness"
+      },
+      "artifacts": [
+        "config/effective_config.json",
+        "metadata/sources.json",
+        "monitoring/execution_20261030T221037Z-3de69b01.json",
+        "quality/quality_20261030T221037Z-3de69b01.json"
+      ]
+    },
+    {
+      "tracking_run_id": "4b2d06723ce5489a8b57446c24edd823",
+      "status": "FINISHED",
+      "parameters": {
+        "pipeline_run_id": "20261030T221034Z-cca1de37",
+        "generated_at": "2026-10-30T22:10:34+00:00",
+        "git_commit": "b98efce1967e818f53ea2cbc609c27f5a35134f9",
+        "procedure.version": "1",
+        "procedure.unit": "visitantes únicos del mes",
+        "procedure.seed": "7",
+        "procedure.reparto_factor": "mean_of_monthly_ratios",
+        "migration.traveler_types": "Turista,Excursionista",
+        "migration.first_year": "2023",
+        "periods.fit": "2025-09,2025-10,2025-11,2025-12,2026-03,2026-04,2026-05,2026-06",
+        "periods.evaluation": "2026-03,2026-04,2026-05,2026-06",
+        "periods.estimate": "2026-01,2026-02",
+        "reproducibility.tolerance": "1e-09",
+        "source.mobility.file_name": "BD_moviidad_mensual.xlsx",
+        "source.mobility.size_bytes": "63595",
+        "source.mobility.sha256": "f6624bdd49922a879bf3ef6a2c3c6d44badbb24e85e30da79f028faad45ca3f9",
+        "source.migration.file_name": "Base_Migracion_2009-2026jun.xlsx",
+        "source.migration.size_bytes": "30632",
+        "source.migration.sha256": "671ca7b7ca36f0ce7484c8d7927a1234edc86278bc31c5bc8e02e105ce2130cc",
+        "quality.columns_and_types.status": "passed",
+        "quality.dates_and_coverage.status": "warning",
+        "quality.uniqueness.status": "passed",
+        "quality.missing_values.status": "passed",
+        "quality.values_and_denominators.status": "passed",
+        "quality.methodology.status": "passed",
+        "evaluation.months": "2026-03,2026-04,2026-05,2026-06",
+        "acceptance.max_mape": "25.0",
+        "acceptance.min_evaluated_months": "4.0"
+      },
+      "metrics": {
+        "evaluation.candidate.mae": 15.983922235585908,
+        "evaluation.candidate.rmse": 20.979102411138673,
+        "evaluation.candidate.mape": 1.796335441049597,
+        "evaluation.candidate.n": 72.0,
+        "evaluation.candidate.zero_observed_excluded": 0.0,
+        "evaluation.last_observed.mae": 217.40277777777777,
+        "evaluation.last_observed.rmse": 271.42542970195126,
+        "evaluation.last_observed.mape": 26.723022296090516,
+        "evaluation.last_observed.n": 72.0,
+        "evaluation.last_observed.zero_observed_excluded": 0.0,
+        "evaluation.historical_mean.mae": 158.45737433862433,
+        "evaluation.historical_mean.rmse": 195.1843742638595,
+        "evaluation.historical_mean.mape": 18.732793714600326,
+        "evaluation.historical_mean.n": 72.0,
+        "evaluation.historical_mean.zero_observed_excluded": 0.0,
+        "evaluation.evaluated_months": 4.0
+      },
+      "tags": {
+        "pipeline.run_id": "20261030T221034Z-cca1de37",
+        "pipeline.generated_at": "2026-10-30T22:10:34+00:00",
+        "mlflow.runName": "20261030T221034Z-cca1de37",
+        "quality.has_critical_failures": "false",
+        "acceptance.verdict": "aprobada",
+        "publication.outcome": "published",
+        "publication.current_version": "20261030T221034Z-cca1de37",
+        "pipeline.outcome": "success",
+        "publication.restored_at": "2026-10-30T22:10:39+00:00"
+      },
+      "artifacts": [
+        "acceptance/acceptance.json",
+        "config/effective_config.json",
+        "metadata/sources.json",
+        "monitoring/execution_20261030T221034Z-cca1de37.json",
+        "outputs/coverage.csv",
+        "outputs/estimates.csv",
+        "outputs/evaluation.csv",
+        "outputs/evaluation_by_destination.csv",
+        "outputs/national_entries.csv",
+        "outputs/observed.csv",
+        "outputs/reparto_factors.csv",
+        "quality/quality_20261030T221034Z-cca1de37.json"
+      ]
+    }
+  ]
+}

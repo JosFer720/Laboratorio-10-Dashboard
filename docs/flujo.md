@@ -63,3 +63,9 @@ Cuando se detiene, el pipeline termina con código de salida 2, deja el reporte 
 | `versions/<ejecución>/` | Versión aprobada: estimaciones, evaluación, configuración efectiva y `metadata.json`. |
 | `versions/current.json` | Puntero a la versión vigente que consulta el tablero. |
 | `versions/history.jsonl` | Cada publicación y restauración, con su fecha y la versión anterior. |
+| `versions/<ejecución>/observed.csv` | Instantánea de visitantes observados por subdestino y mes que acompaña a las estimaciones aprobadas. |
+| `reports/execution_<ejecución>.json` | Inicio, fin, etapas completadas, advertencias, errores, monitoreo y resultado de publicación. También se guarda en MLflow. |
+
+El tablero consulta el puntero vigente cada 30 segundos y al elegir un subdestino. No ejecuta ninguna etapa del procedimiento. Distingue observado en azul continuo de estimado en naranja discontinuo y deja los meses sin observación como sin dato. Si no hay una versión aprobada legible, no muestra estimaciones.
+
+El monitoreo compara el último mes de cada fuente y de los resultados con la cobertura configurada. También compara faltantes, claves duplicadas y cobertura con la ejecución anterior que leyó ambas fuentes, y revisa valores negativos, no finitos o variaciones superiores al umbral frente a la versión vigente. Las alertas de variación requieren revisión y no prueban pérdida de precisión. Solo la evaluación de meses observados comparables produce métricas de error.
