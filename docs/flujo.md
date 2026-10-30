@@ -1,6 +1,6 @@
 # Flujo de los datos
 
-El flujo va desde la lectura de las fuentes institucionales hasta la consulta de las estimaciones. Se ejecuta con un solo comando (`python run_pipeline.py`) y no depende de archivos intermedios hechos a mano ni de la memoria de una sesión. El tablero no ejecuta el pipeline: solo leerá resultados ya generados, de modo que cambiar un filtro nunca vuelve a calcular nada.
+El flujo va desde la lectura de las fuentes institucionales hasta la consulta de las estimaciones. Se ejecuta con un solo comando (`python run_pipeline.py`) y no depende de archivos intermedios hechos a mano ni de la memoria de una sesión. El tablero no ejecuta el pipeline: solo lee la versión aprobada vigente, de modo que cambiar un filtro nunca vuelve a calcular nada.
 
 ```mermaid
 flowchart TD
@@ -9,14 +9,17 @@ flowchart TD
     V -- "falla un control crítico" --> X["Se detiene<br/>queda el reporte de controles<br/>los resultados anteriores no cambian"]
     V -- "correcto o con advertencias" --> P["3. Preparación<br/>entradas nacionales, visitantes por subdestino, cobertura"]
     P --> E["4. Factor de reparto y estimación<br/>meses sin cobertura"]
-    E --> A["5. Almacenamiento<br/>carpeta temporal y luego carpeta de salida"]
-    A --> R[("Resultados de la ejecución<br/>estimates.csv y archivos de apoyo")]
-    R -.-> EV{{"EVALUACIÓN del procedimiento<br/>(etapa prevista)"}}
-    EV -.-> AU{{"AUTORIZACIÓN de la publicación<br/>(etapa prevista)"}}
-    AU -.-> T["Tablero<br/>consulta de las estimaciones"]
+    E --> EV{{"5. EVALUACIÓN del procedimiento<br/>meses ocultos, solo con meses anteriores<br/>comparación con referencias sencillas"}}
+    EV --> AU{"6. AUTORIZACIÓN<br/>regla de aceptación"}
+    AU --> A["7. Almacenamiento<br/>carpeta temporal y luego carpeta de salida"]
+    A --> R[("Resultados de la ejecución<br/>estimaciones, evaluación y reportes")]
+    AU -- "aprobada" --> PV[("Almacén de versiones aprobadas<br/>la nueva versión pasa a ser la vigente")]
+    AU -- "rechazada" --> KV["La versión vigente no cambia"]
+    PV --> T["Tablero<br/>consulta de la versión vigente"]
+    RS["Restauración de una versión anterior"] --> PV
 ```
 
-Las líneas continuas son etapas que ya se ejecutan. Las líneas punteadas son etapas previstas que todavía no están implementadas: evaluar el procedimiento con meses ocultos y autorizar qué resultados puede consultar el tablero.
+La evaluación ocurre en la etapa 5 y la autorización de la publicación en la etapa 6. Una versión rechazada igual deja sus resultados y su reporte en la carpeta de salida para revisarlos, pero no entra al almacén de versiones aprobadas.
 
 ## Etapas
 
@@ -26,7 +29,9 @@ Las líneas continuas son etapas que ya se ejecutan. Las líneas punteadas son e
 | 2. Validación | Ejecuta los seis controles de calidad y escribe su reporte. | `tourism_pipeline.validation` |
 | 3. Preparación | Construye las entradas nacionales por mes, los visitantes por subdestino y mes, y la tabla de cobertura. | `tourism_pipeline.preparation` |
 | 4. Estimación | Calcula el factor de reparto de cada subdestino con los meses de ajuste anteriores y estima los meses sin cobertura. | `tourism_pipeline.preparation`, `tourism_pipeline.estimation` |
-| 5. Almacenamiento | Escribe los resultados en una carpeta temporal y, si todo terminó bien, los mueve a la carpeta de salida. | `tourism_pipeline.pipeline` |
+| 5. Evaluación | Oculta los meses de evaluación uno por uno, los estima solo con meses anteriores y calcula MAE, RMSE y MAPE del procedimiento y de dos referencias sencillas. | `tourism_pipeline.estimation` |
+| 6. Autorización | Aplica la regla de aceptación: calidad, integridad de las salidas, cobertura de la evaluación y desempeño. | `tourism_pipeline.publication` |
+| 7. Almacenamiento y publicación | Escribe los resultados en una carpeta temporal, los mueve a la carpeta de salida y, si la versión se aprobó, la guarda en el almacén y cambia el puntero a la vigente. | `tourism_pipeline.pipeline`, `tourism_pipeline.publication` |
 
 ## Dónde se valida y dónde se detiene
 
@@ -52,3 +57,9 @@ Cuando se detiene, el pipeline termina con código de salida 2, deja el reporte 
 | `national_entries.csv` | Entradas nacionales de los meses de ajuste y de los meses estimados. |
 | `coverage.csv` | Qué fuente tiene datos en cada mes de la ventana de trabajo. |
 | `reports/quality_<ejecución>.json` | Resultado de los seis controles de cada ejecución, también cuando se detiene. |
+| `evaluation.csv` | Valor observado y estimaciones del procedimiento y de las dos referencias en cada mes evaluado. |
+| `evaluation_by_destination.csv` | MAE, RMSE y MAPE de cada método por subdestino. |
+| `reports/acceptance_<ejecución>.json` | Veredicto de la regla de aceptación, sus razones, umbrales y métricas. |
+| `versions/<ejecución>/` | Versión aprobada: estimaciones, evaluación, configuración efectiva y `metadata.json`. |
+| `versions/current.json` | Puntero a la versión vigente que consulta el tablero. |
+| `versions/history.jsonl` | Cada publicación y restauración, con su fecha y la versión anterior. |

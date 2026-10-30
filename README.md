@@ -75,7 +75,7 @@ El comando lee las fuentes, ejecuta los controles de calidad, prepara las series
 | `coverage.csv` | Qué fuente tiene datos en cada mes de la ventana de trabajo. |
 | `reports/quality_<ejecución>.json` | Resultado de los seis controles de cada ejecución. |
 
-El código de salida indica el resultado: `0` si terminó, `2` si un control crítico detuvo la ejecución y `3` si la configuración, un archivo o una hoja de las fuentes no se pudo leer. Cuando un control crítico falla, el reporte queda escrito y los resultados anteriores no se reemplazan. Una ejecución con advertencias, como los meses sin cobertura, continúa y las deja anotadas en el reporte.
+El código de salida indica el resultado: `0` si terminó y la versión se aprobó y publicó, `2` si un control crítico detuvo la ejecución, `3` si la configuración, un archivo o una hoja de las fuentes no se pudo leer, y `4` si la ejecución terminó pero la regla de aceptación rechazó la versión. Cuando un control crítico falla, el reporte queda escrito y los resultados anteriores no se reemplazan. Una ejecución con advertencias, como los meses sin cobertura, continúa y las deja anotadas en el reporte.
 
 ### Configuración
 
@@ -86,6 +86,7 @@ Los períodos, los parámetros, los umbrales de calidad y los nombres de los arc
 | `INGUAT_DATA_DIR` | Carpeta con los archivos de datos institucionales (obligatoria). |
 | `PIPELINE_CONFIG` | Ruta de otro archivo de configuración. |
 | `PIPELINE_OUTPUT_DIR` | Carpeta donde se guardan los resultados (por defecto `output`). |
+| `PIPELINE_VERSIONS_DIR` | Carpeta del almacén de versiones aprobadas (por defecto `output/versions`). |
 
 El procedimiento no tiene componentes aleatorios. La semilla (`parameters.seed`) solo se usa para generar los datos sintéticos.
 
@@ -101,7 +102,7 @@ Para comprobar que dos ejecuciones con los mismos datos y configuración produce
 python scripts/check_reproducibility.py
 ```
 
-La comparación cubre los cuatro CSV, ignora únicamente el identificador y la fecha variables de cada corrida y usa la tolerancia `tracking.reproducibility_tolerance` de la configuración. El procedimiento actual es determinista, por lo que la diferencia esperada es cero.
+La comparación cubre los CSV de resultados y de evaluación, ignora únicamente el identificador y la fecha variables de cada corrida y usa la tolerancia `tracking.reproducibility_tolerance` de la configuración. El procedimiento actual es determinista, por lo que la diferencia esperada es cero.
 
 Para consultar estados, métricas, parámetros y artefactos registrados:
 
@@ -109,7 +110,27 @@ Para consultar estados, métricas, parámetros y artefactos registrados:
 python scripts/query_mlflow.py --limit 20
 ```
 
-Las métricas predictivas se registrarán cuando se ejecute la etapa de evaluación; una corrida que se detiene antes no contiene métricas.
+Las métricas de la evaluación temporal (`evaluation.*`) se registran en cada ejecución que llega a evaluar; una corrida que se detiene antes no contiene métricas. La comprobación de reproducibilidad nunca publica versiones.
+
+### Evaluación, aprobación y versiones
+
+Cada ejecución oculta los meses de evaluación (marzo a junio de 2026), uno por uno y en orden, y los estima solo con la movilidad de los meses anteriores. Compara el factor de reparto con dos referencias sencillas, el último valor observado y el promedio de los meses anteriores, con MAE, RMSE y MAPE. El MAPE excluye los observados iguales a cero y los cuenta aparte. Enero y febrero de 2026 no se evalúan porque no tienen valores observados.
+
+La regla de aceptación está en la sección `acceptance` de `config/pipeline.yaml`: ningún control crítico en falla, estimaciones completas, positivas y finitas, al menos cuatro meses evaluados con todos los subdestinos y un MAPE que no supere `max_mape`. El veredicto y sus razones quedan en `output/reports/acceptance_<ejecución>.json` y en MLflow.
+
+Solo una versión aprobada se publica. Cada una queda en su carpeta dentro del almacén de versiones, con sus estimaciones, la evaluación, la configuración efectiva y un `metadata.json` con la ejecución, la fecha, la versión del procedimiento, la métrica de validación y los períodos evaluados. `current.json` apunta a la versión vigente y `history.jsonl` registra cada publicación y restauración. Si una ejecución falla o se rechaza, la versión vigente no cambia.
+
+Para listar las versiones aprobadas y ver cuál está vigente:
+
+```bash
+python scripts/restore_version.py
+```
+
+Para volver vigente una versión anterior:
+
+```bash
+python scripts/restore_version.py --version <identificador>
+```
 
 ## Tablero
 
