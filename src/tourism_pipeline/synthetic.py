@@ -72,9 +72,28 @@ PROBLEMS = (
 )
 
 
+def _seasonal_index(seed: int) -> dict[pd.Timestamp, float]:
+    """Forma mensual de las entradas sintéticas de Turista y Excursionista.
+
+    Los visitantes sintéticos la siguen, con ruido, para que el procedimiento
+    pueda evaluarse sobre datos que tengan una estacionalidad reconocible.
+    """
+    migration = build_migration(seed)
+    visitors = migration.loc[migration["Tipo de Viajero"].isin(("Turista", "Excursionista"))]
+    totals = visitors.groupby(["Año", "Mes cod"])["Viajero"].sum()
+    index = {
+        pd.Timestamp(year=int(year), month=int(month), day=1): float(value)
+        for (year, month), value in totals.items()
+    }
+    observed = [index[month] for month in MOBILITY_MONTHS if month in index]
+    mean = float(np.mean(observed))
+    return {month: index.get(month, mean) / mean for month in MOBILITY_MONTHS}
+
+
 def build_mobility(seed: int = 7) -> dict[str, pd.DataFrame]:
     """Una tabla por hoja de la base mensual de movilidad."""
     rng = np.random.default_rng(seed)
+    season = _seasonal_index(seed)
     sheets: dict[str, pd.DataFrame] = {}
     for sheet, subdestinations in MOBILITY_STRUCTURE.items():
         rows = []
@@ -82,7 +101,9 @@ def build_mobility(seed: int = 7) -> dict[str, pd.DataFrame]:
             for month in MOBILITY_MONTHS:
                 for country in COUNTRIES:
                     for segment in SEGMENTS:
-                        visitors = float(rng.integers(5, 500))
+                        base = 50 + 40 * (len(destination) % 7)
+                        noise = float(rng.uniform(0.9, 1.1))
+                        visitors = float(max(1, round(base * season[month] * noise)))
                         stay = 1.0 if segment == "menor a 1 dia" else float(rng.uniform(1.5, 5.0))
                         rows.append(
                             {
