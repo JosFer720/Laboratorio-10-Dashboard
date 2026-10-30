@@ -22,6 +22,7 @@ def test_default_config_loads_with_data_dir_from_environment(tmp_path: Path) -> 
     assert config.paths.migration_path == tmp_path / "Base_Migracion_2009-2026jun.xlsx"
     assert len(config.paths.mobility_sheets) == 6
     assert config.paths.results_file == "estimates.csv"
+    assert config.paths.reports_path == config.paths.output_dir / "reports"
     assert config.parameters.procedure_version == "1"
     assert config.parameters.migration.traveler_types == ("Turista", "Excursionista")
     assert config.parameters.migration.first_year == 2023

@@ -25,10 +25,15 @@ class PathsConfig:
     migration_file: str
     migration_sheet: str
     output_dir: Path
+    reports_dir: str
     results_file: str
     factors_file: str
     national_series_file: str
     coverage_file: str
+
+    @property
+    def reports_path(self) -> Path:
+        return self.output_dir / self.reports_dir
 
     @property
     def mobility_path(self) -> Path:
@@ -149,6 +154,7 @@ def _build_paths(raw: Mapping[str, Any], env: Mapping[str, str]) -> PathsConfig:
         migration_file=str(raw["migration_file"]),
         migration_sheet=str(raw["migration_sheet"]),
         output_dir=Path(env.get("PIPELINE_OUTPUT_DIR") or raw["output_dir"]),
+        reports_dir=str(raw["reports_dir"]),
         results_file=str(raw["results_file"]),
         factors_file=str(raw["factors_file"]),
         national_series_file=str(raw["national_series_file"]),
