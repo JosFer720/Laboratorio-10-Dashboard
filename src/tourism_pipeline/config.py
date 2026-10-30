@@ -30,6 +30,8 @@ class PathsConfig:
     factors_file: str
     national_series_file: str
     coverage_file: str
+    evaluation_file: str
+    evaluation_summary_file: str
 
     @property
     def reports_path(self) -> Path:
@@ -86,6 +88,17 @@ class QualityConfig:
 
 
 @dataclass(frozen=True)
+class AcceptanceConfig:
+    max_mape: float
+    min_evaluated_months: int
+
+
+@dataclass(frozen=True)
+class PublicationConfig:
+    versions_dir: Path
+
+
+@dataclass(frozen=True)
 class TrackingConfig:
     uri: str
     experiment_name: str
@@ -99,6 +112,8 @@ class PipelineConfig:
     parameters: ParametersConfig
     quality: QualityConfig
     tracking: TrackingConfig
+    acceptance: AcceptanceConfig
+    publication: PublicationConfig
 
 
 def expand_months(ranges: list[Mapping[str, str]] | None, name: str) -> tuple[pd.Timestamp, ...]:
@@ -143,6 +158,8 @@ def load_config(
             parameters=_build_parameters(raw["parameters"]),
             quality=_build_quality(raw["quality"]),
             tracking=_build_tracking(raw["tracking"], values, paths),
+            acceptance=_build_acceptance(raw["acceptance"]),
+            publication=_build_publication(raw["publication"], values, paths),
         )
     except KeyError as exc:
         raise ConfigError(f"Falta la clave {exc} en la configuración.") from exc
@@ -150,6 +167,7 @@ def load_config(
     _check_quality(config.quality)
     if config.tracking.reproducibility_tolerance < 0:
         raise ConfigError("La tolerancia de reproducibilidad no puede ser negativa.")
+    _check_acceptance(config.acceptance, config.periods)
     return config
 
 
@@ -171,6 +189,8 @@ def _build_paths(raw: Mapping[str, Any], env: Mapping[str, str]) -> PathsConfig:
         factors_file=str(raw["factors_file"]),
         national_series_file=str(raw["national_series_file"]),
         coverage_file=str(raw["coverage_file"]),
+        evaluation_file=str(raw["evaluation_file"]),
+        evaluation_summary_file=str(raw["evaluation_summary_file"]),
     )
 
 
@@ -229,6 +249,29 @@ def _build_tracking(
             tolerance if tolerance is not None else raw["reproducibility_tolerance"]
         ),
     )
+
+
+def _build_acceptance(raw: Mapping[str, Any]) -> AcceptanceConfig:
+    return AcceptanceConfig(
+        max_mape=float(raw["max_mape"]),
+        min_evaluated_months=int(raw["min_evaluated_months"]),
+    )
+
+
+def _build_publication(
+    raw: Mapping[str, Any], values: Mapping[str, str], paths: PathsConfig
+) -> PublicationConfig:
+    versions = values.get("PIPELINE_VERSIONS_DIR") or paths.output_dir / str(raw["versions_dir"])
+    return PublicationConfig(versions_dir=Path(versions))
+
+
+def _check_acceptance(acceptance: AcceptanceConfig, periods: PeriodsConfig) -> None:
+    if acceptance.max_mape <= 0:
+        raise ConfigError("El umbral max_mape de la regla de aceptación debe ser positivo.")
+    if not 1 <= acceptance.min_evaluated_months <= len(periods.evaluation):
+        raise ConfigError(
+            "min_evaluated_months debe estar entre 1 y el número de meses de evaluación."
+        )
 
 
 def _check_periods(periods: PeriodsConfig) -> None:

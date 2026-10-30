@@ -22,6 +22,9 @@ paths:
   factors_file: reparto_factors.csv
   national_series_file: national_entries.csv
   coverage_file: coverage.csv
+  # Evaluación temporal: estimaciones de los meses ocultos y errores por subdestino.
+  evaluation_file: evaluation.csv
+  evaluation_summary_file: evaluation_by_destination.csv
 
 # Los períodos se expresan como rangos de meses inclusivos (AAAA-MM).
 periods:
@@ -143,6 +146,32 @@ quality:
   thresholds:
     max_optional_missing_fraction: 0.05
     zero_count_warning_fraction: 0.0
+
+# Regla de aceptación de una versión candidata. Se fija antes de evaluar y no se
+# cambia después para aprobar una versión. Una candidata se aprueba solo si:
+# 1. ningún control de calidad crítico falló;
+# 2. las salidas están íntegras: columnas completas, valores finitos y positivos,
+#    y una estimación por subdestino para cada mes a estimar (enero y febrero sin
+#    cero ni faltantes);
+# 3. la evaluación cubre al menos `min_evaluated_months` meses con todos los
+#    subdestinos, y
+# 4. el MAPE del procedimiento en esos meses no supera `max_mape`.
+# El umbral es relativo porque los subdestinos van de unos miles a cerca de un
+# millón de visitantes al mes: un umbral en personas sería laxo para los grandes
+# e imposible para los pequeños. Con a lo sumo siete meses de ajuste, un factor
+# que traslada la estacionalidad nacional no puede exigir más precisión que una
+# desviación media de una cuarta parte del valor observado; más allá de eso la
+# estimación ya no distingue un mes alto de uno bajo, porque las entradas
+# nacionales varían cerca de 70 % entre los meses de ajuste. No es obligatorio
+# superar a las referencias sencillas: se reportan para comparar.
+acceptance:
+  max_mape: 25.0
+  min_evaluated_months: 4
+
+# Almacén de versiones aprobadas. Por defecto vive dentro de output_dir; la
+# variable PIPELINE_VERSIONS_DIR lo cambia, por ejemplo a un volumen persistente.
+publication:
+  versions_dir: versions
 
 tracking:
   directory: mlflow

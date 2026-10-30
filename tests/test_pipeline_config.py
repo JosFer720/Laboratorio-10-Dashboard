@@ -154,3 +154,34 @@ def test_quality_thresholds_must_be_fractions(tmp_path: Path, name: str, value: 
 
     with pytest.raises(ConfigError, match="umbrales de calidad"):
         load_config(custom, env={"INGUAT_DATA_DIR": str(tmp_path)})
+
+
+def test_acceptance_rule_and_versions_store_come_from_configuration(tmp_path: Path) -> None:
+    config = load_config(env={"INGUAT_DATA_DIR": str(tmp_path)})
+
+    assert config.acceptance.max_mape == 25.0
+    assert config.acceptance.min_evaluated_months == 4
+    assert config.publication.versions_dir == Path("output") / "versions"
+    assert config.paths.evaluation_file == "evaluation.csv"
+
+
+def test_versions_store_can_live_outside_the_output_directory(tmp_path: Path) -> None:
+    config = load_config(
+        env={"INGUAT_DATA_DIR": str(tmp_path), "PIPELINE_VERSIONS_DIR": str(tmp_path / "v")}
+    )
+
+    assert config.publication.versions_dir == tmp_path / "v"
+
+
+@pytest.mark.parametrize(
+    ("key", "value", "message"),
+    [("max_mape", 0, "max_mape"), ("min_evaluated_months", 9, "min_evaluated_months")],
+)
+def test_invalid_acceptance_rule_is_rejected(tmp_path: Path, key: str, value, message: str) -> None:
+    raw = yaml.safe_load(DEFAULT_CONFIG_PATH.read_text(encoding="utf-8"))
+    raw["acceptance"][key] = value
+    custom = tmp_path / "custom.yaml"
+    custom.write_text(yaml.safe_dump(raw), encoding="utf-8")
+
+    with pytest.raises(ConfigError, match=message):
+        load_config(custom, env={"INGUAT_DATA_DIR": str(tmp_path)})
