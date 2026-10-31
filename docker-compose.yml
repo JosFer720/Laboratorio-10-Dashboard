@@ -1,0 +1,69 @@
+# Servicios del observatorio. La carpeta de resultados (versiones aprobadas y
+# registros de MLflow) vive en el equipo anfitrión, así que sobrevive cuando se
+# eliminan y se vuelven a crear los contenedores.
+
+x-observatorio: &observatorio
+  build: .
+  image: observatorio-turismo:latest
+  user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+  environment: &entorno
+    PIPELINE_OUTPUT_DIR: /srv/output
+    GIT_COMMIT: ${GIT_COMMIT:-unknown}
+  volumes:
+    - type: bind
+      source: ${OUTPUT_DIR:-./output}
+      target: /srv/output
+
+services:
+  dashboard:
+    <<: *observatorio
+    command: ["python", "app.py"]
+    ports:
+      - "${DASH_PORT:-8050}:8050"
+    environment:
+      <<: *entorno
+      DASH_HOST: 0.0.0.0
+      DASH_PORT: "8050"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:8050/', timeout=5)"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  mlflow:
+    <<: *observatorio
+    command:
+      - mlflow
+      - server
+      - --host=0.0.0.0
+      - --port=5000
+      - --backend-store-uri=sqlite:////srv/output/mlflow/mlflow.db
+      - --default-artifact-root=file:///srv/output/mlflow/artifacts
+    ports:
+      - "${MLFLOW_PORT:-5000}:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://localhost:5000/health', timeout=5)"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Se ejecuta a demanda: docker compose run --rm pipeline
+  pipeline:
+    <<: *observatorio
+    profiles: ["pipeline"]
+    command: ["python", "run_pipeline.py"]
+    environment:
+      <<: *entorno
+      INGUAT_DATA_DIR: /datos
+    volumes:
+      - type: bind
+        source: ${OUTPUT_DIR:-./output}
+        target: /srv/output
+      - type: bind
+        source: ${INGUAT_DATA_DIR:-./datos_institucionales}
+        target: /datos
+        read_only: true

@@ -1,0 +1,23 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.pytest-tmp
+.idea
+.vscode
+
+# Datos institucionales y resultados: nunca entran a la imagen
+Datos Inguat
+datos_institucionales
+datos_sinteticos
+*.xlsx
+*.xlsm
+*.xls
+*.parquet
+*.pdf
+.env
+output
+mlruns
