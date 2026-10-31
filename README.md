@@ -164,6 +164,96 @@ python scripts/demonstrate_recovery.py --workspace output/recovery-demo
 
 Comprueba el mensaje sin versión, publica una versión válida, introduce una clave duplicada, verifica el estado `FAILED` y su causa en MLflow sin métricas inventadas y comprueba que el tablero sigue consultando las mismas estimaciones aprobadas. Después corrige, publica y usa el comando de restauración para volver a consultar la primera versión. La carpeta elegida debe ser nueva para no sobrescribir datos existentes. Guarda `evidence.json`, las fuentes sintéticas, los reportes, las versiones y los registros reales de MLflow. La evidencia de una ejecución realizada está en [docs/evidencia_recuperacion.json](docs/evidencia_recuperacion.json); los registros completos permanecen fuera de Git en la carpeta de salida.
 
+## Docker
+
+El tablero, el pipeline y la interfaz de MLflow también se ejecutan con Docker Compose, sin instalar Python en el equipo.
+
+### Requisitos previos
+
+- Docker con Compose v2 (`docker compose version`) y el servicio de Docker en ejecución.
+- La carpeta con los datos institucionales (`BD_moviidad_mensual.xlsx` y `Base_Migracion_2009-2026jun.xlsx`) en el equipo. Los datos nunca se copian a las imágenes: el pipeline los lee de una carpeta montada en solo lectura.
+
+### Configuración inicial
+
+Copia `.env.example` como `.env` y completa estas variables. Docker Compose lee ese archivo automáticamente, y `.env` no se versiona.
+
+| Variable | Uso |
+|---|---|
+| `INGUAT_DATA_DIR` | Ruta de la carpeta con los datos institucionales en tu equipo. Es obligatoria para ejecutar el pipeline. |
+| `OUTPUT_DIR` | Carpeta del equipo donde quedan los resultados, las versiones aprobadas y los registros de MLflow (por defecto `./output`). |
+| `GIT_COMMIT` | Commit del código que se registra en MLflow, porque dentro del contenedor no hay repositorio. Obtenlo con `git rev-parse HEAD`. |
+| `HOST_UID`, `HOST_GID` | Usuario con el que corren los contenedores. En Linux y macOS usa `id -u` y `id -g`, para que los archivos de `OUTPUT_DIR` te pertenezcan. En Docker Desktop de Windows se deja el valor por defecto. |
+| `DASH_PORT`, `MLFLOW_PORT` | Puertos del tablero (8050) y de MLflow (5000) en tu equipo. |
+
+Las variables también se pueden definir en la terminal en lugar de usar `.env`. En Windows PowerShell:
+
+```powershell
+$env:INGUAT_DATA_DIR = "C:\ruta\a\Datos Inguat"
+$env:GIT_COMMIT = (git rev-parse HEAD)
+```
+
+En macOS o Linux:
+
+```bash
+export INGUAT_DATA_DIR="/ruta/a/Datos Inguat"
+export GIT_COMMIT=$(git rev-parse HEAD)
+export HOST_UID=$(id -u) HOST_GID=$(id -g)
+```
+
+### Construcción e inicio
+
+```bash
+docker compose build
+docker compose up -d
+```
+
+- Tablero: `http://localhost:8050`
+- MLflow: `http://localhost:5000`
+
+Mientras no exista una versión aprobada, el tablero indica que las estimaciones no están disponibles. Para ver el estado de los servicios, `docker compose ps`, y para ver sus mensajes, `docker compose logs`.
+
+### Ejecución del pipeline
+
+```bash
+docker compose run --rm pipeline
+```
+
+El comando ejecuta el mismo flujo que `python run_pipeline.py` y termina con los mismos códigos de salida. Al aprobarse, el tablero y MLflow muestran la nueva versión sin reiniciarse. Con datos sintéticos, genera las fuentes con `python scripts/generate_synthetic_data.py datos_sinteticos` y apunta `INGUAT_DATA_DIR` a esa carpeta.
+
+Otros comandos se ejecutan sobre el mismo servicio:
+
+```bash
+docker compose run --rm pipeline python scripts/restore_version.py
+docker compose run --rm pipeline python scripts/restore_version.py --version <identificador>
+docker compose run --rm pipeline python scripts/check_reproducibility.py
+docker compose run --rm pipeline python scripts/query_mlflow.py --limit 20
+```
+
+### Registros, resultados y persistencia
+
+Todo lo que produce el pipeline queda en `OUTPUT_DIR` del equipo y no dentro de los contenedores:
+
+| Ruta dentro de `OUTPUT_DIR` | Contenido |
+|---|---|
+| `versions/` | Versiones aprobadas, el puntero a la vigente (`current.json`) y el historial (`history.jsonl`). |
+| `mlflow/` | Base de datos y artefactos de los registros de MLflow. |
+| `reports/` | Reportes de controles, de aceptación y registro de cada ejecución. |
+| `*.csv` | Resultados de la última ejecución. |
+
+Por eso los registros de MLflow y las versiones aprobadas persisten cuando se eliminan y se crean de nuevo los contenedores. Para borrar esa información hay que borrar la carpeta a mano.
+
+### Detención
+
+```bash
+docker compose down
+```
+
+Detiene y elimina los contenedores y la red. No borra `OUTPUT_DIR`. Para volver a levantar los servicios basta con `docker compose up -d`.
+
+### Restauración de versiones
+
+Se restaura con `restore_version.py` como se muestra arriba. El tablero revisa el puntero cada 30 segundos, así que muestra la versión restaurada sin reiniciarse.
+
 ## Pruebas
 
 ```bash
