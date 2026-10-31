@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import time
 from dataclasses import asdict, is_dataclass
@@ -64,13 +65,24 @@ def effective_config(config: PipelineConfig) -> dict[str, Any]:
 
 
 def git_commit() -> str:
-    completed = subprocess.run(
-        ["git", "-c", f"safe.directory={REPOSITORY_ROOT.as_posix()}", "rev-parse", "HEAD"],
-        cwd=REPOSITORY_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    """Identificador del commit del código.
+
+    Dentro de un contenedor no hay repositorio ni `git`: ahí se toma de la
+    variable de entorno `GIT_COMMIT`.
+    """
+    declared = os.environ.get("GIT_COMMIT", "").strip()
+    if declared and declared != "unknown":
+        return declared
+    try:
+        completed = subprocess.run(
+            ["git", "-c", f"safe.directory={REPOSITORY_ROOT.as_posix()}", "rev-parse", "HEAD"],
+            cwd=REPOSITORY_ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except OSError:
+        return "unknown"
     return completed.stdout.strip() if completed.returncode == 0 else "unknown"
 
 
