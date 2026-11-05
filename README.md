@@ -167,16 +167,19 @@ Comprueba el mensaje sin versión, publica una versión válida, introduce una c
 
 ## Versión en Power BI
 
-El informe `powerbi/observatorio_turismo.pbix` reproduce el tablero con los mismos CSV de `data/` y no usa datos institucionales. Se abre con Power BI Desktop, que es gratuito y solo funciona en Windows. La versión de Power BI Desktop, cómo cambiar la carpeta de los datos y cómo actualizarlos están en `powerbi/README.md`.
+El proyecto editable `powerbi/observatorio_turismo.pbip` contiene la preparación de los mismos CSV de `data/`, el modelo de datos y el tema, con una página vacía. No usa datos institucionales. La actualización en Power BI Desktop y el guardado de `powerbi/observatorio_turismo.pbix` están pendientes de realizar en Windows. Las instrucciones para preparar la ruta local, abrirlo, comprobarlo y registrar la versión de Desktop están en [powerbi/README.md](powerbi/README.md).
 
 | Ruta | Contenido |
 |---|---|
-| `powerbi/observatorio_turismo.pbix` | Informe de Power BI. |
+| `powerbi/observatorio_turismo.pbip` | Proyecto editable del modelo y del informe. |
+| `powerbi/observatorio_turismo.SemanticModel/model.bim` | Consultas Power Query, tablas, jerarquías y relaciones. |
+| `powerbi/comprobaciones.dax` | Controles para ejecutar después de actualizar en Desktop. |
 | `powerbi/tema_observatorio.json` | Tema con la paleta y las fuentes del tablero. |
 | `data/model_predictions_s0.csv` | Predicciones de los tres modelos: valor observado y estimado por mes y modelo. |
 | `data/model_metrics_s0.csv` | Métricas MAE, RMSE y MAPE de cada modelo y su período de evaluación. |
 | `docs/lab12/resultados_esperados.md` | Valores de referencia para verificar que ambas versiones muestran lo mismo. |
 | `docs/lab12/protocolo_pruebas.md` | Las tres pruebas que se ejecutan en ambas versiones. |
+| `docs/lab12/modelo_de_datos.md` | Transformaciones, grano, relaciones y tratamiento del observado repetido por modelo. |
 
 Los resultados esperados se recalculan con:
 

@@ -1,0 +1,54 @@
+{
+  "referencia_commit": "29a091d26d8a9efec62e4ea292a3b5240fddee17",
+  "alcance_validacion": "Fuentes CSV y estructura del proyecto; Power Query, DAX y apertura en Desktop pendientes de ejecución en Windows.",
+  "sha256": {
+    "arrivals_migration_2009_2026.csv": "8bb1635cca1f0bd6f0b1df720acab2ef5c238906de10da4c1bbdc4b86b530443",
+    "hotel_occupancy_inguat_2022_2024.csv": "9c1944bb818b5290825e21a54d2c0e11ea04a8f535c8d3b54c1ac73192307e63",
+    "model_predictions_s0.csv": "501cefef0f08b227fc829ad1ee2c6200b5a7b97971fdcc4eb3d8d197ef8e8c64",
+    "model_metrics_s0.csv": "b9fb1e039683cd8ef3c94932fe6055c4235447ee74c87fb0870e8d4c0a38a912"
+  },
+  "filas_esperadas": {
+    "Llegadas": 2310,
+    "Hospedaje": 36,
+    "Predicciones": 189,
+    "Metricas": 3,
+    "Observados": 63,
+    "Origenes": 11,
+    "Modelos": 3,
+    "Calendario": 6574
+  },
+  "llegadas_total_sin_redondear": "46711912.886517508050438",
+  "mes_maximo": {
+    "date": "2019-12-01",
+    "arrivals": "449114.070500167407"
+  },
+  "llegadas_2024": "3274435.9951355968673",
+  "llegadas_2025": "3352288.6575084552497",
+  "observado_diciembre_2025": "365573.0218067979",
+  "observado_evaluacion_sin_duplicar": "15221881.52276320207",
+  "metricas_recalculadas": {
+    "lstm-catch22-contexto-w24": {
+      "meses": 63,
+      "mae": "55256.39114699105285714285714285714285714",
+      "rmse": "67734.69894114921528521941485815015850108",
+      "mape_porcentaje": "29.16153074764961515568936095340500463560"
+    },
+    "prophet": {
+      "meses": 63,
+      "mae": "132304.3577696720179365079365079365079365",
+      "rmse": "139548.6432098954745668838384952886172232",
+      "mape_porcentaje": "60.88743410092475183937471293941951568606"
+    },
+    "arima-1-1-1": {
+      "meses": 63,
+      "mae": "154872.6248034411041269841269841269841270",
+      "rmse": "169524.1901453960872509059647251977009869",
+      "mape_porcentaje": "59.30134441733117234542570912422964517683"
+    }
+  },
+  "definicion": {
+    "tablas": 8,
+    "relaciones_activas_unidireccionales": 7,
+    "catalogo_origenes": "coincide con la referencia"
+  }
+}
