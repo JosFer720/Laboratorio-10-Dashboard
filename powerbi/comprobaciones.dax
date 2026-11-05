@@ -1,0 +1,71 @@
+// Ejecutar en la vista de consultas DAX después de actualizar en Desktop.
+// Las cifras completas están en docs/lab12/validacion_fuentes.json.
+
+// Total: 46.711.913 al mostrar cero decimales; conservar el valor completo.
+EVALUATE
+ROW(
+    "Llegadas completas", SUM(Llegadas[arrivals]),
+    "Llegadas 2024", CALCULATE(SUM(Llegadas[arrivals]), Calendario[year] = 2024),
+    "Llegadas 2025", CALCULATE(SUM(Llegadas[arrivals]), Calendario[year] = 2025)
+)
+
+// Máximo histórico: diciembre de 2019, 449.114 al mostrar cero decimales.
+EVALUATE
+VAR Meses =
+    SUMMARIZECOLUMNS(
+        Calendario[year_month],
+        "Llegadas", SUM(Llegadas[arrivals])
+    )
+RETURN
+    TOPN(1, FILTER(Meses, NOT ISBLANK([Llegadas])), [Llegadas], DESC)
+
+// Máximo de 2025: diciembre, 365.573 al mostrar cero decimales.
+EVALUATE
+VAR Meses =
+    SUMMARIZECOLUMNS(
+        Calendario[year_month],
+        TREATAS({2025}, Calendario[year]),
+        "Llegadas", SUM(Llegadas[arrivals])
+    )
+RETURN
+    TOPN(1, FILTER(Meses, NOT ISBLANK([Llegadas])), [Llegadas], DESC)
+
+// Las tres filas deben dar el mismo observado: 365573.0218067979.
+// El estimado cambia por modelo. No usar SUM(Predicciones[observed]).
+EVALUATE
+SUMMARIZECOLUMNS(
+    Modelos[model_label],
+    TREATAS({DATE(2025, 12, 1)}, Calendario[date]),
+    "Observado nacional", [Observado evaluado],
+    "Estimado", SUM(Predicciones[estimate])
+)
+
+// Sin filtro de modelo el observado también es 365573.0218067979.
+EVALUATE
+ROW(
+    "Observado con todos los modelos",
+    CALCULATE([Observado evaluado], Calendario[date] = DATE(2025, 12, 1))
+)
+
+// MAPE viene en unidades porcentuales: aproximadamente 29,2; 60,9; 59,3.
+EVALUATE
+SELECTCOLUMNS(
+    Metricas,
+    "Modelo", Metricas[model_label],
+    "MAE", Metricas[mae],
+    "RMSE", Metricas[rmse],
+    "MAPE (%)", Metricas[mape]
+)
+
+// Filas: 6574, 11, 3, 2310, 36, 189, 3 y 63 respectivamente.
+EVALUATE
+ROW(
+    "Calendario", COUNTROWS(Calendario),
+    "Origenes", COUNTROWS(Origenes),
+    "Modelos", COUNTROWS(Modelos),
+    "Llegadas", COUNTROWS(Llegadas),
+    "Hospedaje", COUNTROWS(Hospedaje),
+    "Predicciones", COUNTROWS(Predicciones),
+    "Metricas", COUNTROWS(Metricas),
+    "Observados", COUNTROWS(Observados)
+)

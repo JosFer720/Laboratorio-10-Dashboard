@@ -28,3 +28,10 @@ datos_institucionales/
 # Salidas del pipeline
 output/
 mlruns/
+
+# Caché y configuración local de Power BI
+**/.pbi/
+powerbi/local/
+
+# Informe de trabajo compartido fuera del repositorio
+decisiones_lab12.md

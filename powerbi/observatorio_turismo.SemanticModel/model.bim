@@ -1,0 +1,764 @@
+{
+  "name": "observatorio_turismo",
+  "compatibilityLevel": 1601,
+  "model": {
+    "culture": "es-ES",
+    "sourceQueryCulture": "en-US",
+    "defaultPowerBIDataSourceVersion": "powerBI_V3",
+    "tables": [
+      {
+        "name": "Calendario",
+        "description": "Calendario diario continuo de años completos. Las tablas de hechos contienen fechas de inicio de mes.",
+        "columns": [
+          {
+            "name": "date",
+            "dataType": "dateTime",
+            "sourceColumn": "date",
+            "summarizeBy": "none",
+            "isKey": true,
+            "formatString": "dd/MM/yyyy"
+          },
+          {
+            "name": "year",
+            "dataType": "int64",
+            "sourceColumn": "year",
+            "summarizeBy": "none",
+            "formatString": "0"
+          },
+          {
+            "name": "quarter",
+            "dataType": "int64",
+            "sourceColumn": "quarter",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "quarter_label",
+            "dataType": "string",
+            "sourceColumn": "quarter_label",
+            "summarizeBy": "none",
+            "sortByColumn": "quarter"
+          },
+          {
+            "name": "month_number",
+            "dataType": "int64",
+            "sourceColumn": "month_number",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "month_name",
+            "dataType": "string",
+            "sourceColumn": "month_name",
+            "summarizeBy": "none",
+            "sortByColumn": "month_number"
+          },
+          {
+            "name": "year_month",
+            "dataType": "string",
+            "sourceColumn": "year_month",
+            "summarizeBy": "none",
+            "sortByColumn": "year_month_sort"
+          },
+          {
+            "name": "year_month_sort",
+            "dataType": "int64",
+            "sourceColumn": "year_month_sort",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Calendario",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Inicio = Date.StartOfYear(List.Min(LlegadasFuente[date])),",
+                "    Fin = Date.EndOfYear(List.Max(LlegadasFuente[date])),",
+                "    Fechas = List.Dates(Inicio, Duration.Days(Fin - Inicio) + 1, #duration(1, 0, 0, 0)),",
+                "    Base = Table.FromColumns({Fechas}, type table [date=date]),",
+                "    Anio = Table.AddColumn(Base, \"year\", each Date.Year([date]), Int64.Type),",
+                "    Trimestre = Table.AddColumn(Anio, \"quarter\", each Date.QuarterOfYear([date]), Int64.Type),",
+                "    EtiquetaTrimestre = Table.AddColumn(Trimestre, \"quarter_label\", each \"T\" & Text.From([quarter]), type text),",
+                "    NumeroMes = Table.AddColumn(EtiquetaTrimestre, \"month_number\", each Date.Month([date]), Int64.Type),",
+                "    NombreMes = Table.AddColumn(NumeroMes, \"month_name\", each Text.Proper(Date.MonthName([date], \"es-ES\")), type text),",
+                "    AnioMes = Table.AddColumn(NombreMes, \"year_month\", each Date.ToText([date], [Format=\"yyyy-MM\", Culture=\"es-ES\"]), type text),",
+                "    Orden = Table.AddColumn(AnioMes, \"year_month_sort\", each [year] * 100 + [month_number], Int64.Type)",
+                "in",
+                "    Orden"
+              ]
+            }
+          }
+        ],
+        "dataCategory": "Time",
+        "hierarchies": [
+          {
+            "name": "Año, trimestre y mes",
+            "levels": [
+              {
+                "name": "Año",
+                "ordinal": 0,
+                "column": "year"
+              },
+              {
+                "name": "Trimestre",
+                "ordinal": 1,
+                "column": "quarter_label"
+              },
+              {
+                "name": "Mes",
+                "ordinal": 2,
+                "column": "month_name"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Origenes",
+        "description": "Los once mercados y sus cinco regiones conservan la clasificación del Laboratorio 10.",
+        "columns": [
+          {
+            "name": "origin_key",
+            "dataType": "string",
+            "sourceColumn": "origin_key",
+            "summarizeBy": "none",
+            "isHidden": true,
+            "isKey": true
+          },
+          {
+            "name": "origin",
+            "dataType": "string",
+            "sourceColumn": "origin",
+            "summarizeBy": "none",
+            "sortByColumn": "origin_order"
+          },
+          {
+            "name": "origin_region",
+            "dataType": "string",
+            "sourceColumn": "origin_region",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "origin_level",
+            "dataType": "string",
+            "sourceColumn": "origin_level",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "origin_order",
+            "dataType": "int64",
+            "sourceColumn": "origin_order",
+            "summarizeBy": "none",
+            "isHidden": true
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Origenes",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "CatalogoOrigenes"
+              ]
+            }
+          }
+        ],
+        "hierarchies": [
+          {
+            "name": "Región y origen",
+            "levels": [
+              {
+                "name": "Región",
+                "ordinal": 0,
+                "column": "origin_region"
+              },
+              {
+                "name": "Origen",
+                "ordinal": 1,
+                "column": "origin"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Modelos",
+        "description": "Una fila por identificador original de modelo; no se relaciona con los observados nacionales.",
+        "columns": [
+          {
+            "name": "model_id",
+            "dataType": "string",
+            "sourceColumn": "model_id",
+            "summarizeBy": "none",
+            "isHidden": true,
+            "isKey": true
+          },
+          {
+            "name": "model_label",
+            "dataType": "string",
+            "sourceColumn": "model_label",
+            "summarizeBy": "none"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Modelos",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "Table.SelectColumns(MetricasFuente, {\"model_id\", \"model_label\"})"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Llegadas",
+        "description": "Grano: mes y mercado. reported_total se usa solo para auditoría y nunca se despivota ni se suma como mercado.",
+        "columns": [
+          {
+            "name": "date",
+            "dataType": "dateTime",
+            "sourceColumn": "date",
+            "summarizeBy": "none",
+            "isHidden": true,
+            "formatString": "dd/MM/yyyy"
+          },
+          {
+            "name": "origin_key",
+            "dataType": "string",
+            "sourceColumn": "origin_key",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "arrivals",
+            "dataType": "double",
+            "sourceColumn": "arrivals",
+            "summarizeBy": "none",
+            "formatString": "#,0.###############"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Llegadas",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Origenes = CatalogoOrigenes[origin_key],",
+                "    SinTotal = Table.SelectColumns(LlegadasFuente, {\"date\"} & Origenes),",
+                "    Largo = Table.Unpivot(SinTotal, Origenes, \"origin_key\", \"arrivals\"),",
+                "    Tipos = Table.TransformColumnTypes(Largo, {{\"date\", type date}, {\"origin_key\", type text}, {\"arrivals\", type number}}, \"en-US\")",
+                "in",
+                "    Tipos"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Hospedaje",
+        "description": "Grano: mes nacional, enero de 2022 a diciembre de 2024. Calcular la tasa agregada con SUM(rooms_occupied) / SUM(rooms_available).",
+        "columns": [
+          {
+            "name": "date",
+            "dataType": "dateTime",
+            "sourceColumn": "date",
+            "summarizeBy": "none",
+            "isHidden": true,
+            "formatString": "dd/MM/yyyy"
+          },
+          {
+            "name": "rooms_available",
+            "dataType": "int64",
+            "sourceColumn": "rooms_available",
+            "summarizeBy": "none",
+            "formatString": "#,0"
+          },
+          {
+            "name": "rooms_occupied",
+            "dataType": "int64",
+            "sourceColumn": "rooms_occupied",
+            "summarizeBy": "none",
+            "formatString": "#,0"
+          },
+          {
+            "name": "reported_occupancy_pct",
+            "dataType": "int64",
+            "sourceColumn": "reported_occupancy_pct",
+            "summarizeBy": "none",
+            "formatString": "0\" %\""
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Hospedaje",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "OcupacionFuente"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Predicciones",
+        "description": "Grano: mes y modelo. observed está oculto y sin agregación; usar Observados[Observado evaluado] para el observado nacional.",
+        "columns": [
+          {
+            "name": "date",
+            "dataType": "dateTime",
+            "sourceColumn": "date",
+            "summarizeBy": "none",
+            "isHidden": true,
+            "formatString": "dd/MM/yyyy"
+          },
+          {
+            "name": "model_id",
+            "dataType": "string",
+            "sourceColumn": "model_id",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "model_label",
+            "dataType": "string",
+            "sourceColumn": "model_label",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "observed",
+            "dataType": "double",
+            "sourceColumn": "observed",
+            "summarizeBy": "none",
+            "isHidden": true,
+            "formatString": "#,0.###############"
+          },
+          {
+            "name": "estimate",
+            "dataType": "double",
+            "sourceColumn": "estimate",
+            "summarizeBy": "none",
+            "formatString": "#,0.###############"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Predicciones",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "PrediccionesFuente"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Metricas",
+        "description": "Una fila por modelo. Las métricas corresponden a la evaluación histórica completa, no al período filtrado. MAPE ya viene en unidades porcentuales.",
+        "columns": [
+          {
+            "name": "model_id",
+            "dataType": "string",
+            "sourceColumn": "model_id",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "model_label",
+            "dataType": "string",
+            "sourceColumn": "model_label",
+            "summarizeBy": "none",
+            "isHidden": true
+          },
+          {
+            "name": "source_lab",
+            "dataType": "string",
+            "sourceColumn": "source_lab",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "source_commit",
+            "dataType": "string",
+            "sourceColumn": "source_commit",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "mae",
+            "dataType": "double",
+            "sourceColumn": "mae",
+            "summarizeBy": "none",
+            "formatString": "#,0.###############"
+          },
+          {
+            "name": "rmse",
+            "dataType": "double",
+            "sourceColumn": "rmse",
+            "summarizeBy": "none",
+            "formatString": "#,0.###############"
+          },
+          {
+            "name": "mape",
+            "dataType": "double",
+            "sourceColumn": "mape",
+            "summarizeBy": "none",
+            "formatString": "0.0\" %\""
+          },
+          {
+            "name": "aic",
+            "dataType": "double",
+            "sourceColumn": "aic",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "bic",
+            "dataType": "double",
+            "sourceColumn": "bic",
+            "summarizeBy": "none"
+          },
+          {
+            "name": "train_end",
+            "dataType": "dateTime",
+            "sourceColumn": "train_end",
+            "summarizeBy": "none",
+            "formatString": "dd/MM/yyyy"
+          },
+          {
+            "name": "evaluation_start",
+            "dataType": "dateTime",
+            "sourceColumn": "evaluation_start",
+            "summarizeBy": "none",
+            "formatString": "dd/MM/yyyy"
+          },
+          {
+            "name": "evaluation_end",
+            "dataType": "dateTime",
+            "sourceColumn": "evaluation_end",
+            "summarizeBy": "none",
+            "formatString": "dd/MM/yyyy"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Metricas",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "MetricasFuente"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "name": "Observados",
+        "description": "Una fila por mes evaluado, tras comprobar igualdad del observado entre modelos y con las llegadas nacionales. No recibe filtros de Modelos ni de Origenes.",
+        "columns": [
+          {
+            "name": "date",
+            "dataType": "dateTime",
+            "sourceColumn": "date",
+            "summarizeBy": "none",
+            "isHidden": true,
+            "formatString": "dd/MM/yyyy"
+          },
+          {
+            "name": "observed",
+            "dataType": "double",
+            "sourceColumn": "observed",
+            "summarizeBy": "none",
+            "isHidden": true,
+            "formatString": "#,0.###############"
+          }
+        ],
+        "partitions": [
+          {
+            "name": "Observados",
+            "mode": "import",
+            "source": {
+              "type": "m",
+              "expression": [
+                "let",
+                "    Columnas = Table.SelectColumns(PrediccionesFuente, {\"date\", \"observed\"}),",
+                "    UnMes = Table.Distinct(Columnas, {\"date\", \"observed\"}),",
+                "    Orden = Table.Sort(UnMes, {{\"date\", Order.Ascending}})",
+                "in",
+                "    Orden"
+              ]
+            }
+          }
+        ],
+        "measures": [
+          {
+            "name": "Observado evaluado",
+            "expression": "SUM(Observados[observed])",
+            "formatString": "#,0",
+            "description": "Suma una sola vez cada mes nacional de la evaluación, aunque se seleccionen los tres modelos. No representa un mercado de origen."
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "name": "Llegadas_Calendario",
+        "fromTable": "Llegadas",
+        "fromColumn": "date",
+        "toTable": "Calendario",
+        "toColumn": "date",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "crossFilteringBehavior": "oneDirection",
+        "isActive": true
+      },
+      {
+        "name": "Hospedaje_Calendario",
+        "fromTable": "Hospedaje",
+        "fromColumn": "date",
+        "toTable": "Calendario",
+        "toColumn": "date",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "crossFilteringBehavior": "oneDirection",
+        "isActive": true
+      },
+      {
+        "name": "Predicciones_Calendario",
+        "fromTable": "Predicciones",
+        "fromColumn": "date",
+        "toTable": "Calendario",
+        "toColumn": "date",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "crossFilteringBehavior": "oneDirection",
+        "isActive": true
+      },
+      {
+        "name": "Observados_Calendario",
+        "fromTable": "Observados",
+        "fromColumn": "date",
+        "toTable": "Calendario",
+        "toColumn": "date",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "crossFilteringBehavior": "oneDirection",
+        "isActive": true
+      },
+      {
+        "name": "Llegadas_Origenes",
+        "fromTable": "Llegadas",
+        "fromColumn": "origin_key",
+        "toTable": "Origenes",
+        "toColumn": "origin_key",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "crossFilteringBehavior": "oneDirection",
+        "isActive": true
+      },
+      {
+        "name": "Predicciones_Modelos",
+        "fromTable": "Predicciones",
+        "fromColumn": "model_id",
+        "toTable": "Modelos",
+        "toColumn": "model_id",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "crossFilteringBehavior": "oneDirection",
+        "isActive": true
+      },
+      {
+        "name": "Metricas_Modelos",
+        "fromTable": "Metricas",
+        "fromColumn": "model_id",
+        "toTable": "Modelos",
+        "toColumn": "model_id",
+        "fromCardinality": "many",
+        "toCardinality": "one",
+        "crossFilteringBehavior": "oneDirection",
+        "isActive": true
+      }
+    ],
+    "expressions": [
+      {
+        "name": "pCarpetaDatos",
+        "kind": "m",
+        "expression": [
+          "\"\" meta [IsParameterQuery=true, Type=\"Text\", IsParameterQueryRequired=true]"
+        ]
+      },
+      {
+        "name": "fnLeerCsv",
+        "kind": "m",
+        "expression": [
+          "(archivo as text, columnas as list) as table =>",
+          "let",
+          "    Carpeta = Text.TrimEnd(pCarpetaDatos, {\"\\\", \"/\"}),",
+          "    Ruta = if Text.Trim(Carpeta) = \"\" then",
+          "        error Error.Record(\"Carpeta de datos\", \"Configura pCarpetaDatos con la carpeta data del repositorio.\", archivo)",
+          "        else Carpeta & \"/\" & archivo,",
+          "    Csv = Csv.Document(File.Contents(Ruta), [Delimiter=\",\", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),",
+          "    Encabezados = Table.PromoteHeaders(Csv, [PromoteAllScalars=true]),",
+          "    Faltantes = List.Difference(columnas, Table.ColumnNames(Encabezados)),",
+          "    Resultado = if not List.IsEmpty(Faltantes) then",
+          "        error Error.Record(\"Columnas faltantes\", archivo, Faltantes)",
+          "        else Table.SelectColumns(Encabezados, columnas)",
+          "in",
+          "    Resultado"
+        ]
+      },
+      {
+        "name": "fnValidarMeses",
+        "kind": "m",
+        "expression": [
+          "(datos as table, inicio as date, cantidad as number) as table =>",
+          "let",
+          "    Fechas = Table.Column(datos, \"date\"),",
+          "    Esperadas = List.Transform({0..cantidad-1}, each Date.AddMonths(inicio, _)),",
+          "    Valido = List.Count(Fechas) = cantidad",
+          "        and List.Count(List.Distinct(Fechas)) = cantidad",
+          "        and List.IsEmpty(List.Difference(Esperadas, Fechas))",
+          "        and List.IsEmpty(List.Difference(Fechas, Esperadas))",
+          "in",
+          "    if Valido then datos else",
+          "        error Error.Record(\"Cobertura mensual\", \"Hay fechas faltantes, repetidas o fuera del período de referencia.\", inicio)"
+        ]
+      },
+      {
+        "name": "fnNumeroValido",
+        "kind": "m",
+        "expression": [
+          "(valor as nullable number) as logical =>",
+          "    if valor = null then false",
+          "    else not Number.IsNaN(valor) and valor <> #infinity and valor <> -#infinity and valor >= 0"
+        ]
+      },
+      {
+        "name": "CatalogoOrigenes",
+        "kind": "m",
+        "expression": [
+          "#table(",
+          "    type table [origin_key=text, origin=text, origin_region=text, origin_level=text, origin_order=Int64.Type],",
+          "    {",
+          "        {\"canada\", \"Canadá\", \"América del Norte\", \"country\", 0},",
+          "        {\"united_states\", \"Estados Unidos\", \"América del Norte\", \"country\", 1},",
+          "        {\"mexico\", \"México\", \"América del Norte\", \"country\", 2},",
+          "        {\"belize\", \"Belice\", \"América Central\", \"country\", 3},",
+          "        {\"el_salvador\", \"El Salvador\", \"América Central\", \"country\", 4},",
+          "        {\"honduras\", \"Honduras\", \"América Central\", \"country\", 5},",
+          "        {\"rest_of_central_america\", \"Resto de América Central\", \"América Central\", \"region\", 6},",
+          "        {\"south_america\", \"América del Sur\", \"América del Sur\", \"region\", 7},",
+          "        {\"europe\", \"Europa\", \"Europa\", \"region\", 8},",
+          "        {\"rest_of_world\", \"Resto del mundo\", \"Resto del mundo\", \"region\", 9},",
+          "        {\"guatemala\", \"Guatemala\", \"América Central\", \"country\", 10}",
+          "    }",
+          ")"
+        ]
+      },
+      {
+        "name": "LlegadasFuente",
+        "kind": "m",
+        "expression": [
+          "let",
+          "    Origenes = CatalogoOrigenes[origin_key],",
+          "    Csv = fnLeerCsv(\"arrivals_migration_2009_2026.csv\", {\"date\"} & Origenes & {\"reported_total\"}),",
+          "    Tipos = Table.TransformColumnTypes(Csv, {{\"date\", type date}} & List.Transform(Origenes & {\"reported_total\"}, each {_, type number}), \"en-US\"),",
+          "    Meses = fnValidarMeses(Tipos, #date(2009, 1, 1), 210),",
+          "    Inconsistentes = Table.SelectRows(Meses, (fila) =>",
+          "        not List.AllTrue(List.Transform(Record.ToList(Record.SelectFields(fila, Origenes & {\"reported_total\"})), each fnNumeroValido(_)))",
+          "        or Number.Abs(List.Sum(Record.ToList(Record.SelectFields(fila, Origenes))) - fila[reported_total]) > 0.000001),",
+          "    Resultado = if Table.IsEmpty(Inconsistentes) then Meses else",
+          "        error Error.Record(\"Llegadas inconsistentes\", \"Los valores deben ser finitos, no negativos y coincidir con reported_total.\", Inconsistentes)",
+          "in",
+          "    Resultado"
+        ]
+      },
+      {
+        "name": "OcupacionFuente",
+        "kind": "m",
+        "expression": [
+          "let",
+          "    Csv = fnLeerCsv(\"hotel_occupancy_inguat_2022_2024.csv\", {\"date\", \"rooms_available\", \"rooms_occupied\", \"reported_occupancy_pct\"}),",
+          "    Numeros = Table.TransformColumnTypes(Csv, {{\"date\", type date}, {\"rooms_available\", type number}, {\"rooms_occupied\", type number}, {\"reported_occupancy_pct\", type number}}, \"en-US\"),",
+          "    Meses = fnValidarMeses(Numeros, #date(2022, 1, 1), 36),",
+          "    Inconsistentes = Table.SelectRows(Meses, each",
+          "        not List.AllTrue(List.Transform({[rooms_available], [rooms_occupied], [reported_occupancy_pct]}, each fnNumeroValido(_)))",
+          "        or [rooms_available] = 0 or [rooms_occupied] > [rooms_available]",
+          "        or [reported_occupancy_pct] > 100",
+          "        or Number.Mod([rooms_available], 1) <> 0 or Number.Mod([rooms_occupied], 1) <> 0",
+          "        or Number.Mod([reported_occupancy_pct], 1) <> 0),",
+          "    Validados = if Table.IsEmpty(Inconsistentes) then Meses else",
+          "        error Error.Record(\"Ocupación inconsistente\", \"Revisa habitaciones e índice publicado; no se redondean ni corrigen valores.\", Inconsistentes),",
+          "    Tipos = Table.TransformColumnTypes(Validados, {{\"rooms_available\", Int64.Type}, {\"rooms_occupied\", Int64.Type}, {\"reported_occupancy_pct\", Int64.Type}})",
+          "in",
+          "    Tipos"
+        ]
+      },
+      {
+        "name": "MetricasFuente",
+        "kind": "m",
+        "expression": [
+          "let",
+          "    Csv = fnLeerCsv(\"model_metrics_s0.csv\", {\"model_id\", \"model_label\", \"source_lab\", \"source_commit\", \"mae\", \"rmse\", \"mape\", \"aic\", \"bic\", \"train_end\", \"evaluation_start\", \"evaluation_end\"}),",
+          "    Opcionales = Table.ReplaceValue(Csv, \"\", null, Replacer.ReplaceValue, {\"aic\", \"bic\"}),",
+          "    Tipos = Table.TransformColumnTypes(Opcionales, {{\"model_id\", type text}, {\"model_label\", type text}, {\"source_lab\", type text}, {\"source_commit\", type text}, {\"mae\", type number}, {\"rmse\", type number}, {\"mape\", type number}, {\"aic\", type number}, {\"bic\", type number}, {\"train_end\", type date}, {\"evaluation_start\", type date}, {\"evaluation_end\", type date}}, \"en-US\"),",
+          "    Identificadores = {\"lstm-catch22-contexto-w24\", \"prophet\", \"arima-1-1-1\"},",
+          "    ClavesValidas = Table.RowCount(Tipos) = 3 and List.Count(List.Distinct(Tipos[model_id])) = 3",
+          "        and List.IsEmpty(List.Difference(Identificadores, Tipos[model_id])),",
+          "    Inconsistentes = Table.SelectRows(Tipos, each",
+          "        not List.AllTrue(List.Transform({[mae], [rmse], [mape]}, each fnNumeroValido(_)))",
+          "        or ([aic] <> null and not fnNumeroValido([aic])) or ([bic] <> null and not fnNumeroValido([bic]))",
+          "        or [train_end] <> #date(2021, 3, 1) or [evaluation_start] <> #date(2021, 4, 1) or [evaluation_end] <> #date(2026, 6, 1)),",
+          "    Resultado = if ClavesValidas and Table.IsEmpty(Inconsistentes) then Tipos else",
+          "        error Error.Record(\"Métricas inconsistentes\", \"Deben existir los tres modelos con el período y las métricas de referencia.\", Inconsistentes)",
+          "in",
+          "    Resultado"
+        ]
+      },
+      {
+        "name": "PrediccionesFuente",
+        "kind": "m",
+        "expression": [
+          "let",
+          "    Csv = fnLeerCsv(\"model_predictions_s0.csv\", {\"date\", \"model_id\", \"model_label\", \"observed\", \"estimate\"}),",
+          "    Tipos = Table.TransformColumnTypes(Csv, {{\"date\", type date}, {\"model_id\", type text}, {\"model_label\", type text}, {\"observed\", type number}, {\"estimate\", type number}}, \"en-US\"),",
+          "    ClavesUnicas = Table.RowCount(Table.Distinct(Tipos, {\"date\", \"model_id\"})) = Table.RowCount(Tipos),",
+          "    ValoresInvalidos = Table.SelectRows(Tipos, each not fnNumeroValido([observed]) or not fnNumeroValido([estimate])),",
+          "    PorModelo = Table.Group(Tipos, {\"model_id\"}, {{\"filas\", each fnValidarMeses(_, #date(2021, 4, 1), 63)}}),",
+          "    CoberturaValida = Table.RowCount(Tipos) = 189 and Table.RowCount(PorModelo) = 3",
+          "        and List.AllTrue(List.Transform(PorModelo[filas], each Table.RowCount(_) = 63)),",
+          "    Identidad = Table.NestedJoin(Tipos, {\"model_id\", \"model_label\"}, MetricasFuente, {\"model_id\", \"model_label\"}, \"modelo\", JoinKind.LeftOuter),",
+          "    ModeloInvalido = Table.SelectRows(Identidad, each Table.RowCount([modelo]) <> 1),",
+          "    PorMes = Table.Group(Tipos, {\"date\"}, {{\"valores_observados\", each List.Count(List.Distinct([observed])), Int64.Type}}),",
+          "    ObservadoInvalido = Table.SelectRows(PorMes, each [valores_observados] <> 1),",
+          "    Auditoria = Table.NestedJoin(Tipos, {\"date\"}, LlegadasFuente, {\"date\"}, \"llegadas\", JoinKind.LeftOuter),",
+          "    Total = Table.ExpandTableColumn(Auditoria, \"llegadas\", {\"reported_total\"}, {\"total_fuente\"}),",
+          "    Diferencias = Table.SelectRows(Total, each [total_fuente] = null or Number.Abs([observed] - [total_fuente]) > 0.000001),",
+          "    Resultado = if ClavesUnicas and CoberturaValida and Table.IsEmpty(ValoresInvalidos)",
+          "        and Table.IsEmpty(ModeloInvalido) and Table.IsEmpty(ObservadoInvalido) and Table.IsEmpty(Diferencias)",
+          "        then Tipos else error Error.Record(\"Predicciones inconsistentes\", \"Revisa claves, cobertura, identidad y observado nacional antes de cargar.\", null)",
+          "in",
+          "    Resultado"
+        ]
+      }
+    ],
+    "annotations": [
+      {
+        "name": "PBI_TimeIntelligenceEnabled",
+        "value": "0"
+      }
+    ]
+  }
+}
