@@ -2,7 +2,7 @@
 
 La definición del modelo está preparada en `powerbi/observatorio_turismo.SemanticModel/model.bim`. Las consultas Power Query, las tablas, las relaciones, las jerarquías y una medida para el observado nacional forman parte del proyecto `powerbi/observatorio_turismo.pbip`. El informe incluye una página vacía y una copia del tema de colores existente.
 
-Se preparó en macOS, sin Power BI Desktop ni sesión de Windows disponible. Por eso no hay un `.pbix` guardado y no se afirma que las consultas hayan sido ejecutadas en Desktop. La sintaxis M y los metadatos del informe se comprobaron por separado; la carga, la ejecución DAX, la apariencia del tema y la versión exacta de Desktop quedan pendientes de comprobar en Windows. El procedimiento completo está en [el README de Power BI](../../powerbi/README.md).
+El modelo se preparó primero como proyecto y después se actualizó y guardó en Power BI Desktop 2.159.1231.0 en Windows, en `powerbi/observatorio_turismo.pbix`. La sintaxis M y los metadatos del informe se comprobaron por separado, y la carga, las relaciones y las consultas DAX se comprobaron en Desktop, como se detalla al final. El procedimiento completo está en [el README de Power BI](../../powerbi/README.md).
 
 ## Fuentes y parámetro
 
@@ -27,7 +27,7 @@ Las expresiones auxiliares del modelo no cargan tablas adicionales. `fnValidarMe
 
 ## Tablas y grano
 
-Los conteos son los esperados a partir de las fuentes verificadas, pendientes de cotejar tras Actualizar en Desktop.
+Los conteos son los esperados a partir de las fuentes verificadas. En Desktop se cargaron las ocho tablas.
 
 | Tabla | Una fila representa | Filas esperadas | Clave |
 |---|---|---:|---|
@@ -85,4 +85,4 @@ Esa tabla solo recibe filtros del calendario. Elegir uno, dos o tres modelos no 
 
 Las 17 expresiones y particiones M pasaron el analizador de sintaxis `@microsoft/powerquery-parser` 4.0.1. Los siete archivos JSON con esquema del proyecto y del informe pasaron los esquemas oficiales de Microsoft. Estas comprobaciones no ejecutan el motor M ni certifican la deserialización del modelo TMSL en Desktop.
 
-En Windows quedan por ejecutar Actualizar, las consultas de [comprobaciones.dax](../../powerbi/comprobaciones.dax), la revisión de las relaciones y del tema, el registro de la versión exacta y el guardado del `.pbix`. El observado de diciembre de 2025 debe seguir siendo 365573.0218067979 con cualquier selección de modelos y con todos ellos. Los indicadores deben coincidir con [resultados_esperados.md](resultados_esperados.md); pequeñas diferencias de representación binaria se comparan con tolerancia, nunca redondeando la fuente.
+En Desktop se ejecutó Actualizar y las consultas de [comprobaciones.dax](../../powerbi/comprobaciones.dax). El total histórico fue 46711912.89, el máximo fue diciembre de 2019 con 449114.07 y el observado de diciembre de 2025 fue 365573.0218067979 con uno y con todos los modelos. Los indicadores coinciden con [resultados_esperados.md](resultados_esperados.md); las diferencias de representación binaria se comparan con tolerancia, nunca redondeando la fuente.

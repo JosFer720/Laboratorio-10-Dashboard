@@ -12,6 +12,8 @@ La actualización terminó correctamente el 5 de noviembre de 2026. Se cargaron 
 - máximo histórico: diciembre de 2019, con `449,114.07`, mostrado como `449,114`;
 - observado de diciembre de 2025: `365573.0218067979`, mostrado como `365,573.02`, sin variar al seleccionar uno o todos los modelos.
 
+El informe tiene seis páginas: Inicio, Llegadas y mercados, Temporadas y hospedaje, Predicciones y modelos, Sobre los datos y una página de detalle de región a países que no aparece entre los botones. Las cinco primeras se recorren con los botones del encabezado. El diseño previsto está en [bosquejo.png](../docs/lab12/bosquejo.png).
+
 La página **Llegadas y mercados** incluye una línea temporal con la jerarquía año > trimestre > mes y barras por mercado de origen. La selección de un período en la primera visualización filtra la segunda. Ambas usan la medida:
 
 ```DAX

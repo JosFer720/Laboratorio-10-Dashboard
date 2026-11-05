@@ -167,7 +167,7 @@ Comprueba el mensaje sin versión, publica una versión válida, introduce una c
 
 ## Versión en Power BI
 
-El proyecto editable `powerbi/observatorio_turismo.pbip` contiene la preparación de los mismos CSV de `data/`, el modelo de datos y el tema, con una página vacía. No usa datos institucionales. La actualización en Power BI Desktop y el guardado de `powerbi/observatorio_turismo.pbix` están pendientes de realizar en Windows. Las instrucciones para preparar la ruta local, abrirlo, comprobarlo y registrar la versión de Desktop están en [powerbi/README.md](powerbi/README.md).
+El informe `powerbi/observatorio_turismo.pbix` usa los mismos CSV de `data/`, con el modelo de datos, el tema, las páginas con su navegación y las visualizaciones enlazadas de llegadas y mercados. El proyecto `powerbi/observatorio_turismo.pbip` contiene la preparación de los datos y el modelo. No usa datos institucionales. Las instrucciones para preparar la ruta local, abrirlo, comprobarlo y registrar la versión de Desktop están en [powerbi/README.md](powerbi/README.md).
 
 | Ruta | Contenido |
 |---|---|
