@@ -1,0 +1,63 @@
+{
+  "name": "Observatorio de turismo sostenible",
+  "dataColors": [
+    "#0B5C8E",
+    "#D55E00",
+    "#8A939E",
+    "#3F86BD",
+    "#7FB0D6",
+    "#0B3C5D",
+    "#BBD5EA",
+    "#5B6573"
+  ],
+  "foreground": "#1F2933",
+  "foregroundNeutralSecondary": "#5B6573",
+  "foregroundNeutralTertiary": "#8A939E",
+  "background": "#FFFFFF",
+  "backgroundLight": "#F7F8FA",
+  "backgroundNeutral": "#E3E6EA",
+  "tableAccent": "#0B5C8E",
+  "minimum": "#E8F1F8",
+  "center": "#3F86BD",
+  "maximum": "#0B3C5D",
+  "good": "#0B5C8E",
+  "neutral": "#8A939E",
+  "bad": "#D55E00",
+  "hyperlink": "#0B5C8E",
+  "textClasses": {
+    "callout": {
+      "fontSize": 21,
+      "fontFace": "Inter, Segoe UI, wf_segoe-ui_normal, helvetica, arial, sans-serif",
+      "color": "#1F2933"
+    },
+    "title": {
+      "fontSize": 12,
+      "fontFace": "Inter Semibold, Segoe UI Semibold, wf_segoe-ui_semibold, helvetica, arial, sans-serif",
+      "color": "#1F2933"
+    },
+    "header": {
+      "fontSize": 12,
+      "fontFace": "Inter Semibold, Segoe UI Semibold, wf_segoe-ui_semibold, helvetica, arial, sans-serif",
+      "color": "#1F2933"
+    },
+    "label": {
+      "fontSize": 10,
+      "fontFace": "Inter, Segoe UI, wf_segoe-ui_normal, helvetica, arial, sans-serif",
+      "color": "#5B6573"
+    }
+  },
+  "visualStyles": {
+    "page": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#F7F8FA" } }, "transparency": 0 }]
+      }
+    },
+    "*": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#E3E6EA" } }, "radius": 8 }],
+        "valueAxis": [{ "gridlineColor": { "solid": { "color": "#E3E6EA" } } }]
+      }
+    }
+  }
+}
