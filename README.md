@@ -1,9 +1,10 @@
 # Observatorio de turismo sostenible
 
-Este proyecto tiene dos partes:
+Este proyecto tiene tres partes:
 
 - Un tablero interactivo para consultar turistas y excursionistas en Guatemala entre enero de 2009 y junio de 2026, comparar tres modelos sobre su evaluación histórica y explorar la ocupación hotelera de 2022 a 2024.
 - Un pipeline que lee las fuentes institucionales de movilidad y de flujo migratorio, valida los datos con seis controles de calidad y estima los visitantes únicos de los meses sin cobertura en cada subdestino.
+- Una segunda versión del tablero en Power BI Desktop, con los mismos datos, preguntas de gestión y resultados de los tres modelos, para comparar ambas herramientas. Está en `powerbi/` y su documentación en `docs/lab12/`.
 
 El alcance de la estimación está en `docs/alcance.md` y el diagrama del flujo en `docs/flujo.md`.
 
@@ -163,6 +164,37 @@ python scripts/demonstrate_recovery.py --workspace output/recovery-demo
 ```
 
 Comprueba el mensaje sin versión, publica una versión válida, introduce una clave duplicada, verifica el estado `FAILED` y su causa en MLflow sin métricas inventadas y comprueba que el tablero sigue consultando las mismas estimaciones aprobadas. Después corrige, publica y usa el comando de restauración para volver a consultar la primera versión. La carpeta elegida debe ser nueva para no sobrescribir datos existentes. Guarda `evidence.json`, las fuentes sintéticas, los reportes, las versiones y los registros reales de MLflow. La evidencia de una ejecución realizada está en [docs/evidencia_recuperacion.json](docs/evidencia_recuperacion.json); los registros completos permanecen fuera de Git en la carpeta de salida.
+
+## Versión en Power BI
+
+El informe `powerbi/observatorio_turismo.pbix` reproduce el tablero con los mismos CSV de `data/` y no usa datos institucionales. Se abre con Power BI Desktop, que es gratuito y solo funciona en Windows. La versión de Power BI Desktop, cómo cambiar la carpeta de los datos y cómo actualizarlos están en `powerbi/README.md`.
+
+| Ruta | Contenido |
+|---|---|
+| `powerbi/observatorio_turismo.pbix` | Informe de Power BI. |
+| `powerbi/tema_observatorio.json` | Tema con la paleta y las fuentes del tablero. |
+| `data/model_predictions_s0.csv` | Predicciones de los tres modelos: valor observado y estimado por mes y modelo. |
+| `data/model_metrics_s0.csv` | Métricas MAE, RMSE y MAPE de cada modelo y su período de evaluación. |
+| `docs/lab12/resultados_esperados.md` | Valores de referencia para verificar que ambas versiones muestran lo mismo. |
+| `docs/lab12/protocolo_pruebas.md` | Las tres pruebas que se ejecutan en ambas versiones. |
+
+Los resultados esperados se recalculan con:
+
+```bash
+python scripts/resultados_esperados.py
+```
+
+### Versión del tablero que se compara
+
+La comparación usa el tablero en Dash tal como quedó en el Laboratorio 10, identificado con el tag `lab10-final`. Para consultarlo en una carpeta aparte, sin cambiar la rama de trabajo:
+
+```bash
+git worktree add ../tablero-lab10 lab10-final
+cd ../tablero-lab10
+python app.py
+```
+
+Se instala y se ejecuta igual que el tablero actual. Para quitar esa carpeta después: `git worktree remove ../tablero-lab10`.
 
 ## Pruebas
 
