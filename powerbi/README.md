@@ -2,11 +2,25 @@
 
 ## Versión de Power BI Desktop
 
-Pendiente de registrar al abrir y actualizar el proyecto en Windows (Ayuda > Acerca de en Power BI Desktop). No se ejecutó Desktop en el entorno donde se prepararon estas fuentes.
+El informe se actualizó y guardó con Power BI Desktop `2.159.1231.0 (64 bits)` en Windows.
+
+## Resultados comprobados en Desktop
+
+La actualización terminó correctamente el 5 de noviembre de 2026. Se cargaron las ocho tablas y se conservaron las siete relaciones del modelo. Las consultas de `comprobaciones.dax` dieron estos resultados:
+
+- total histórico: `46,711,912.89`, mostrado como `46,711,913`;
+- máximo histórico: diciembre de 2019, con `449,114.07`, mostrado como `449,114`;
+- observado de diciembre de 2025: `365573.0218067979`, mostrado como `365,573.02`, sin variar al seleccionar uno o todos los modelos.
+
+La página **Llegadas y mercados** incluye una línea temporal con la jerarquía año > trimestre > mes y barras por mercado de origen. La selección de un período en la primera visualización filtra la segunda. Ambas usan la medida:
+
+```DAX
+Llegadas = SUM(Llegadas[arrivals])
+```
 
 ## Abrir el informe
 
-La definición editable está en `observatorio_turismo.pbip`, con el modelo en `observatorio_turismo.SemanticModel/model.bim` y el informe en `observatorio_turismo.Report/`. Tiene una página vacía y el tema incorporado. Todavía no hay un `.pbix` generado ni una actualización comprobada en Desktop.
+La definición editable está en `observatorio_turismo.pbip`, con el modelo en `observatorio_turismo.SemanticModel/model.bim` y el informe en `observatorio_turismo.Report/`. El archivo actualizado para continuar el trabajo está en `observatorio_turismo.pbix`.
 
 En Windows, desde la raíz del repositorio:
 
@@ -21,8 +35,8 @@ El comando verifica las cuatro fuentes y crea una copia en `powerbi/local/`, ign
 3. Pulsa **Actualizar** y espera a que se carguen todas las tablas. No continúes si aparece un error de carga.
 4. En la vista de modelo, revisa las siete relaciones y la jerarquía de `Calendario`. La descripción y las filas esperadas están en [modelo_de_datos.md](../docs/lab12/modelo_de_datos.md).
 5. Ejecuta `powerbi/comprobaciones.dax` en la vista de consultas DAX. Revisa los totales, los conteos y el observado con uno y con todos los modelos.
-6. Comprueba el tema en Vista > Temas y la disponibilidad de Inter o Segoe UI en el equipo. El recurso incrustado coincide con `tema_observatorio.json`; la apariencia aún requiere revisión en Desktop.
-7. Guarda como `powerbi/observatorio_turismo.pbix`. Registra arriba la versión exacta de Desktop y documenta los resultados reales de actualización y de las consultas. El proyecto editable sirve para preparar el modelo; el archivo de intercambio del informe sigue siendo el `.pbix`.
+6. Comprueba el tema en Vista > Temas y la disponibilidad de Inter o Segoe UI en el equipo. El recurso incrustado coincide con `tema_observatorio.json`.
+7. Guarda como `powerbi/observatorio_turismo.pbix`. El proyecto editable sirve para preparar el modelo; el archivo de intercambio del informe sigue siendo el `.pbix`.
 
 Si el `.pbix` ya existe, ábrelo directamente. No vuelvas a generar el proyecto sobre un informe que ya tenga cambios.
 
