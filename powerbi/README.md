@@ -37,13 +37,15 @@ La página **Llegadas y mercados** también tiene gráficos pequeños, uno por r
 Peso de la región = DIVIDE([Llegadas], CALCULATE([Llegadas], REMOVEFILTERS(Origenes)))
 ```
 
-Con clic derecho sobre una región y Obtener detalles se llega a la página de detalle con sus mercados.
+Con clic derecho sobre una región de V4 y Obtener detalles se llega a la página de detalle con sus mercados. Se conserva el período seleccionado; el tooltip de las barras del detalle incluye la participación del país dentro de la región.
 
 La página **Llegadas y mercados** incluye una línea temporal con la jerarquía año > trimestre > mes y barras por mercado de origen. La selección de un período en la primera visualización filtra la segunda. Ambas usan la medida:
 
 ```DAX
 Llegadas = SUM(Llegadas[arrivals])
 ```
+
+Las tarjetas muestran el total filtrado, el máximo mensual y el mes correspondiente. Con enero a diciembre de 2025 y todos los mercados, deben mostrar 3.352.289, 365.573 y diciembre de 2025. El máximo se calcula sobre meses aunque V1 esté en el nivel anual.
 
 ## Predicciones y modelos
 
@@ -55,7 +57,7 @@ Las medidas específicas del informe están en `observatorio_turismo.Report/defi
 
 ## Filtros y navegación
 
-Los cinco botones del encabezado enlazan las páginas principales y resaltan en azul la página activa. El detalle de región se abre con clic derecho desde los mercados o los paneles de regiones y tiene un botón Volver. En Desktop, los botones se activan con Ctrl + clic.
+Los cinco botones del encabezado enlazan las páginas principales y resaltan en azul la página activa. El detalle de región se abre con clic derecho desde los paneles de regiones de V4 y tiene un botón Volver. En Desktop, los botones se activan con Ctrl + clic.
 
 Los segmentadores de años y meses se sincronizan entre las tres páginas de análisis. Mercado se sincroniza entre Llegadas y mercados y Temporadas y hospedaje; solo afecta llegadas, porque hospedaje y predicciones son nacionales. Cada página muestra una tarjeta con los filtros activos. Las páginas de análisis agregan mensajes para selecciones sin datos.
 
@@ -113,6 +115,8 @@ python scripts/verificar_informe_powerbi.py
 ```
 
 La auditoría opcional del modelo importado usa `pbixray==0.15.5`: después de instalarlo, ejecuta `python scripts/auditar_modelo_powerbi.py`. Comprueba las predicciones y llegadas almacenadas frente a los CSV y recalcula las métricas. Los resultados están en [validacion_modelos_pbix.json](../docs/lab12/validacion_modelos_pbix.json). Tampoco ejecuta las medidas nuevas ni renderiza los visuales.
+
+El validador oficial `@microsoft/powerbi-report-authoring-cli@0.5.0`, con el comando `validate powerbi/observatorio_turismo.Report`, terminó con cero errores y cero advertencias. Pasaron además 320 pruebas del repositorio actual, 171 de la referencia `lab10-final` y las tres tareas HTTP de Dash. El intento de abrir Desktop con la herramienta oficial devolvió `UNSUPPORTED_OS` en macOS. La evidencia y el alcance de cada comprobación se consultan en [resultados_pruebas.md](../docs/lab12/resultados_pruebas.md).
 
 ## Tema
 

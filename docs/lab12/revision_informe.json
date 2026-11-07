@@ -3,14 +3,14 @@
   "paginas": 6,
   "visualizaciones_principales": 8,
   "marcadores": 6,
-  "medidas_de_informe": 12,
+  "medidas_de_informe": 15,
   "referencias_validas": true,
   "objetos_superpuestos": 0,
   "pbir_y_pbix_coinciden": true,
   "modelo_importado_conservado": true,
   "sha256_modelo": "e0a04f56d8809dbe7b72ac6a48148ae3d59074fab298bab47bf135ecc3806e63",
-  "sha256_pbix": "568802e996433dfec57882d42880ff9e24a8a6004e546de35f5f024869afb024",
-  "bytes_pbix": 281104,
+  "sha256_pbix": "1dd040f9e9c44e7a41b9f5940b1243dc6271f1be85d91c9d9d233ccc737a878c",
+  "bytes_pbix": 284216,
   "graficos": {
     "V1": {
       "pagina": "Llegadas y mercados",

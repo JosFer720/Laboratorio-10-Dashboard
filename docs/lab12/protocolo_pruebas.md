@@ -45,7 +45,7 @@ Pasos en Power BI:
 
 1. En la página Llegadas y mercados, en el segmentador de período, elegir el año 2025.
 2. Confirmar que el segmentador de mercado no tiene selección.
-3. Leer el mes más alto en V1 o en la tarjeta de mes con más llegadas.
+3. Leer las tarjetas Mes con más llegadas y Máximo mensual. Para comprobar la curva de V1, bajar desde año a trimestre y mes.
 
 ## Prueba 2: pasar de una vista general al detalle y regresar
 
@@ -65,8 +65,8 @@ Pasos en Dash (`lab10-final`):
 Pasos en Power BI:
 
 1. Con 2025 en el segmentador de período, identificar la región con más llegadas.
-2. Abrir el detalle de América Central (clic derecho y Obtener detalles, o bajar de nivel en la jerarquía región y país).
-3. Leer el país con más llegadas y su participación dentro de la región.
+2. En V4, abrir el detalle de América Central con clic derecho y Obtener detalles. Comprobar que se conserva el año 2025.
+3. Leer el país con más llegadas en las barras del detalle y pasar el cursor para consultar su participación dentro de la región.
 4. Pulsar el botón de regreso o subir de nivel, y confirmar que vuelven las cinco regiones.
 
 ## Prueba 3: consultar las predicciones y comparar los tres modelos

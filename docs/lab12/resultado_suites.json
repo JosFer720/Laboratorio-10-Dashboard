@@ -1,0 +1,21 @@
+{
+  "metodo": "pytest, suites completas; valores extraídos de JUnit XML.",
+  "ejecuciones": [
+    {
+      "version": "repositorio_actual",
+      "pruebas": 320,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0,
+      "segundos": 249.647
+    },
+    {
+      "version": "dash_lab10_final",
+      "pruebas": 171,
+      "fallos": 0,
+      "errores": 0,
+      "omitidas": 0,
+      "segundos": 80.245
+    }
+  ]
+}

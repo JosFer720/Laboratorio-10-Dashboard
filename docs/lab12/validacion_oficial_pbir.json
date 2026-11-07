@@ -1,0 +1,9 @@
+{
+  "data": {
+    "result": "succeeded",
+    "errorCount": 0,
+    "warningCount": 0,
+    "reportPath": "powerbi/observatorio_turismo.Report"
+  },
+  "herramienta": "@microsoft/powerbi-report-authoring-cli 0.5.0"
+}

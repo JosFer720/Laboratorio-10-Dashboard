@@ -1,0 +1,196 @@
+{
+  "fecha_local": "2026-11-07T16:01:07.290072-06:00",
+  "metodo": "Callbacks HTTP reales del servidor Dash lab10-final; no son clics ni cronometraje de uso humano.",
+  "plataforma": "macOS-26.6.2-x86_64-i386-64bit",
+  "referencia": "29a091d",
+  "pruebas": [
+    {
+      "prueba": 1,
+      "resultado": {
+        "mes": "Diciembre de 2025",
+        "llegadas_mostradas": "365.573",
+        "total_2025_mostrado": "3.352.289"
+      },
+      "coincide": true,
+      "milisegundos_http_tarea": 41.74
+    },
+    {
+      "prueba": 2,
+      "resultado": {
+        "region": "América Central",
+        "llegadas_region_mostradas": "2.143.694",
+        "participacion_region_porcentaje": "63,9",
+        "pais": "El Salvador",
+        "llegadas_pais": 1582844.6207710486,
+        "participacion_pais_porcentaje": "73,8",
+        "regiones_al_regresar": 5
+      },
+      "coincide": true,
+      "milisegundos_http_tarea": 334.347
+    },
+    {
+      "prueba": 3,
+      "resultado": {
+        "mejor_modelo": "lstm-catch22-contexto-w24",
+        "modelos": [
+          {
+            "model_id": "lstm-catch22-contexto-w24",
+            "mape_mostrado": "29,2 %",
+            "observado_diciembre_2025": 365573.0218067979,
+            "error_diciembre_2025": -142130.70322635162
+          },
+          {
+            "model_id": "prophet",
+            "mape_mostrado": "60,9 %",
+            "observado_diciembre_2025": 365573.0218067979,
+            "error_diciembre_2025": -205732.54412419448
+          },
+          {
+            "model_id": "arima-1-1-1",
+            "mape_mostrado": "59,3 %",
+            "observado_diciembre_2025": 365573.0218067979,
+            "error_diciembre_2025": -275896.4756345232
+          }
+        ]
+      },
+      "coincide": true,
+      "milisegundos_http_tarea": 170.677
+    }
+  ],
+  "indicador_llegadas_2024_mostrado": "3.274.436",
+  "mensaje_sin_hospedaje": true,
+  "rendimiento_http": {
+    "muestras": 8,
+    "mediana_ms": 42.438,
+    "minimo_ms": 39.787,
+    "maximo_ms": 43.236
+  },
+  "llamadas_http": [
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 41.528
+    },
+    {
+      "salida": "market-share-chart.figure",
+      "milisegundos_http": 143.12
+    },
+    {
+      "salida": "origin-filter.value",
+      "milisegundos_http": 1.877
+    },
+    {
+      "salida": "v1-selection.data",
+      "milisegundos_http": 6.685
+    },
+    {
+      "salida": "market-chart.figure",
+      "milisegundos_http": 22.94
+    },
+    {
+      "salida": "origin-filter.value",
+      "milisegundos_http": 1.938
+    },
+    {
+      "salida": "market-share-chart.figure",
+      "milisegundos_http": 157.06
+    },
+    {
+      "salida": "arrivals-panel.hidden",
+      "milisegundos_http": 1.892
+    },
+    {
+      "salida": "v7-model-selection.data",
+      "milisegundos_http": 2.404
+    },
+    {
+      "salida": "model-evaluation-chart.figure",
+      "milisegundos_http": 23.831
+    },
+    {
+      "salida": "model-errors-chart.figure",
+      "milisegundos_http": 29.003
+    },
+    {
+      "salida": "v7-model-selection.data",
+      "milisegundos_http": 2.465
+    },
+    {
+      "salida": "model-evaluation-chart.figure",
+      "milisegundos_http": 23.461
+    },
+    {
+      "salida": "model-errors-chart.figure",
+      "milisegundos_http": 29.533
+    },
+    {
+      "salida": "v7-model-selection.data",
+      "milisegundos_http": 2.539
+    },
+    {
+      "salida": "model-evaluation-chart.figure",
+      "milisegundos_http": 24.19
+    },
+    {
+      "salida": "model-errors-chart.figure",
+      "milisegundos_http": 30.24
+    },
+    {
+      "salida": "seasonality-chart.figure",
+      "milisegundos_http": 48.269
+    },
+    {
+      "salida": "occupancy-chart.figure",
+      "milisegundos_http": 36.778
+    },
+    {
+      "salida": "arrivals-occupancy-chart.figure",
+      "milisegundos_http": 57.888
+    },
+    {
+      "salida": "occupancy-chart.figure",
+      "milisegundos_http": 21.882
+    },
+    {
+      "salida": "arrivals-panel.hidden",
+      "milisegundos_http": 1.895
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 43.63
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 43.145
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 43.117
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 42.025
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 42.851
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 41.351
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 43.236
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 39.787
+    },
+    {
+      "salida": "arrivals-timeline.figure",
+      "milisegundos_http": 41.134
+    }
+  ],
+  "clics_y_tiempos_de_navegacion": "No medidos: el control del navegador no estuvo operativo.",
+  "power_bi_interactivo": "No ejecutado: el host Desktop requiere Windows y no hay un modelo publicado configurado para preview del servicio."
+}
