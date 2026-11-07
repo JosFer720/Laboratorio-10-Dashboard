@@ -82,7 +82,7 @@
         }
       }
     ],
-    "acceptsFilterContext": "None"
+    "acceptsFilterContext": "Default"
   },
   "visibility": "HiddenInViewMode",
   "type": "Drillthrough"

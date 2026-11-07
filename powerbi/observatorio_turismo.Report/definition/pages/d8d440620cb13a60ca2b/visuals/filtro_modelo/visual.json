@@ -101,13 +101,6 @@
                 }
               }
             },
-            "fontSize": {
-              "expr": {
-                "Literal": {
-                  "Value": "10D"
-                }
-              }
-            },
             "fontColor": {
               "solid": {
                 "color": {
@@ -118,6 +111,13 @@
                   }
                 }
               }
+            },
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
             }
           }
         }
@@ -125,7 +125,7 @@
       "items": [
         {
           "properties": {
-            "fontSize": {
+            "textSize": {
               "expr": {
                 "Literal": {
                   "Value": "11D"

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "Observatorio de turismo sostenible"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "ccdd298c-a465-5c4b-9eca-0e112d8697ee"
+  }
+}

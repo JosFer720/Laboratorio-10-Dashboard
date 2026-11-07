@@ -3,9 +3,9 @@
   "name": "4b19faa7236096e48039",
   "position": {
     "x": 780,
-    "y": 320,
+    "y": 408,
     "width": 476,
-    "height": 260,
+    "height": 244,
     "z": 100,
     "tabOrder": 100
   },
@@ -47,26 +47,6 @@
               },
               "queryRef": "Calendario.Llegadas",
               "nativeQueryRef": "Llegadas"
-            }
-          ]
-        },
-        "Tooltips": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Origenes"
-                    }
-                  },
-                  "Property": "origin_region"
-                }
-              },
-              "queryRef": "Origenes.origin_region",
-              "nativeQueryRef": "origin_region",
-              "active": true,
-              "displayName": "Región"
             }
           ]
         }

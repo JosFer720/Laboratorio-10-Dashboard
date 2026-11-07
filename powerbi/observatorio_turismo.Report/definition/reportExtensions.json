@@ -95,6 +95,29 @@
           "expression": "IF(NOT HASONEVALUE(Modelos[model_id]), \"Elige un único modelo para V7 o pulsa Restablecer vista.\", IF(COUNTROWS(Predicciones) = 0, \"No hay resultados para este período. La evaluación cubre abril de 2021 a junio de 2026.\", \"Evaluación histórica, no pronóstico · 63 meses por modelo · mismas fechas y misma serie nacional.\"))",
           "description": "Evita un gráfico de predicciones vacío o una suma engañosa de modelos.",
           "displayFolder": "Informe"
+        },
+        {
+          "name": "Participación en región",
+          "dataType": "Double",
+          "expression": "DIVIDE(SUM(Llegadas[arrivals]), CALCULATE(SUM(Llegadas[arrivals]), ALLEXCEPT(Origenes, Origenes[origin_region])))",
+          "formatString": "0.0%",
+          "description": "Participación del país en su región, conservando el año y el mes seleccionados.",
+          "displayFolder": "Informe"
+        },
+        {
+          "name": "Máximo mensual",
+          "dataType": "Double",
+          "expression": "MAXX(VALUES(Calendario[year_month]), CALCULATE(SUM(Llegadas[arrivals])))",
+          "formatString": "#,0",
+          "description": "Máximo de las llegadas mensuales dentro del período y mercado activos.",
+          "displayFolder": "Informe"
+        },
+        {
+          "name": "Mes con más llegadas",
+          "dataType": "Text",
+          "expression": "VAR Serie = ADDCOLUMNS(VALUES(Calendario[year_month]), \"TotalMensual\", CALCULATE(SUM(Llegadas[arrivals])))\nVAR Ganadores = TOPN(1, FILTER(Serie, NOT ISBLANK([TotalMensual])), [TotalMensual], DESC)\nRETURN IF(COUNTROWS(Ganadores) = 0, \"Sin información\", IF(COUNTROWS(Ganadores) > 1, FORMAT(COUNTROWS(Ganadores), \"0\") & \" meses empatados\", CONCATENATEX(Ganadores, FORMAT(DATE(VALUE(LEFT(Calendario[year_month], 4)), VALUE(RIGHT(Calendario[year_month], 2)), 1), \"mmmm yyyy\", \"es-ES\"), \", \")))",
+          "description": "Nombre del mes máximo sin depender del nivel de detalle de V1; informa empates.",
+          "displayFolder": "Informe"
         }
       ]
     }

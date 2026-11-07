@@ -18,23 +18,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "Las barras comparan los mercados de la región; las líneas muestran su evolución. América del Sur, Europa y Resto del mundo son agregados.",
+                    "value": "Las barras muestran llegadas por mercado; su información al pasar el cursor incluye la participación en la región. Se conservan año y mes del origen del detalle.\nVolver conserva el recorrido. Restablecer limpia filtros y vuelve a Llegadas y mercados. Los agregados no son países; Guatemala está en cero desde 2023.",
                     "textStyle": {
                       "fontSize": "11pt",
-                      "color": "#5B6573",
-                      "fontFamily": "Segoe UI"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "Volver conserva el recorrido anterior. Restablecer vista limpia los filtros y regresa a Llegadas y mercados. Guatemala está en cero desde 2023 en la fuente.",
-                    "textStyle": {
-                      "fontSize": "11pt",
-                      "color": "#5B6573",
-                      "fontFamily": "Segoe UI"
+                      "color": "#5B6573"
                     }
                   }
                 ]

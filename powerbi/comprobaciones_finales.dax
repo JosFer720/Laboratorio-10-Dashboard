@@ -1,6 +1,4 @@
-// Consultas de comprobación de las medidas del informe.
-// Ejecutar en la vista de consultas DAX de Power BI Desktop.
-// DEFINE permite comprobar también las medidas que están guardadas en el informe.
+// Comprobaciones reproducibles de todas las medidas de informe.
 DEFINE
 
     // Observado nacional de evaluación, una sola vez por mes; permanece igual con uno o con todos los modelos.
@@ -60,6 +58,20 @@ DEFINE
     MEASURE Predicciones[Estado de modelos] =
         IF(NOT HASONEVALUE(Modelos[model_id]), "Elige un único modelo para V7 o pulsa Restablecer vista.", IF(COUNTROWS(Predicciones) = 0, "No hay resultados para este período. La evaluación cubre abril de 2021 a junio de 2026.", "Evaluación histórica, no pronóstico · 63 meses por modelo · mismas fechas y misma serie nacional."))
 
+    // Participación del país en su región, conservando el año y el mes seleccionados.
+    MEASURE Predicciones[Participación en región] =
+        DIVIDE(SUM(Llegadas[arrivals]), CALCULATE(SUM(Llegadas[arrivals]), ALLEXCEPT(Origenes, Origenes[origin_region])))
+
+    // Máximo de las llegadas mensuales dentro del período y mercado activos.
+    MEASURE Predicciones[Máximo mensual] =
+        MAXX(VALUES(Calendario[year_month]), CALCULATE(SUM(Llegadas[arrivals])))
+
+    // Nombre del mes máximo sin depender del nivel de detalle de V1; informa empates.
+    MEASURE Predicciones[Mes con más llegadas] =
+        VAR Serie = ADDCOLUMNS(VALUES(Calendario[year_month]), "TotalMensual", CALCULATE(SUM(Llegadas[arrivals])))
+        VAR Ganadores = TOPN(1, FILTER(Serie, NOT ISBLANK([TotalMensual])), [TotalMensual], DESC)
+        RETURN IF(COUNTROWS(Ganadores) = 0, "Sin información", IF(COUNTROWS(Ganadores) > 1, FORMAT(COUNTROWS(Ganadores), "0") & " meses empatados", CONCATENATEX(Ganadores, FORMAT(DATE(VALUE(LEFT(Calendario[year_month], 4)), VALUE(RIGHT(Calendario[year_month], 2)), 1), "mmmm yyyy", "es-ES"), ", ")))
+
 // Diciembre de 2025: observado 365573.0218067979 para los tres modelos.
 // Error LSTM ≈ −142130.7032; Prophet ≈ −205732.5441; ARIMA ≈ −275896.4756.
 EVALUATE
@@ -102,3 +114,12 @@ CALCULATETABLE(
     TREATAS({2019}, Calendario[year]),
     TREATAS({"lstm-catch22-contexto-w24"}, Modelos[model_id])
 )
+
+
+// Prueba 1: diciembre de 2025, máximo 365573.0218067979.
+EVALUATE
+CALCULATETABLE(ROW("Mes máximo", [Mes con más llegadas], "Máximo mensual", [Máximo mensual]), TREATAS({2025}, Calendario[year]))
+
+// Prueba 2: participación de El Salvador en América Central en 2025 ≈ 0.7383723.
+EVALUATE
+CALCULATETABLE(ROW("Llegadas", SUM(Llegadas[arrivals]), "Participación", [Participación en región]), TREATAS({2025}, Calendario[year]), TREATAS({"América Central"}, Origenes[origin_region]), TREATAS({"El Salvador"}, Origenes[origin]))

@@ -388,6 +388,33 @@
               "selection": []
             },
             "singleVisual": {}
+          },
+          "resumen_total": {
+            "filters": {
+              "byExpr": []
+            },
+            "highlight": {
+              "selection": []
+            },
+            "singleVisual": {}
+          },
+          "resumen_maximo": {
+            "filters": {
+              "byExpr": []
+            },
+            "highlight": {
+              "selection": []
+            },
+            "singleVisual": {}
+          },
+          "resumen_mes": {
+            "filters": {
+              "byExpr": []
+            },
+            "highlight": {
+              "selection": []
+            },
+            "singleVisual": {}
           }
         }
       },

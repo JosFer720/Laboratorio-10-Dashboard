@@ -3,9 +3,9 @@
   "name": "titulo",
   "position": {
     "x": 24,
-    "y": 12,
+    "y": 8,
     "width": 1060,
-    "height": 42,
+    "height": 48,
     "z": 100,
     "tabOrder": 100
   },

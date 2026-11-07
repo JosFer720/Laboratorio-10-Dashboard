@@ -2,9 +2,9 @@
   "name": "pista",
   "position": {
     "x": 24,
-    "y": 586,
+    "y": 658,
     "width": 1232,
-    "height": 52,
+    "height": 50,
     "z": 100,
     "tabOrder": 100
   },
@@ -18,23 +18,10 @@
               {
                 "textRuns": [
                   {
-                    "value": "V1: baja y sube entre año, trimestre y mes. Selecciona un período para filtrar V2; vuelve a pulsarlo para limpiar.",
+                    "value": "V1: baja y sube entre año, trimestre y mes. Selecciona un período para filtrar V2; vuelve a pulsarlo para limpiar.\nV4: clic derecho sobre la región > Obtener detalles. Se conserva el año seleccionado y Volver regresa a la vista anterior.",
                     "textStyle": {
                       "fontSize": "11pt",
-                      "color": "#5B6573",
-                      "fontFamily": "Segoe UI"
-                    }
-                  }
-                ]
-              },
-              {
-                "textRuns": [
-                  {
-                    "value": "V2 y V4: clic derecho en una región > Obtener detalles; el botón Volver regresa a la vista anterior.",
-                    "textStyle": {
-                      "fontSize": "11pt",
-                      "color": "#5B6573",
-                      "fontFamily": "Segoe UI"
+                      "color": "#5B6573"
                     }
                   }
                 ]

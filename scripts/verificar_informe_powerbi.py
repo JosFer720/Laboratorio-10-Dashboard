@@ -124,7 +124,10 @@ def verify(report_dir: Path = ROOT / "powerbi/observatorio_turismo.Report",
     detail = page_meta["Detalle de región"]
     require(detail.get("type") == "Drillthrough" and detail.get("visibility") == "HiddenInViewMode", "El detalle no está configurado como drillthrough oculto.")
     require(detail["pageBinding"]["parameters"][0]["fieldExpr"]["Column"]["Property"] == "origin_region", "El detalle no recibe la región.")
+    require(detail["pageBinding"].get("acceptsFilterContext", "Default") == "Default", "El detalle pierde el año y el mes de la consulta.")
     require("volver" in page_visuals["Detalle de región"], "Falta el regreso del detalle.")
+    for name in ["resumen_total", "resumen_maximo", "resumen_mes"]:
+        require(name in page_visuals["Llegadas y mercados"], "Falta una tarjeta para responder el máximo mensual.")
     bookmarks = load(definition / "bookmarks/bookmarks.json")["items"]
     for entry in bookmarks:
         bookmark = load(definition / f"bookmarks/{entry['name']}.bookmark.json")

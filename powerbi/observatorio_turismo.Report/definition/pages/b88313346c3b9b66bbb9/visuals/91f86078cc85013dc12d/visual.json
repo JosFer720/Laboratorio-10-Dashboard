@@ -49,6 +49,25 @@
               "nativeQueryRef": "Llegadas"
             }
           ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Predicciones",
+                      "Schema": "extension"
+                    }
+                  },
+                  "Property": "Participación en región"
+                }
+              },
+              "queryRef": "extension.Predicciones.Participación en región",
+              "nativeQueryRef": "Participación en región"
+            }
+          ]
         }
       }
     },
