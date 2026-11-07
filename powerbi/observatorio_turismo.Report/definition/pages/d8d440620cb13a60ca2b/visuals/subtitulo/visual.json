@@ -1,0 +1,37 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "subtitulo",
+  "position": {
+    "x": 24,
+    "y": 58,
+    "z": 1000,
+    "height": 34,
+    "width": 1232,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Qué tan cerca estuvo cada modelo de lo observado en la evaluación de abril de 2021 a junio de 2026",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

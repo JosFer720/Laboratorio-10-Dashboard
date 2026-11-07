@@ -1,0 +1,102 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/reportExtension/1.0.0/schema.json",
+  "name": "extension",
+  "entities": [
+    {
+      "name": "Predicciones",
+      "measures": [
+        {
+          "name": "Observado histórico",
+          "dataType": "Double",
+          "expression": "SUM(Observados[observed])",
+          "description": "Observado nacional de evaluación, una sola vez por mes; permanece igual con uno o con todos los modelos.",
+          "displayFolder": "Informe",
+          "formatString": "#,0"
+        },
+        {
+          "name": "Estimado histórico",
+          "dataType": "Double",
+          "expression": "IF(HASONEVALUE(Modelos[model_id]), SUM(Predicciones[estimate]), BLANK())",
+          "description": "Estimado del único modelo elegido para V7; no suma modelos diferentes.",
+          "displayFolder": "Informe",
+          "formatString": "#,0"
+        },
+        {
+          "name": "Error mensual",
+          "dataType": "Double",
+          "expression": "VAR Estimado = SUM(Predicciones[estimate])\nVAR Observado = SUM(Observados[observed])\nRETURN IF(HASONEVALUE(Modelos[model_id]) && NOT ISBLANK(Estimado) && NOT ISBLANK(Observado), Estimado - Observado, BLANK())",
+          "description": "Error con signo por mes y modelo: estimado menos observado.",
+          "displayFolder": "Informe",
+          "formatString": "#,0;−#,0;0"
+        },
+        {
+          "name": "MAE de evaluación",
+          "dataType": "Double",
+          "expression": "CALCULATE(MAX(Metricas[mae]), REMOVEFILTERS(Calendario))",
+          "description": "Error absoluto medio sobre los 63 meses completos.",
+          "displayFolder": "Informe",
+          "formatString": "#,0"
+        },
+        {
+          "name": "RMSE de evaluación",
+          "dataType": "Double",
+          "expression": "CALCULATE(MAX(Metricas[rmse]), REMOVEFILTERS(Calendario))",
+          "description": "Raíz del error cuadrático medio de los 63 meses completos.",
+          "displayFolder": "Informe",
+          "formatString": "#,0"
+        },
+        {
+          "name": "MAPE de evaluación",
+          "dataType": "Double",
+          "expression": "CALCULATE(MAX(Metricas[mape]), REMOVEFILTERS(Calendario))",
+          "description": "El CSV ya contiene unidades porcentuales; no se multiplica por cien.",
+          "displayFolder": "Informe",
+          "formatString": "0.0\" %\""
+        },
+        {
+          "name": "Llegadas con hospedaje",
+          "dataType": "Double",
+          "expression": "IF(NOT ISBLANK(SUM(Hospedaje[rooms_available])), SUM(Llegadas[arrivals]), BLANK())",
+          "description": "Evita que la dispersión convierta los meses sin hospedaje en puntos con cero ocupación.",
+          "displayFolder": "Informe",
+          "formatString": "#,0"
+        },
+        {
+          "name": "Filtros aplicados",
+          "dataType": "Text",
+          "expression": "VAR Anios = IF(ISFILTERED(Calendario[year]), IF(COUNTROWS(VALUES(Calendario[year])) > 4, FORMAT(COUNTROWS(VALUES(Calendario[year])), \"0\") & \" años seleccionados\", CONCATENATEX(VALUES(Calendario[year]), FORMAT(Calendario[year], \"0\"), \", \", Calendario[year], ASC)), \"todos (2009–2026)\")\nVAR Meses = IF(ISFILTERED(Calendario[month_name]), IF(COUNTROWS(VALUES(Calendario[month_name])) > 4, FORMAT(COUNTROWS(VALUES(Calendario[month_name])), \"0\") & \" meses seleccionados\", CONCATENATEX(VALUES(Calendario[month_name]), Calendario[month_name], \", \", CALCULATE(MIN(Calendario[month_number])), ASC)), \"todos\")\nVAR Mercados = IF(ISCROSSFILTERED(Origenes), IF(COUNTROWS(VALUES(Origenes[origin])) > 3, FORMAT(COUNTROWS(VALUES(Origenes[origin])), \"0\") & \" mercados\", CONCATENATEX(VALUES(Origenes[origin]), Origenes[origin], \", \")), \"todos\")\nVAR Region = IF(ISFILTERED(Origenes[origin_region]), \" · Región: \" & CONCATENATEX(VALUES(Origenes[origin_region]), Origenes[origin_region], \", \"), \"\")\nRETURN \"Años: \" & Anios & \" · Meses: \" & Meses & \" · Mercados: \" & Mercados & Region",
+          "description": "Resume los años, meses, mercados y región activos.",
+          "displayFolder": "Informe"
+        },
+        {
+          "name": "Filtros de modelos",
+          "dataType": "Text",
+          "expression": "VAR Anios = IF(ISFILTERED(Calendario[year]), IF(COUNTROWS(VALUES(Calendario[year])) > 4, FORMAT(COUNTROWS(VALUES(Calendario[year])), \"0\") & \" años seleccionados\", CONCATENATEX(VALUES(Calendario[year]), FORMAT(Calendario[year], \"0\"), \", \", Calendario[year], ASC)), \"todos (2009–2026)\")\nVAR Meses = IF(ISFILTERED(Calendario[month_name]), IF(COUNTROWS(VALUES(Calendario[month_name])) > 4, FORMAT(COUNTROWS(VALUES(Calendario[month_name])), \"0\") & \" meses seleccionados\", CONCATENATEX(VALUES(Calendario[month_name]), Calendario[month_name], \", \", CALCULATE(MIN(Calendario[month_number])), ASC)), \"todos\")\nVAR Modelo = SELECTEDVALUE(Modelos[model_label], \"elige un único modelo\")\nRETURN \"Años: \" & Anios & \" · Meses: \" & Meses & \" · Modelo de V7: \" & Modelo & \" · V8 y métricas: los tres modelos\"",
+          "description": "Distingue el modelo de V7 de las comparaciones de los tres modelos.",
+          "displayFolder": "Informe"
+        },
+        {
+          "name": "Estado de llegadas",
+          "dataType": "Text",
+          "expression": "IF(COUNTROWS(Llegadas) = 0, \"No hay datos para esta selección. Amplía años o meses, cambia el mercado o pulsa Restablecer vista.\", \"Datos observados · selecciona un elemento para explorar; la franja superior muestra los filtros activos.\")",
+          "description": "Mensaje explícito para selecciones sin llegadas.",
+          "displayFolder": "Informe"
+        },
+        {
+          "name": "Estado de hospedaje",
+          "dataType": "Text",
+          "expression": "IF(COUNTROWS(Hospedaje) = 0, \"No hay datos de hospedaje para esta selección. Incluye meses de 2022–2024 o pulsa Restablecer vista.\", \"Hospedaje y dispersión nacionales · cobertura 2022–2024 · no responden al mercado de origen.\")",
+          "description": "Informa la cobertura y los filtros que no aplican a hospedaje.",
+          "displayFolder": "Informe"
+        },
+        {
+          "name": "Estado de modelos",
+          "dataType": "Text",
+          "expression": "IF(NOT HASONEVALUE(Modelos[model_id]), \"Elige un único modelo para V7 o pulsa Restablecer vista.\", IF(COUNTROWS(Predicciones) = 0, \"No hay resultados para este período. La evaluación cubre abril de 2021 a junio de 2026.\", \"Evaluación histórica, no pronóstico · 63 meses por modelo · mismas fechas y misma serie nacional.\"))",
+          "description": "Evita un gráfico de predicciones vacío o una suma engañosa de modelos.",
+          "displayFolder": "Informe"
+        }
+      ]
+    }
+  ]
+}

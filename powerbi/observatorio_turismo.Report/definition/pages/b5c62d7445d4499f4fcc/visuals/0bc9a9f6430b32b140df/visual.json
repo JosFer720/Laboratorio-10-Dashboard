@@ -1,0 +1,50 @@
+{
+  "name": "0bc9a9f6430b32b140df",
+  "position": {
+    "x": 24,
+    "y": 1024,
+    "width": 1232,
+    "height": 48,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "V5: porcentaje ponderado por habitaciones, con eje de 0 a 100 %. V6: cada punto es un mes; una asociación no implica causalidad.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Hospedaje y V6 son nacionales: el mercado solo filtra V3. Cobertura de INGUAT: enero de 2022 a diciembre de 2024.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

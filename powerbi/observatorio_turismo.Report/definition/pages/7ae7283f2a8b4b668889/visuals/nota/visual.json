@@ -1,0 +1,50 @@
+{
+  "name": "nota",
+  "position": {
+    "x": 24,
+    "y": 938,
+    "width": 1232,
+    "height": 70,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "V4 conserva la evolución anual y la misma escala de 0 a 100 % en sus cinco paneles. Los segmentadores sí cambian el contexto; la selección de V1 o V2 no reduce la serie de V4 a un punto.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Fuente: serie migratoria e INGUAT. Guatemala está en cero desde enero de 2023 en la fuente; no se interpreta como un cambio real del mercado.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

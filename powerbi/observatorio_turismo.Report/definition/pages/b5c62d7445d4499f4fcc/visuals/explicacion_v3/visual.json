@@ -1,0 +1,38 @@
+{
+  "name": "explicacion_v3",
+  "position": {
+    "x": 24,
+    "y": 706,
+    "width": 1232,
+    "height": 36,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Un azul más intenso indica más llegadas; el color revela patrones entre años y meses. Desplázate por la matriz para ver todos los años. Los cambios no prueban sus causas.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

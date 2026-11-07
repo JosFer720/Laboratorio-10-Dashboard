@@ -1,0 +1,39 @@
+{
+  "name": "titulo",
+  "position": {
+    "x": 24,
+    "y": 12,
+    "width": 1060,
+    "height": 42,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Observatorio de turismo sostenible · Guatemala",
+                    "textStyle": {
+                      "fontSize": "20pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

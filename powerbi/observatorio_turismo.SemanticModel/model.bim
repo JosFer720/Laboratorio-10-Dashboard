@@ -115,6 +115,23 @@
               }
             ]
           }
+        ],
+        "measures": [
+          {
+            "name": "Llegadas",
+            "expression": "SUM(Llegadas[arrivals])",
+            "formatString": "#,0"
+          },
+          {
+            "name": "Peso de la región",
+            "expression": "DIVIDE([Llegadas], CALCULATE([Llegadas], REMOVEFILTERS(Origenes)))",
+            "formatString": "0.0%"
+          },
+          {
+            "name": "Ocupación hotelera",
+            "expression": "DIVIDE(SUM(Hospedaje[rooms_occupied]), SUM(Hospedaje[rooms_available]))",
+            "formatString": "0.0%"
+          }
         ]
       },
       {

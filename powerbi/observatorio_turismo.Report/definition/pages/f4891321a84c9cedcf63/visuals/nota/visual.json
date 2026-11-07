@@ -1,0 +1,50 @@
+{
+  "name": "nota",
+  "position": {
+    "x": 24,
+    "y": 934,
+    "width": 1232,
+    "height": 86,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "OBSERVADO · cifras publicadas, en azul. INTERPRETADO · participaciones y relaciones descriptivas calculadas con esos datos. ESTIMADO · resultados de modelos, en naranja.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Las estimaciones son una evaluación histórica, no un pronóstico. Consulta Sobre los datos antes de usar los resultados para decidir.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

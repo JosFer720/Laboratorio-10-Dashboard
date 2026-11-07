@@ -1,0 +1,23 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/bookmarksMetadata/1.0.0/schema.json",
+  "items": [
+    {
+      "name": "restablecer_inicio"
+    },
+    {
+      "name": "restablecer_llegadas"
+    },
+    {
+      "name": "restablecer_temporadas"
+    },
+    {
+      "name": "restablecer_modelos"
+    },
+    {
+      "name": "restablecer_datos"
+    },
+    {
+      "name": "restablecer_detalle"
+    }
+  ]
+}

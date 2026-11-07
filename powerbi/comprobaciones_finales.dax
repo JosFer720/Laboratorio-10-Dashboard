@@ -1,0 +1,104 @@
+// Consultas de comprobación de las medidas del informe.
+// Ejecutar en la vista de consultas DAX de Power BI Desktop.
+// DEFINE permite comprobar también las medidas que están guardadas en el informe.
+DEFINE
+
+    // Observado nacional de evaluación, una sola vez por mes; permanece igual con uno o con todos los modelos.
+    MEASURE Predicciones[Observado histórico] =
+        SUM(Observados[observed])
+
+    // Estimado del único modelo elegido para V7; no suma modelos diferentes.
+    MEASURE Predicciones[Estimado histórico] =
+        IF(HASONEVALUE(Modelos[model_id]), SUM(Predicciones[estimate]), BLANK())
+
+    // Error con signo por mes y modelo: estimado menos observado.
+    MEASURE Predicciones[Error mensual] =
+        VAR Estimado = SUM(Predicciones[estimate])
+        VAR Observado = SUM(Observados[observed])
+        RETURN IF(HASONEVALUE(Modelos[model_id]) && NOT ISBLANK(Estimado) && NOT ISBLANK(Observado), Estimado - Observado, BLANK())
+
+    // Error absoluto medio sobre los 63 meses completos.
+    MEASURE Predicciones[MAE de evaluación] =
+        CALCULATE(MAX(Metricas[mae]), REMOVEFILTERS(Calendario))
+
+    // Raíz del error cuadrático medio de los 63 meses completos.
+    MEASURE Predicciones[RMSE de evaluación] =
+        CALCULATE(MAX(Metricas[rmse]), REMOVEFILTERS(Calendario))
+
+    // El CSV ya contiene unidades porcentuales; no se multiplica por cien.
+    MEASURE Predicciones[MAPE de evaluación] =
+        CALCULATE(MAX(Metricas[mape]), REMOVEFILTERS(Calendario))
+
+    // Evita que la dispersión convierta los meses sin hospedaje en puntos con cero ocupación.
+    MEASURE Predicciones[Llegadas con hospedaje] =
+        IF(NOT ISBLANK(SUM(Hospedaje[rooms_available])), SUM(Llegadas[arrivals]), BLANK())
+
+    // Resume los años, meses, mercados y región activos.
+    MEASURE Predicciones[Filtros aplicados] =
+        VAR Anios = IF(ISFILTERED(Calendario[year]), IF(COUNTROWS(VALUES(Calendario[year])) > 4, FORMAT(COUNTROWS(VALUES(Calendario[year])), "0") & " años seleccionados", CONCATENATEX(VALUES(Calendario[year]), FORMAT(Calendario[year], "0"), ", ", Calendario[year], ASC)), "todos (2009–2026)")
+        VAR Meses = IF(ISFILTERED(Calendario[month_name]), IF(COUNTROWS(VALUES(Calendario[month_name])) > 4, FORMAT(COUNTROWS(VALUES(Calendario[month_name])), "0") & " meses seleccionados", CONCATENATEX(VALUES(Calendario[month_name]), Calendario[month_name], ", ", CALCULATE(MIN(Calendario[month_number])), ASC)), "todos")
+        VAR Mercados = IF(ISCROSSFILTERED(Origenes), IF(COUNTROWS(VALUES(Origenes[origin])) > 3, FORMAT(COUNTROWS(VALUES(Origenes[origin])), "0") & " mercados", CONCATENATEX(VALUES(Origenes[origin]), Origenes[origin], ", ")), "todos")
+        VAR Region = IF(ISFILTERED(Origenes[origin_region]), " · Región: " & CONCATENATEX(VALUES(Origenes[origin_region]), Origenes[origin_region], ", "), "")
+        RETURN "Años: " & Anios & " · Meses: " & Meses & " · Mercados: " & Mercados & Region
+
+    // Distingue el modelo de V7 de las comparaciones de los tres modelos.
+    MEASURE Predicciones[Filtros de modelos] =
+        VAR Anios = IF(ISFILTERED(Calendario[year]), IF(COUNTROWS(VALUES(Calendario[year])) > 4, FORMAT(COUNTROWS(VALUES(Calendario[year])), "0") & " años seleccionados", CONCATENATEX(VALUES(Calendario[year]), FORMAT(Calendario[year], "0"), ", ", Calendario[year], ASC)), "todos (2009–2026)")
+        VAR Meses = IF(ISFILTERED(Calendario[month_name]), IF(COUNTROWS(VALUES(Calendario[month_name])) > 4, FORMAT(COUNTROWS(VALUES(Calendario[month_name])), "0") & " meses seleccionados", CONCATENATEX(VALUES(Calendario[month_name]), Calendario[month_name], ", ", CALCULATE(MIN(Calendario[month_number])), ASC)), "todos")
+        VAR Modelo = SELECTEDVALUE(Modelos[model_label], "elige un único modelo")
+        RETURN "Años: " & Anios & " · Meses: " & Meses & " · Modelo de V7: " & Modelo & " · V8 y métricas: los tres modelos"
+
+    // Mensaje explícito para selecciones sin llegadas.
+    MEASURE Predicciones[Estado de llegadas] =
+        IF(COUNTROWS(Llegadas) = 0, "No hay datos para esta selección. Amplía años o meses, cambia el mercado o pulsa Restablecer vista.", "Datos observados · selecciona un elemento para explorar; la franja superior muestra los filtros activos.")
+
+    // Informa la cobertura y los filtros que no aplican a hospedaje.
+    MEASURE Predicciones[Estado de hospedaje] =
+        IF(COUNTROWS(Hospedaje) = 0, "No hay datos de hospedaje para esta selección. Incluye meses de 2022–2024 o pulsa Restablecer vista.", "Hospedaje y dispersión nacionales · cobertura 2022–2024 · no responden al mercado de origen.")
+
+    // Evita un gráfico de predicciones vacío o una suma engañosa de modelos.
+    MEASURE Predicciones[Estado de modelos] =
+        IF(NOT HASONEVALUE(Modelos[model_id]), "Elige un único modelo para V7 o pulsa Restablecer vista.", IF(COUNTROWS(Predicciones) = 0, "No hay resultados para este período. La evaluación cubre abril de 2021 a junio de 2026.", "Evaluación histórica, no pronóstico · 63 meses por modelo · mismas fechas y misma serie nacional."))
+
+// Diciembre de 2025: observado 365573.0218067979 para los tres modelos.
+// Error LSTM ≈ −142130.7032; Prophet ≈ −205732.5441; ARIMA ≈ −275896.4756.
+EVALUATE
+SUMMARIZECOLUMNS(
+    Modelos[model_label],
+    TREATAS({DATE(2025, 12, 1)}, Calendario[date]),
+    "Observado", [Observado histórico],
+    "Estimado", [Estimado histórico],
+    "Error", [Error mensual]
+)
+
+// Sin seleccionar un modelo: el observado no se triplica y el estimado queda en blanco.
+EVALUATE
+CALCULATETABLE(
+    ROW("Observado con todos", [Observado histórico], "Estimado sin modelo único", [Estimado histórico]),
+    TREATAS({DATE(2025, 12, 1)}, Calendario[date]),
+    REMOVEFILTERS(Modelos)
+)
+
+// Métricas de la misma serie y los 63 meses: 29,2 %, 60,9 % y 59,3 %.
+EVALUATE
+SUMMARIZECOLUMNS(
+    Modelos[model_label],
+    "MAE", [MAE de evaluación],
+    "RMSE", [RMSE de evaluación],
+    "MAPE (%)", [MAPE de evaluación]
+)
+
+// Selección sin hospedaje: mensaje explícito y sin punto falso en la dispersión.
+EVALUATE
+CALCULATETABLE(
+    ROW("Mensaje", [Estado de hospedaje], "Llegadas con hospedaje", [Llegadas con hospedaje]),
+    TREATAS({2025}, Calendario[year])
+)
+
+// Fuera del período evaluado: mensaje de cobertura.
+EVALUATE
+CALCULATETABLE(
+    ROW("Mensaje", [Estado de modelos]),
+    TREATAS({2019}, Calendario[year]),
+    TREATAS({"lstm-catch22-contexto-w24"}, Modelos[model_id])
+)

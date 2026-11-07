@@ -1,8 +1,25 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
   "name": "7ae7283f2a8b4b668889",
-  "displayName": "Página 1",
-  "displayOption": "FitToPage",
-  "height": 720,
-  "width": 1280
+  "displayName": "Llegadas y mercados",
+  "displayOption": "FitToWidth",
+  "height": 1080,
+  "width": 1280,
+  "visualInteractions": [
+    {
+      "source": "88c8af3689835bd26b02",
+      "target": "a1179305634011f679ed",
+      "type": "NoFilter"
+    },
+    {
+      "source": "4b19faa7236096e48039",
+      "target": "a1179305634011f679ed",
+      "type": "NoFilter"
+    },
+    {
+      "source": "88c8af3689835bd26b02",
+      "target": "4b19faa7236096e48039",
+      "type": "DataFilter"
+    }
+  ]
 }

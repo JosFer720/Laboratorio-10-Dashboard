@@ -1,0 +1,50 @@
+{
+  "name": "nota_error",
+  "position": {
+    "x": 24,
+    "y": 1016,
+    "width": 1232,
+    "height": 54,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "V8: barras sobre cero = sobreestimación; bajo cero = subestimación. Los paneles comparten escala. La tabla y V8 conservan los tres modelos; el selector de modelo solo cambia V7.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "No hay intervalos de predicción en los resultados fuente, por lo que no se presenta un margen de incertidumbre inventado.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

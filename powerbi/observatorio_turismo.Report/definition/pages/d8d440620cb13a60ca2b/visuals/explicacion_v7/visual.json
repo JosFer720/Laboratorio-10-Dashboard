@@ -1,0 +1,50 @@
+{
+  "name": "explicacion_v7",
+  "position": {
+    "x": 24,
+    "y": 628,
+    "width": 1232,
+    "height": 52,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Azul continuo: llegadas observadas una sola vez por mes. Naranja discontinuo: estimación del modelo elegido. Selecciona un mes para ver sus errores abajo.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Los tres modelos se comparan sobre la misma serie y los mismos 63 meses, de abril de 2021 a junio de 2026; no son pronósticos futuros.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

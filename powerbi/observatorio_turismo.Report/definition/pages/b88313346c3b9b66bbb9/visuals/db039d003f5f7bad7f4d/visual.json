@@ -1,0 +1,50 @@
+{
+  "name": "db039d003f5f7bad7f4d",
+  "position": {
+    "x": 24,
+    "y": 918,
+    "width": 1232,
+    "height": 90,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Las barras comparan los mercados de la región; las líneas muestran su evolución. América del Sur, Europa y Resto del mundo son agregados.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Volver conserva el recorrido anterior. Restablecer vista limpia los filtros y regresa a Llegadas y mercados. Guatemala está en cero desde 2023 en la fuente.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

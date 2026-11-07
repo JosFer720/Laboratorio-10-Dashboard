@@ -1,0 +1,74 @@
+{
+  "name": "glosario_metricas",
+  "position": {
+    "x": 788,
+    "y": 862,
+    "width": 468,
+    "height": 146,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "MAE: diferencia absoluta media, en visitantes.",
+                    "textStyle": {
+                      "fontSize": "10.5pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "RMSE: error en visitantes que pesa más los fallos grandes.",
+                    "textStyle": {
+                      "fontSize": "10.5pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "MAPE: error absoluto medio como porcentaje de lo observado. Menor es mejor; no garantiza aciertos futuros.",
+                    "textStyle": {
+                      "fontSize": "10.5pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Las métricas corresponden a los 63 meses completos; los filtros de V7 no las recalculan.",
+                    "textStyle": {
+                      "fontSize": "10.5pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

@@ -1,0 +1,200 @@
+{
+  "name": "tabla_metricas",
+  "position": {
+    "x": 788,
+    "y": 692,
+    "width": 468,
+    "height": 162,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Modelos"
+                    }
+                  },
+                  "Property": "model_label"
+                }
+              },
+              "queryRef": "Modelos.model_label",
+              "nativeQueryRef": "model_label",
+              "active": true,
+              "displayName": "Modelo"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Predicciones",
+                      "Schema": "extension"
+                    }
+                  },
+                  "Property": "MAE de evaluación"
+                }
+              },
+              "queryRef": "extension.Predicciones.MAE de evaluación",
+              "nativeQueryRef": "MAE de evaluación",
+              "active": true,
+              "displayName": "MAE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Predicciones",
+                      "Schema": "extension"
+                    }
+                  },
+                  "Property": "RMSE de evaluación"
+                }
+              },
+              "queryRef": "extension.Predicciones.RMSE de evaluación",
+              "nativeQueryRef": "RMSE de evaluación",
+              "active": true,
+              "displayName": "RMSE"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Predicciones",
+                      "Schema": "extension"
+                    }
+                  },
+                  "Property": "MAPE de evaluación"
+                }
+              },
+              "queryRef": "extension.Predicciones.MAPE de evaluación",
+              "nativeQueryRef": "MAPE de evaluación",
+              "active": true,
+              "displayName": "MAPE (%)"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Evaluación completa · tres modelos comparables'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#1F2933'"
+                    }
+                  }
+                }
+              }
+            },
+            "titleWrap": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "showFilterRestatementButton": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "showFocusModeButton": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "showOptionsMenu": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "grid": [
+        {
+          "properties": {
+            "textSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

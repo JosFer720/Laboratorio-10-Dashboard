@@ -1,0 +1,110 @@
+{
+  "name": "limitaciones",
+  "position": {
+    "x": 24,
+    "y": 660,
+    "width": 1232,
+    "height": 300,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "LÍMITES QUE CAMBIAN LA LECTURA",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Guatemala aparece en cero desde enero de 2023 en la fuente. Esa ruptura afecta su serie y el peso regional; no se atribuye a un cambio real de mercado.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Hospedaje tiene otro universo: incluye huéspedes residentes y no residentes. Solo coincide temporalmente con llegadas en 2022–2024; una asociación no demuestra causalidad.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• La ocupación de noviembre de 2023 (41 %) se conserva como fue publicada. El índice de enero de 2023 presenta diferencias de redondeo entre boletines; se conserva el de 2023.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• Las predicciones son nacionales y no se reparten por país. El observado se almacena una vez por mes para evitar triplicarlo entre modelos.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• No hay intervalos de predicción, datos en tiempo real ni estimaciones nuevas posteriores a junio de 2026. Las métricas describen 63 meses históricos, no una garantía futura.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "• No se reentrenan modelos, no se incluyen resultados por subdestino del Laboratorio 11 y no se atribuyen causas que los datos no permiten establecer.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

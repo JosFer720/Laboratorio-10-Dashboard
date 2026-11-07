@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "b5c62d7445d4499f4fcc",
+  "displayName": "Temporadas y hospedaje",
+  "displayOption": "FitToWidth",
+  "height": 1080,
+  "width": 1280,
+  "visualInteractions": [
+    {
+      "source": "filtro_mercado",
+      "target": "4eca71e6ed45a075d88b",
+      "type": "NoFilter"
+    },
+    {
+      "source": "filtro_mercado",
+      "target": "c1cb095e0fa0eae39f3f",
+      "type": "NoFilter"
+    },
+    {
+      "source": "filtro_mercado",
+      "target": "estado_hospedaje",
+      "type": "NoFilter"
+    },
+    {
+      "source": "v3_estacionalidad",
+      "target": "4eca71e6ed45a075d88b",
+      "type": "DataFilter"
+    },
+    {
+      "source": "v3_estacionalidad",
+      "target": "c1cb095e0fa0eae39f3f",
+      "type": "DataFilter"
+    },
+    {
+      "source": "4eca71e6ed45a075d88b",
+      "target": "c1cb095e0fa0eae39f3f",
+      "type": "DataFilter"
+    }
+  ]
+}

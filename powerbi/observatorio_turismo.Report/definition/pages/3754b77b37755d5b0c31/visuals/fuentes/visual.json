@@ -1,0 +1,86 @@
+{
+  "name": "fuentes",
+  "position": {
+    "x": 24,
+    "y": 314,
+    "width": 600,
+    "height": 310,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "FUENTES Y COBERTURA",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Llegadas: registros del Instituto Guatemalteco de Migración y estimaciones de flujos terrestres de INGUAT, enero de 2009 a junio de 2026. Son turistas y excursionistas por residencia agrupada.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Hospedaje: boletines anuales de ocupación hotelera de INGUAT, enero de 2022 a diciembre de 2024. Es un indicador nacional; no hay ocupación por mercado.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Modelos: resultados ya producidos de LSTM catch22 con ventana 24, Prophet y ARIMA(1,1,1). Entrenamiento hasta marzo de 2021; evaluación abril de 2021 a junio de 2026.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Los cuatro CSV y la procedencia completa están en data/README.md. Referencia de comparación: lab10-final, commit 29a091d.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

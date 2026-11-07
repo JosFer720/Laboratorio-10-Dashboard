@@ -1,0 +1,89 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "b88313346c3b9b66bbb9",
+  "displayName": "Detalle de región",
+  "displayOption": "FitToWidth",
+  "height": 1080,
+  "width": 1280,
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "a3f9c2d71b64e08a5c12",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Origenes"
+              }
+            },
+            "Property": "origin_region"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "o",
+              "Entity": "Origenes",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "o"
+                          }
+                        },
+                        "Property": "origin_region"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'América Central'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "Drillthrough"
+      }
+    ]
+  },
+  "pageBinding": {
+    "name": "b7d41e6a90c3f2851d07",
+    "type": "Drillthrough",
+    "parameters": [
+      {
+        "name": "Param_Region",
+        "boundFilter": "a3f9c2d71b64e08a5c12",
+        "fieldExpr": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Origenes"
+              }
+            },
+            "Property": "origin_region"
+          }
+        }
+      }
+    ],
+    "acceptsFilterContext": "None"
+  },
+  "visibility": "HiddenInViewMode",
+  "type": "Drillthrough"
+}

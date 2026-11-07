@@ -1,0 +1,50 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "d8d440620cb13a60ca2b",
+  "displayName": "Predicciones y modelos",
+  "displayOption": "FitToWidth",
+  "height": 1080,
+  "width": 1280,
+  "visualInteractions": [
+    {
+      "source": "filtro_modelo",
+      "target": "v8_error_mensual",
+      "type": "NoFilter"
+    },
+    {
+      "source": "filtro_modelo",
+      "target": "tabla_metricas",
+      "type": "NoFilter"
+    },
+    {
+      "source": "filtro_anio",
+      "target": "tabla_metricas",
+      "type": "NoFilter"
+    },
+    {
+      "source": "filtro_mes",
+      "target": "tabla_metricas",
+      "type": "NoFilter"
+    },
+    {
+      "source": "v7_observado_estimado",
+      "target": "tabla_metricas",
+      "type": "NoFilter"
+    },
+    {
+      "source": "v8_error_mensual",
+      "target": "tabla_metricas",
+      "type": "NoFilter"
+    },
+    {
+      "source": "v7_observado_estimado",
+      "target": "v8_error_mensual",
+      "type": "DataFilter"
+    },
+    {
+      "source": "v8_error_mensual",
+      "target": "v7_observado_estimado",
+      "type": "NoFilter"
+    }
+  ]
+}

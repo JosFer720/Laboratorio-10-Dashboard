@@ -1,0 +1,62 @@
+{
+  "name": "enlaces",
+  "position": {
+    "x": 24,
+    "y": 982,
+    "width": 1232,
+    "height": 84,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "CONSULTA DE LAS FUENTES",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "INGUAT: inguat.gob.gt/es/recursos/informacion-estadistica/ocupacion-hotelera/ · Datos y artefactos: github.com/JosFer720/Laboratorio-10-Dashboard",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "La página activa queda resaltada arriba. Restablecer vista recupera los filtros iniciales; las fuentes y las limitaciones se mantienen visibles.",
+                    "textStyle": {
+                      "fontSize": "10pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

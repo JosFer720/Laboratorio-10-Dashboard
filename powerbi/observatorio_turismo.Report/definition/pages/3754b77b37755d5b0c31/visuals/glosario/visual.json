@@ -1,0 +1,98 @@
+{
+  "name": "glosario",
+  "position": {
+    "x": 656,
+    "y": 314,
+    "width": 600,
+    "height": 310,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "GLOSARIO",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Llegadas: registros agregados de turistas y excursionistas; no equivalen a personas únicas.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Mercado: país o agregado de residencia. Región: agrupación de mercados; Europa, América del Sur y Resto del mundo no son países individuales.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Ocupación: habitaciones-noche ocupadas ÷ disponibles; se pondera por habitaciones al combinar meses.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Participación: parte del total seleccionado. Error: estimado − observado; negativo indica subestimación.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "MAE: error absoluto medio. RMSE: da más peso a errores grandes. MAPE: error absoluto medio porcentual.",
+                    "textStyle": {
+                      "fontSize": "11pt",
+                      "color": "#1F2933",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}

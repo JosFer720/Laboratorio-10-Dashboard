@@ -1,0 +1,50 @@
+{
+  "name": "guia",
+  "position": {
+    "x": 24,
+    "y": 776,
+    "width": 1232,
+    "height": 126,
+    "z": 100,
+    "tabOrder": 100
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Cómo explorar",
+                    "textStyle": {
+                      "fontSize": "12pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Usa los botones del encabezado. En las páginas de análisis, elige años, meses y mercado o modelo. La franja de filtros muestra la selección activa. Haz clic en un dato para filtrar otra gráfica; Restablecer vista limpia las selecciones y recupera el estado inicial. En Desktop, los botones se activan con Ctrl + clic.",
+                    "textStyle": {
+                      "fontSize": "12pt",
+                      "color": "#5B6573",
+                      "fontFamily": "Segoe UI"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json"
+}
