@@ -14,6 +14,16 @@ La actualización terminó correctamente el 5 de noviembre de 2026. Se cargaron 
 
 El informe tiene seis páginas: Inicio, Llegadas y mercados, Temporadas y hospedaje, Predicciones y modelos, Sobre los datos y una página de detalle de región a países que no aparece entre los botones. Las cinco primeras se recorren con los botones del encabezado. El diseño previsto está en [bosquejo.png](../docs/lab12/bosquejo.png).
 
+La página **Temporadas y hospedaje** tiene una matriz de año por mes con formato condicional en azules, que muestra las llegadas de cada mes.
+
+La página **Llegadas y mercados** también tiene gráficos pequeños, uno por región, con el peso de cada región en las llegadas de cada año. Usan la medida `Peso de la región` de la tabla `Calendario`:
+
+```DAX
+Peso de la región = DIVIDE([Llegadas], CALCULATE([Llegadas], REMOVEFILTERS(Origenes)))
+```
+
+Con clic derecho sobre una región y Obtener detalles se llega a la página de detalle con sus mercados.
+
 La página **Llegadas y mercados** incluye una línea temporal con la jerarquía año > trimestre > mes y barras por mercado de origen. La selección de un período en la primera visualización filtra la segunda. Ambas usan la medida:
 
 ```DAX
