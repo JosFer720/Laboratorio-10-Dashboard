@@ -14,7 +14,20 @@ La actualización terminó correctamente el 5 de noviembre de 2026. Se cargaron 
 
 El informe tiene seis páginas: Inicio, Llegadas y mercados, Temporadas y hospedaje, Predicciones y modelos, Sobre los datos y una página de detalle de región a países que no aparece entre los botones. Las cinco primeras se recorren con los botones del encabezado. El diseño previsto está en [bosquejo.png](../docs/lab12/bosquejo.png).
 
-La página **Temporadas y hospedaje** tiene una matriz de año por mes con formato condicional en azules, que muestra las llegadas de cada mes.
+La página **Temporadas y hospedaje** presenta dos vistas complementarias y mantiene el estilo visual del informe:
+
+- **Ocupación hotelera por mes**: gráfico de columnas con `Calendario[month_name]` y la medida `Ocupación hotelera` en formato porcentual.
+- **Llegadas vs. ocupación hotelera (2022–2024)**: gráfico de dispersión con la ocupación en el eje X, `Llegadas` en el eje Y y `Calendario[year_month]` como detalle. La cobertura queda limitada a los años disponibles en Hospedaje y la relación se interpreta únicamente de forma descriptiva, sin afirmar causalidad.
+
+La tasa agregada se calcula a partir de habitaciones, no sumando porcentajes publicados:
+
+```DAX
+Ocupación hotelera =
+DIVIDE(
+    SUM(Hospedaje[rooms_occupied]),
+    SUM(Hospedaje[rooms_available])
+)
+```
 
 La página **Llegadas y mercados** también tiene gráficos pequeños, uno por región, con el peso de cada región en las llegadas de cada año. Usan la medida `Peso de la región` de la tabla `Calendario`:
 
