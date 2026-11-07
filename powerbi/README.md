@@ -2,7 +2,7 @@
 
 ## Versión de Power BI Desktop
 
-El informe se actualizó y guardó con Power BI Desktop `2.159.1231.0 (64 bits)` en Windows.
+La última versión de Desktop documentada para el archivo recibido es `2.159.1231.0 (64 bits)` en Windows. Los cambios de predicciones, controles y navegación se incorporaron después mediante los archivos PBIR, conservando el modelo importado. Esta última edición todavía no se abrió ni guardó en Desktop; la revisión de ejecución debe completarse allí.
 
 ## Resultados comprobados en Desktop
 
@@ -13,6 +13,8 @@ La actualización terminó correctamente el 5 de noviembre de 2026. Se cargaron 
 - observado de diciembre de 2025: `365573.0218067979`, mostrado como `365,573.02`, sin variar al seleccionar uno o todos los modelos.
 
 El informe tiene seis páginas: Inicio, Llegadas y mercados, Temporadas y hospedaje, Predicciones y modelos, Sobre los datos y una página de detalle de región a países que no aparece entre los botones. Las cinco primeras se recorren con los botones del encabezado. El diseño previsto está en [bosquejo.png](../docs/lab12/bosquejo.png).
+
+La definición actual contiene las ocho visualizaciones. Se recuperó la matriz V3, que había sido reemplazada por la dispersión V6. El `.pbix` y los archivos de `observatorio_turismo.Report/` contienen el mismo informe; el modelo importado mantiene exactamente el mismo SHA-256 que la versión recibida. La revisión y sus límites están en [revision_informe.md](../docs/lab12/revision_informe.md).
 
 La página **Temporadas y hospedaje** presenta dos vistas complementarias y mantiene el estilo visual del informe:
 
@@ -43,9 +45,29 @@ La página **Llegadas y mercados** incluye una línea temporal con la jerarquía
 Llegadas = SUM(Llegadas[arrivals])
 ```
 
+## Predicciones y modelos
+
+V7 compara el observado nacional en azul continuo con el estimado del modelo elegido en naranja discontinuo. El selector empieza en LSTM catch22 y solo afecta V7. Si se limpia o se selecciona más de un modelo, no se suman estimaciones de modelos diferentes y aparece la indicación de elegir uno.
+
+V8 muestra `estimado − observado` por mes en tres paneles, uno por modelo, con barras naranjas y la misma escala. Una barra negativa indica subestimación. La selección de un mes de V7 filtra V8. La tabla mantiene MAE, RMSE y MAPE de los tres modelos sobre los mismos 63 meses de abril de 2021 a junio de 2026. El filtro temporal no recalcula esas métricas históricas. La etiqueta de evaluación histórica, no pronóstico, aparece en la página.
+
+Las medidas específicas del informe están en `observatorio_turismo.Report/definition/reportExtensions.json`; las referencias de los visuales usan el esquema `extension`. `Observado histórico` suma `Observados[observed]`, con una fila por mes; nunca se usa la suma del observado repetido en Predicciones. Las fórmulas, las equivalencias con Dash y el tratamiento de filtros se describen en [predicciones_y_navegacion.md](../docs/lab12/predicciones_y_navegacion.md).
+
+## Filtros y navegación
+
+Los cinco botones del encabezado enlazan las páginas principales y resaltan en azul la página activa. El detalle de región se abre con clic derecho desde los mercados o los paneles de regiones y tiene un botón Volver. En Desktop, los botones se activan con Ctrl + clic.
+
+Los segmentadores de años y meses se sincronizan entre las tres páginas de análisis. Mercado se sincroniza entre Llegadas y mercados y Temporadas y hospedaje; solo afecta llegadas, porque hospedaje y predicciones son nacionales. Cada página muestra una tarjeta con los filtros activos. Las páginas de análisis agregan mensajes para selecciones sin datos.
+
+Restablecer vista aplica un marcador que limpia años, meses, mercados y selecciones entre gráficos, recupera el detalle anual de V1 y deja LSTM como modelo inicial. Mantiene la página actual; desde el detalle vuelve a Llegadas y mercados. La página Sobre los datos reúne las fuentes, el glosario y las limitaciones.
+
 ## Abrir el informe
 
-La definición editable está en `observatorio_turismo.pbip`, con el modelo en `observatorio_turismo.SemanticModel/model.bim` y el informe en `observatorio_turismo.Report/`. El archivo actualizado para continuar el trabajo está en `observatorio_turismo.pbix`.
+Abre primero `observatorio_turismo.pbix` en Windows. Conserva los datos importados y la definición actual del informe. Si necesitas actualizar las fuentes, cambia `pCarpetaDatos` como se indica abajo y pulsa Actualizar.
+
+Para comprobar esta edición, recorre las seis páginas, ejecuta `comprobaciones_finales.dax` en la vista de consultas DAX y prueba los enlaces V1 → V2, V3 → V5 y V7 → V8, el detalle de región con regreso, los filtros sincronizados y Restablecer vista. Incluye una selección de 2025 en hospedaje para comprobar el mensaje sin datos. Guarda en Desktop y registra cualquier diferencia. Las pruebas comparativas completas siguen [protocolo_pruebas.md](../docs/lab12/protocolo_pruebas.md).
+
+La alternativa editable es `observatorio_turismo.pbip`, con el modelo en `observatorio_turismo.SemanticModel/model.bim` y el informe completo en `observatorio_turismo.Report/`. Para preparar una copia con la ruta de datos de otro equipo:
 
 En Windows, desde la raíz del repositorio:
 
@@ -83,6 +105,14 @@ python scripts/verificar_powerbi.py
 ```
 
 Los resultados registrados están en [validacion_fuentes.json](../docs/lab12/validacion_fuentes.json). Esa verificación no ejecuta Power Query ni DAX y no sustituye la comprobación del `.pbix`.
+
+La integridad del informe y su correspondencia con el `.pbix` se revisan sin dependencias adicionales con:
+
+```powershell
+python scripts/verificar_informe_powerbi.py
+```
+
+La auditoría opcional del modelo importado usa `pbixray==0.15.5`: después de instalarlo, ejecuta `python scripts/auditar_modelo_powerbi.py`. Comprueba las predicciones y llegadas almacenadas frente a los CSV y recalcula las métricas. Los resultados están en [validacion_modelos_pbix.json](../docs/lab12/validacion_modelos_pbix.json). Tampoco ejecuta las medidas nuevas ni renderiza los visuales.
 
 ## Tema
 

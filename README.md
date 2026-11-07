@@ -167,13 +167,14 @@ Comprueba el mensaje sin versión, publica una versión válida, introduce una c
 
 ## Versión en Power BI
 
-El informe `powerbi/observatorio_turismo.pbix` usa los mismos CSV de `data/`, con el modelo de datos, el tema, las páginas con su navegación y las visualizaciones enlazadas de llegadas y mercados. El proyecto `powerbi/observatorio_turismo.pbip` contiene la preparación de los datos y el modelo. No usa datos institucionales. Las instrucciones para preparar la ruta local, abrirlo, comprobarlo y registrar la versión de Desktop están en [powerbi/README.md](powerbi/README.md).
+El informe `powerbi/observatorio_turismo.pbix` usa los mismos CSV de `data/` y contiene ocho visualizaciones, seis páginas, filtros sincronizados, restablecimiento y comparación de los tres modelos. El proyecto `powerbi/observatorio_turismo.pbip` conserva el informe editable y la preparación del modelo. No usa datos institucionales. La última edición se comprobó en su estructura y contra los datos importados; su ejecución en Desktop está pendiente. Las instrucciones para abrirlo, cambiar rutas y comprobarlo están en [powerbi/README.md](powerbi/README.md).
 
 | Ruta | Contenido |
 |---|---|
 | `powerbi/observatorio_turismo.pbip` | Proyecto editable del modelo y del informe. |
 | `powerbi/observatorio_turismo.SemanticModel/model.bim` | Consultas Power Query, tablas, jerarquías y relaciones. |
 | `powerbi/comprobaciones.dax` | Controles para ejecutar después de actualizar en Desktop. |
+| `powerbi/comprobaciones_finales.dax` | Definiciones y controles de las medidas de predicciones, métricas y mensajes. |
 | `powerbi/tema_observatorio.json` | Tema con la paleta y las fuentes del tablero. |
 | `data/model_predictions_s0.csv` | Predicciones de los tres modelos: valor observado y estimado por mes y modelo. |
 | `data/model_metrics_s0.csv` | Métricas MAE, RMSE y MAPE de cada modelo y su período de evaluación. |

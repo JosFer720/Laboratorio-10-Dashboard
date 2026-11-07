@@ -1,6 +1,6 @@
 # Modelo de datos del informe en Power BI
 
-La definición del modelo está preparada en `powerbi/observatorio_turismo.SemanticModel/model.bim`. Las consultas Power Query, las tablas, las relaciones, las jerarquías y una medida para el observado nacional forman parte del proyecto `powerbi/observatorio_turismo.pbip`. El informe incluye una página vacía y una copia del tema de colores existente.
+La definición del modelo está preparada en `powerbi/observatorio_turismo.SemanticModel/model.bim`. Las consultas Power Query, las tablas, las relaciones, las jerarquías y las medidas existentes del modelo forman parte del proyecto `powerbi/observatorio_turismo.pbip`. El informe editable está sincronizado con las seis páginas del `.pbix` y conserva el tema de colores existente.
 
 El modelo se preparó primero como proyecto y después se actualizó y guardó en Power BI Desktop 2.159.1231.0 en Windows, en `powerbi/observatorio_turismo.pbix`. La sintaxis M y los metadatos del informe se comprobaron por separado, y la carga, las relaciones y las consultas DAX se comprobaron en Desktop, como se detalla al final. El procedimiento completo está en [el README de Power BI](../../powerbi/README.md).
 
@@ -86,3 +86,5 @@ Esa tabla solo recibe filtros del calendario. Elegir uno, dos o tres modelos no 
 Las 17 expresiones y particiones M pasaron el analizador de sintaxis `@microsoft/powerquery-parser` 4.0.1. Los siete archivos JSON con esquema del proyecto y del informe pasaron los esquemas oficiales de Microsoft. Estas comprobaciones no ejecutan el motor M ni certifican la deserialización del modelo TMSL en Desktop.
 
 En Desktop se ejecutó Actualizar y las consultas de [comprobaciones.dax](../../powerbi/comprobaciones.dax). El total histórico fue 46711912.89, el máximo fue diciembre de 2019 con 449114.07 y el observado de diciembre de 2025 fue 365573.0218067979 con uno y con todos los modelos. Los indicadores coinciden con [resultados_esperados.md](resultados_esperados.md); las diferencias de representación binaria se comparan con tolerancia, nunca redondeando la fuente.
+
+La revisión posterior de predicciones y navegación conserva el contenido binario de `DataModel` sin cambios. Las doce medidas nuevas pertenecen al informe, en `definition/reportExtensions.json`, y no alteran las tablas ni las relaciones. La auditoría del caché del `.pbix` confirma 189 predicciones, 63 observados mensuales y las métricas esperadas; las fórmulas nuevas y los visuales aún requieren ejecución en Desktop. Véanse [predicciones_y_navegacion.md](predicciones_y_navegacion.md) y [revision_informe.md](revision_informe.md).

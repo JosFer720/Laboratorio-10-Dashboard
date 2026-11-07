@@ -1,0 +1,56 @@
+{
+  "alcance": "Revisión estructural; ejecución y revisión visual en Power BI Desktop no realizadas en esta sesión.",
+  "paginas": 6,
+  "visualizaciones_principales": 8,
+  "marcadores": 6,
+  "medidas_de_informe": 12,
+  "referencias_validas": true,
+  "objetos_superpuestos": 0,
+  "pbir_y_pbix_coinciden": true,
+  "modelo_importado_conservado": true,
+  "sha256_modelo": "e0a04f56d8809dbe7b72ac6a48148ae3d59074fab298bab47bf135ecc3806e63",
+  "sha256_pbix": "568802e996433dfec57882d42880ff9e24a8a6004e546de35f5f024869afb024",
+  "bytes_pbix": 281104,
+  "graficos": {
+    "V1": {
+      "pagina": "Llegadas y mercados",
+      "nombre": "88c8af3689835bd26b02",
+      "tipo": "lineChart"
+    },
+    "V2": {
+      "pagina": "Llegadas y mercados",
+      "nombre": "4b19faa7236096e48039",
+      "tipo": "clusteredBarChart"
+    },
+    "V3": {
+      "pagina": "Temporadas y hospedaje",
+      "nombre": "v3_estacionalidad",
+      "tipo": "pivotTable"
+    },
+    "V4": {
+      "pagina": "Llegadas y mercados",
+      "nombre": "a1179305634011f679ed",
+      "tipo": "lineChart"
+    },
+    "V5": {
+      "pagina": "Temporadas y hospedaje",
+      "nombre": "4eca71e6ed45a075d88b",
+      "tipo": "clusteredColumnChart"
+    },
+    "V6": {
+      "pagina": "Temporadas y hospedaje",
+      "nombre": "c1cb095e0fa0eae39f3f",
+      "tipo": "scatterChart"
+    },
+    "V7": {
+      "pagina": "Predicciones y modelos",
+      "nombre": "v7_observado_estimado",
+      "tipo": "lineChart"
+    },
+    "V8": {
+      "pagina": "Predicciones y modelos",
+      "nombre": "v8_error_mensual",
+      "tipo": "clusteredColumnChart"
+    }
+  }
+}
