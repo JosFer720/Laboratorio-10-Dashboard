@@ -1,24 +1,16 @@
 {
-  "sistema": "macOS-26.6.2-x86_64-i386-64bit-Mach-O",
-  "python": "Python 3.12.14",
-  "power_bi_desktop": {
-    "error": {
-      "code": "HOST_UNAVAILABLE",
-      "message": "Power BI Desktop discovery could not run (UNSUPPORTED_OS); unable to determine whether an instance has this report open.",
-      "hint": "Resolve the reported discovery problem (see details.diagnostics), then retry.",
-      "retryable": false,
-      "details": {
-        "runningInstances": [],
-        "diagnostics": [
-          {
-            "code": "UNSUPPORTED_OS",
-            "message": "Power BI Desktop Bridge discovery is only supported on Windows."
-          }
-        ]
-      }
-    }
-  },
-  "navegador": "Se intentó Chrome; el control de navegación y lectura falló. No se registran clics ni tiempos de usuario.",
-  "alternativa_servicio": "El proyecto usa modelo local byPath; no hay un modelo publicado configurado para la vista previa del servicio.",
-  "metodo_dash_disponible": "Servidor real lab10-final, consultas HTTP y exportación de sus figuras."
+  "fecha": "2026-11-07",
+  "equipo": "Alienware m15 R3",
+  "procesador": "Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz",
+  "memoria_gb": 16,
+  "sistema": "Windows 11 Home Single Language 26H2 (10.0.26300)",
+  "navegador_dash": "Google Chrome 156.0.8078.80",
+  "power_bi_desktop": "2.159.1231.0 (64 bits), Microsoft Store",
+  "python": "3.12.10",
+  "dash_referencia": "lab10-final (29a091d), dependencias de su requirements.txt",
+  "pbix": {
+    "archivo": "powerbi/observatorio_turismo.pbix",
+    "bytes": 297159,
+    "guardado_en_desktop": "2026-11-07"
+  }
 }

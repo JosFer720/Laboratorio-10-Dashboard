@@ -1,7 +1,7 @@
 {
-  "fecha_local": "2026-11-07T16:01:07.290072-06:00",
+  "fecha_local": "2026-11-07T20:06:18.262925-06:00",
   "metodo": "Callbacks HTTP reales del servidor Dash lab10-final; no son clics ni cronometraje de uso humano.",
-  "plataforma": "macOS-26.6.2-x86_64-i386-64bit",
+  "plataforma": "Windows-11-10.0.26300-SP0",
   "referencia": "29a091d",
   "pruebas": [
     {
@@ -12,7 +12,7 @@
         "total_2025_mostrado": "3.352.289"
       },
       "coincide": true,
-      "milisegundos_http_tarea": 41.74
+      "milisegundos_http_tarea": 35.118
     },
     {
       "prueba": 2,
@@ -26,7 +26,7 @@
         "regiones_al_regresar": 5
       },
       "coincide": true,
-      "milisegundos_http_tarea": 334.347
+      "milisegundos_http_tarea": 275.963
     },
     {
       "prueba": 3,
@@ -54,143 +54,142 @@
         ]
       },
       "coincide": true,
-      "milisegundos_http_tarea": 170.677
+      "milisegundos_http_tarea": 264.175
     }
   ],
   "indicador_llegadas_2024_mostrado": "3.274.436",
   "mensaje_sin_hospedaje": true,
   "rendimiento_http": {
     "muestras": 8,
-    "mediana_ms": 42.438,
-    "minimo_ms": 39.787,
-    "maximo_ms": 43.236
+    "mediana_ms": 34.407,
+    "minimo_ms": 24.695,
+    "maximo_ms": 48.159
   },
   "llamadas_http": [
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 41.528
+      "milisegundos_http": 35.021
     },
     {
       "salida": "market-share-chart.figure",
-      "milisegundos_http": 143.12
+      "milisegundos_http": 101.622
     },
     {
       "salida": "origin-filter.value",
-      "milisegundos_http": 1.877
+      "milisegundos_http": 24.503
     },
     {
       "salida": "v1-selection.data",
-      "milisegundos_http": 6.685
+      "milisegundos_http": 19.047
     },
     {
       "salida": "market-chart.figure",
-      "milisegundos_http": 22.94
+      "milisegundos_http": 24.672
     },
     {
       "salida": "origin-filter.value",
-      "milisegundos_http": 1.938
+      "milisegundos_http": 21.987
     },
     {
       "salida": "market-share-chart.figure",
-      "milisegundos_http": 157.06
+      "milisegundos_http": 83.703
     },
     {
       "salida": "arrivals-panel.hidden",
-      "milisegundos_http": 1.892
+      "milisegundos_http": 17.531
     },
     {
       "salida": "v7-model-selection.data",
-      "milisegundos_http": 2.404
+      "milisegundos_http": 17.301
     },
     {
       "salida": "model-evaluation-chart.figure",
-      "milisegundos_http": 23.831
+      "milisegundos_http": 29.774
     },
     {
       "salida": "model-errors-chart.figure",
-      "milisegundos_http": 29.003
+      "milisegundos_http": 34.823
     },
     {
       "salida": "v7-model-selection.data",
-      "milisegundos_http": 2.465
+      "milisegundos_http": 16.967
     },
     {
       "salida": "model-evaluation-chart.figure",
-      "milisegundos_http": 23.461
+      "milisegundos_http": 28.629
     },
     {
       "salida": "model-errors-chart.figure",
-      "milisegundos_http": 29.533
+      "milisegundos_http": 34.436
     },
     {
       "salida": "v7-model-selection.data",
-      "milisegundos_http": 2.539
+      "milisegundos_http": 19.8
     },
     {
       "salida": "model-evaluation-chart.figure",
-      "milisegundos_http": 24.19
+      "milisegundos_http": 27.593
     },
     {
       "salida": "model-errors-chart.figure",
-      "milisegundos_http": 30.24
+      "milisegundos_http": 35.795
     },
     {
       "salida": "seasonality-chart.figure",
-      "milisegundos_http": 48.269
+      "milisegundos_http": 42.841
     },
     {
       "salida": "occupancy-chart.figure",
-      "milisegundos_http": 36.778
+      "milisegundos_http": 46.056
     },
     {
       "salida": "arrivals-occupancy-chart.figure",
-      "milisegundos_http": 57.888
+      "milisegundos_http": 27.524
     },
     {
       "salida": "occupancy-chart.figure",
-      "milisegundos_http": 21.882
+      "milisegundos_http": 28.637
     },
     {
       "salida": "arrivals-panel.hidden",
-      "milisegundos_http": 1.895
+      "milisegundos_http": 25.129
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 43.63
+      "milisegundos_http": 24.99
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 43.145
+      "milisegundos_http": 48.159
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 43.117
+      "milisegundos_http": 46.801
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 42.025
+      "milisegundos_http": 34.721
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 42.851
+      "milisegundos_http": 32.396
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 41.351
+      "milisegundos_http": 32.598
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 43.236
+      "milisegundos_http": 24.695
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 39.787
+      "milisegundos_http": 41.463
     },
     {
       "salida": "arrivals-timeline.figure",
-      "milisegundos_http": 41.134
+      "milisegundos_http": 34.093
     }
   ],
-  "clics_y_tiempos_de_navegacion": "No medidos: el control del navegador no estuvo operativo.",
-  "power_bi_interactivo": "No ejecutado: el host Desktop requiere Windows y no hay un modelo publicado configurado para preview del servicio."
+  "alcance": "Control adicional del servidor de Dash; los clics y tiempos de uso se registran en resultados_pruebas.md."
 }

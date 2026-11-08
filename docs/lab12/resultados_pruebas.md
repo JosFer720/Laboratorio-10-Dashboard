@@ -1,45 +1,91 @@
 # Resultados de las pruebas
 
-Fecha: 7 de noviembre de 2026. Se ejecutó la referencia `lab10-final` en un worktree separado, con sus propios datos y sin modificarla. El servidor estuvo en `http://127.0.0.1:8051`. Las tres tareas se probaron mediante solicitudes reales al endpoint de callbacks de Dash. Esta es una prueba de integración del servidor, no una medición de navegación de una persona.
+Las tres pruebas de [protocolo_pruebas.md](protocolo_pruebas.md) se ejecutaron el 7 de noviembre de 2026 en un mismo equipo Windows, con los mismos CSV de `data/` y las mismas selecciones en las dos versiones: el tablero de Plotly Dash del tag `lab10-final` (commit `29a091d`) y `powerbi/observatorio_turismo.pbix` guardado en Power BI Desktop ese mismo día. Los valores esperados están en [resultados_esperados.md](resultados_esperados.md).
 
-## Prueba 1: máximo de llegadas de 2025
+## Entorno
 
-Se aplicaron enero a diciembre de 2025, todos los mercados y detalle mensual. El callback produjo «Diciembre de 2025», «365.573» y total anual «3.352.289». Coincide con la referencia. Tiempo de la solicitud de tarea: 41,740 ms.
+| Elemento | Valor |
+|---|---|
+| Equipo | Alienware m15 R3, Intel Core i7-10750H a 2,60 GHz, 16 GB de memoria |
+| Sistema operativo | Windows 11 Home Single Language, versión 26H2 (compilación 26300) |
+| Navegador para Dash | Google Chrome 156.0.8078.80 |
+| Power BI Desktop | 2.159.1231.0 (64 bits), instalado desde Microsoft Store |
+| Python para Dash | 3.12.10, con las dependencias de `requirements.txt` de `lab10-final` |
+
+El detalle está en [entorno_pruebas.json](entorno_pruebas.json).
+
+Experiencia previa de quien ejecutó las pruebas: ninguna con Plotly Dash ni con Power BI antes del curso.
+
+## Cómo se registró cada dato
+
+El resultado de cada prueba se leyó en la interfaz de cada versión y se guardó una captura en [capturas/](capturas/). Los clics se cuentan sobre la ruta mínima que describe el protocolo, con la regla del protocolo: cada selección, cambio de página, despliegue de un control o botón pulsado cuenta como un clic. Pasar el cursor para leer un valor no cuenta. Antes de cada prueba se volvió a la vista inicial: recargar la página en Dash y Restablecer vista en Power BI.
+
+Las pruebas se realizaron con una persona habituada a programar, pero que no había usado Plotly Dash ni Power BI antes del curso. Los tiempos de las tablas son aproximados.
+
+## Prueba 1: mes con más llegadas en 2025
+
+Pregunta: en 2025, con todos los mercados, ¿cuál fue el mes con más llegadas y cuántas hubo? Esperado: diciembre de 2025, con 365.573 llegadas.
+
+| Versión | Resultado obtenido | ¿Coincide? | Pasos | Clics | Tiempo aproximado (s) | Dificultades |
+|---|---|---|---|---|---|---|
+| Dash | Diciembre de 2025, 365.573; llegadas del periodo 3.352.289 | Sí | Desde: Enero de 2025; Hasta: Diciembre de 2025; leer la tarjeta Mes con más llegadas | 4 | 35 | Las listas de Desde y Hasta tienen 210 meses; conviene escribir en su buscador para llegar a 2025. |
+| Power BI | diciembre 2025, 365,573; llegadas del período 3,352,289 | Sí | Ir a Llegadas y mercados; desplegar Años; elegir 2025; leer las tarjetas Mes con más llegadas y Máximo mensual | 3 | 25 | La lista de años obliga a desplazarse hasta 2025. En el nivel anual V1 muestra un solo punto; el mes se lee en la tarjeta o bajando a mes. |
+
+Capturas: `capturas/dash_prueba1.png` y `capturas/powerbi_prueba1.png`.
 
 ## Prueba 2: región, país y regreso
 
-Se consultó el peso regional de 2025, se envió el evento de selección de América Central y se consultaron sus mercados. El servidor produjo 2.143.694 llegadas y 63,9 % para la región; El Salvador fue el primero, con 1.582.845 y 73,8 % de la región. El evento de regreso recuperó las cinco regiones. Coincide con la referencia. Tiempo de la secuencia HTTP: 334,347 ms.
+Pregunta: en 2025, ¿qué región aportó más llegadas y, dentro de ella, qué país aportó más y con qué participación? Después, volver a todas las regiones. Esperado: América Central, 2.143.694 (63,9 %); El Salvador, 1.582.845 (73,8 % de la región); al regresar se ven las cinco regiones.
 
-## Prueba 3: modelos y errores
+| Versión | Resultado obtenido | ¿Coincide? | Pasos | Clics | Tiempo aproximado (s) | Dificultades |
+|---|---|---|---|---|---|---|
+| Dash | América Central, 2.143.694 (63,9 % en el peso regional); El Salvador, 1.582.845 · 73,8 %; al pulsar Todos los mercados vuelven las cinco regiones | Sí | Periodo enero a diciembre de 2025; clic en el panel de América Central; leer Llegadas por mercado de origen; pulsar ← Todos los mercados | 6 | 60 | El panel de América Central está al final de la pestaña y hay que desplazarse para verlo. |
+| Power BI | América Central es la región de mayor peso en V4 (2.143.694 llegadas y 63,9 % con la misma medida en la vista de consultas DAX); en el detalle, El Salvador 1,582,845 y 73.8 % de la región; Volver regresa a Llegadas y mercados con 2025 conservado | Sí | Ir a Llegadas y mercados; elegir 2025; clic derecho sobre América Central en V4; Obtener detalles; Detalle de región; pasar el cursor por El Salvador; Volver | 7 | 75 | El detalle solo se descubre con clic derecho. En Desktop el botón Volver requiere Ctrl + clic. La información sobre herramientas rotula el país como «origin». |
 
-Se consultaron los tres modelos y sus errores. Los textos de MAPE fueron 29,2 %, 60,9 % y 59,3 %. LSTM tuvo el menor MAPE y error de diciembre de 2025 de -142130,70322635162, mostrado sin decimales como -142.131. El observado fue 365573,0218067979 con cada modelo. Tiempo de la secuencia HTTP: 170,677 ms.
+Guatemala aparece con cero desde 2023 en las dos versiones porque así viene en la fuente.
 
-## Controles adicionales
+Capturas: `capturas/dash_prueba2.png`, `capturas/powerbi_prueba2_region.png` y `capturas/powerbi_prueba2.png`.
 
-- Las consultas de las ocho visualizaciones respondieron correctamente.
-- Hospedaje en 2025 produjo el mensaje de falta de cobertura; no se imputaron ceros.
-- El resumen de llegadas de 2024 produjo «3.274.436».
-- Ocho solicitudes repetidas del callback temporal dieron mediana de 42,438 ms, mínimo de 39,787 y máximo de 43,236 ms.
-- Pasaron 320 pruebas del repositorio actual y 171 de la referencia de Dash. Los resultados se extrajeron de sus archivos JUnit.
-- El validador oficial de Power BI, versión 0.5.0, terminó con cero errores y cero advertencias después de corregir tema, propiedades de segmentadores y metadatos.
-- El modelo importado del PBIX conserva su contenido y sus métricas; el informe contiene ocho visualizaciones y quince medidas propias de informe.
+## Prueba 3: modelo con menor MAPE y su error en diciembre de 2025
 
-## Intentos interactivos y límites
+Pregunta: en la evaluación de abril de 2021 a junio de 2026, ¿qué modelo tiene el menor MAPE y cuál es su error en diciembre de 2025? Esperado: LSTM catch22 (ventana 24), 29,2 %; error −142.131; observado 365.573 con cualquier modelo.
 
-El control de Chrome presentó errores al navegar y leer la página. El intento nativo tampoco permitió continuar la interacción. Se pudo verificar el servidor, pero no se cuentan clics ni se asignan tiempos de uso humano. Las imágenes en `capturas/` son exportaciones de las figuras devueltas por el servidor, identificadas como tales; no son capturas de una sesión interactiva.
+| Versión | Resultado obtenido | ¿Coincide? | Pasos | Clics | Tiempo aproximado (s) | Dificultades |
+|---|---|---|---|---|---|---|
+| Dash | LSTM catch22 (ventana 24), MAPE 29,16 en la tabla y 29,2 % en la tarjeta; diciembre de 2025: observado 365.573, estimado 223.442, error −142.131 | Sí | Pestaña Predicciones y modelos; leer la tabla Comparación de los tres modelos; LSTM ya está elegido; pasar el cursor por diciembre de 2025 en el gráfico de errores | 1 | 40 | La tabla muestra el MAPE con dos decimales y la tarjeta con uno. |
+| Power BI | LSTM catch22 (ventana 24), 29.2 %; error de diciembre de 2025 −142,131; observado 365,573 con uno y con todos los modelos | Sí | Ir a Predicciones y modelos; leer la tabla de métricas; LSTM ya está elegido; clic en diciembre de 2025 en V7; pasar el cursor por la barra de LSTM en V8 | 2 | 50 | El eje mensual de V8 es categórico y no muestra los 63 meses a la vez; seleccionar el mes en V7 es la forma directa de llegar a diciembre de 2025. |
 
-Se instalaron y ejecutaron las herramientas oficiales de autoría de Power BI. La consulta de estado y el intento de apertura devolvieron `HOST_UNAVAILABLE` con diagnóstico `UNSUPPORTED_OS`: el puente de Desktop solo está disponible en Windows. El proyecto utiliza un modelo local y no tiene un modelo publicado configurado para la alternativa del servicio. No se ejecutaron DAX, filtros, marcadores ni capturas nativas de Power BI en esta sesión.
+Capturas: `capturas/dash_prueba3.png`, `capturas/dash_prueba3_tabla.png`, `capturas/powerbi_prueba3_v7.png` y `capturas/powerbi_prueba3.png`.
 
-Por lo tanto, el protocolo original de dos interfaces en el mismo equipo Windows no pudo completarse. No se considera aprobada la comparación de clics, apertura, actualización o respuesta visual. Los resultados de HTTP no reemplazan esas mediciones.
+## Verificación de indicadores entre versiones
 
-## Evidencia y reproducción
+| Indicador | Filtros | Dash | Power BI | Esperado |
+|---|---|---|---|---|
+| Llegadas de 2024 | Enero a diciembre de 2024, todos los mercados | 3.274.436 | 3.274.436 (3274435,995 sin redondear) | 3.274.436 |
+| MAPE LSTM catch22 (ventana 24) | Evaluación completa | 29,2 % (tabla: 29,16) | 29.2 % | 29,2 % |
+| MAPE Prophet | Evaluación completa | 60,9 % (tabla: 60,89) | 60.9 % | 60,9 % |
+| MAPE ARIMA(1,1,1) | Evaluación completa | 59,3 % (tabla: 59,30) | 59.3 % | 59,3 % |
+| Observado de diciembre de 2025 | Cualquier modelo | 365.573 | 365.573 con uno y con todos los modelos | 365.573 |
 
-`evidencia_http/pruebas_http.json` contiene los resultados y tiempos de cada llamada. Los archivos `.plotly.json` conservan las figuras recibidas. `resultado_suites.json`, `validacion_oficial_pbir.json`, `entorno_pruebas.json` y `validacion_modelos_pbix.json` registran las demás comprobaciones.
+No hay diferencias de valor. Las únicas diferencias son de presentación: Dash usa punto de miles y coma decimal, y Power BI usa la configuración regional del modelo, con coma de miles y punto decimal; la tabla de Dash muestra el MAPE con dos decimales. En Power BI las llegadas de 2024 se obtuvieron con la misma medida que alimenta las tarjetas, ejecutada en la vista de consultas DAX.
 
-Para repetir las consultas después de iniciar la referencia en el puerto 8051:
+## Rendimiento
+
+Todas las mediciones son del mismo equipo.
+
+| Medición | Dash (`lab10-final`) | Power BI Desktop |
+|---|---|---|
+| Apertura | Desde `python app.py` hasta que la página responde: 4,79 s, 2,59 s y 2,07 s (mediana 2,59 s); hasta servir el layout: mediana 2,70 s | Desde abrir el `.pbix` hasta que la página Inicio queda completa y estable: 32,2 s, 18,2 s y 18,0 s; la ventana principal aparece a los 13,6 s, 12,4 s y 12,1 s |
+| Respuesta al filtro de 2025 | Mediana 62 ms en 10 repeticiones (callbacks de la serie y de mercados) | 478 ms desde el primer hasta el último de los 21 visuales actualizados; el más lento fue V4, con 442 ms; la consulta DAX más larga, 27 ms |
+| Cambio de vista | Pestaña Predicciones y modelos: mediana 87 ms en 10 repeticiones | Página Temporadas y hospedaje: 484 ms para 19 visuales; el más lento fue V5, con 375 ms |
+| Tamaño | Código y CSV de la carpeta del tablero | `.pbix` final de 297.159 bytes |
+
+En Dash los tiempos son de las solicitudes al servidor local y no incluyen el dibujo de las figuras en el navegador; se repiten con `python scripts/medir_rendimiento_dash.py` y están en [rendimiento_dash.json](rendimiento_dash.json). En Power BI la apertura se midió con un script que registra cuándo la ventana del informe deja de cambiar, cerrando Desktop antes de cada repetición; la primera apertura incluye la carga inicial del programa. El filtro y el cambio de página se midieron con el Analizador de rendimiento de Desktop, exportado en [rendimiento_powerbi.json](rendimiento_powerbi.json). No se midió el tiempo de Actualizar en Power BI.
+
+## Control adicional del servidor de Dash
+
+Las tres tareas también se ejecutaron contra los callbacks HTTP del servidor `lab10-final`, sin la interfaz. Los tres resultados coinciden con los esperados, el resumen de 2024 devolvió «3.274.436» y la consulta de hospedaje para 2025 devolvió el mensaje de falta de cobertura sin imputar ceros. Ocho solicitudes repetidas del callback temporal tuvieron una mediana de 34,4 ms. Los resultados y las figuras recibidas están en [evidencia_http/](evidencia_http/); se repiten iniciando la referencia en el puerto 8051 y ejecutando:
 
 ```bash
 python scripts/pruebas_http_lab12.py --url http://127.0.0.1:8051
 ```
-
-Los pasos de interfaz siguen en `protocolo_pruebas.md`; sus casillas no se llenaron con observaciones no realizadas.

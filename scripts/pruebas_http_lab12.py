@@ -158,7 +158,7 @@ def run(url: str, output: Path):
     output.mkdir(parents=True, exist_ok=True)
     for name, figure in client.figures.items():
         if name.startswith("prueba"):
-            (output / f"{name}.plotly.json").write_text(json.dumps(figure, ensure_ascii=False), encoding="utf-8")
+            (output / f"{name}.plotly.json").write_text(json.dumps(figure, ensure_ascii=False), encoding="utf-8", newline="\n")
     result = {
         "fecha_local": datetime.now(ZoneInfo("America/Guatemala")).isoformat(),
         "metodo": "Callbacks HTTP reales del servidor Dash lab10-final; no son clics ni cronometraje de uso humano.",
@@ -166,10 +166,9 @@ def run(url: str, output: Path):
         "indicador_llegadas_2024_mostrado": total_2024, "mensaje_sin_hospedaje": True,
         "rendimiento_http": {"muestras": len(durations), "mediana_ms": statistics.median(durations), "minimo_ms": min(durations), "maximo_ms": max(durations)},
         "llamadas_http": client.calls,
-        "clics_y_tiempos_de_navegacion": "No medidos: el control del navegador no estuvo operativo.",
-        "power_bi_interactivo": "No ejecutado: el host Desktop requiere Windows y no hay un modelo publicado configurado para preview del servicio.",
+        "alcance": "Control adicional del servidor de Dash; los clics y tiempos de uso se registran en resultados_pruebas.md.",
     }
-    (output / "pruebas_http.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    (output / "pruebas_http.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     return result
 
 
