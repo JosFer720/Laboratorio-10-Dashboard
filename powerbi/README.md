@@ -2,7 +2,7 @@
 
 ## Versión de Power BI Desktop
 
-La última versión de Desktop documentada para el archivo recibido es `2.159.1231.0 (64 bits)` en Windows. Los cambios de predicciones, controles y navegación se incorporaron después mediante los archivos PBIR, conservando el modelo importado. Esta última edición todavía no se abrió ni guardó en Desktop; la revisión de ejecución debe completarse allí.
+El informe se guardó por última vez en Power BI Desktop `2.159.1231.0 (64 bits)`, instalado desde Microsoft Store en Windows 11, el 7 de noviembre de 2026. En esa sesión se ejecutaron las consultas de comprobación, se recorrieron las seis páginas, se corrigieron los problemas de presentación encontrados y se guardó el archivo. El detalle está en [revision_informe.md](../docs/lab12/revision_informe.md).
 
 ## Resultados comprobados en Desktop
 
@@ -14,7 +14,7 @@ La actualización terminó correctamente el 5 de noviembre de 2026. Se cargaron 
 
 El informe tiene seis páginas: Inicio, Llegadas y mercados, Temporadas y hospedaje, Predicciones y modelos, Sobre los datos y una página de detalle de región a países que no aparece entre los botones. Las cinco primeras se recorren con los botones del encabezado. El diseño previsto está en [bosquejo.png](../docs/lab12/bosquejo.png).
 
-La definición actual contiene las ocho visualizaciones. Se recuperó la matriz V3, que había sido reemplazada por la dispersión V6. El `.pbix` y los archivos de `observatorio_turismo.Report/` contienen el mismo informe; el modelo importado mantiene exactamente el mismo SHA-256 que la versión recibida. La revisión y sus límites están en [revision_informe.md](../docs/lab12/revision_informe.md).
+La definición actual contiene las ocho visualizaciones. Se recuperó la matriz V3, que había sido reemplazada por la dispersión V6. El `.pbix` y los archivos de `observatorio_turismo.Report/` contienen el mismo informe: la carpeta se sincroniza con lo que guarda Desktop y conserva el JSON con sangría para que los cambios se lean en Git. Al guardar, Desktop reescribe el modelo importado aunque los datos no cambien; su contenido se confirma con la auditoría contra los CSV. La revisión y sus límites están en [revision_informe.md](../docs/lab12/revision_informe.md).
 
 La página **Temporadas y hospedaje** presenta dos vistas complementarias y mantiene el estilo visual del informe:
 
@@ -67,7 +67,7 @@ Restablecer vista aplica un marcador que limpia años, meses, mercados y selecci
 
 Abre primero `observatorio_turismo.pbix` en Windows. Conserva los datos importados y la definición actual del informe. Si necesitas actualizar las fuentes, cambia `pCarpetaDatos` como se indica abajo y pulsa Actualizar.
 
-Para comprobar esta edición, recorre las seis páginas, ejecuta `comprobaciones_finales.dax` en la vista de consultas DAX y prueba los enlaces V1 → V2, V3 → V5 y V7 → V8, el detalle de región con regreso, los filtros sincronizados y Restablecer vista. Incluye una selección de 2025 en hospedaje para comprobar el mensaje sin datos. Guarda en Desktop y registra cualquier diferencia. Las pruebas comparativas completas siguen [protocolo_pruebas.md](../docs/lab12/protocolo_pruebas.md).
+Para comprobar el informe después de un cambio, ejecuta `comprobaciones.dax` y `comprobaciones_finales.dax` en la vista de consultas DAX, recorre las seis páginas y prueba los enlaces V1 → V2, V3 → V5 y V7 → V8, el detalle de región con regreso, los filtros sincronizados y Restablecer vista. Incluye una selección de 2025 en hospedaje para comprobar el mensaje sin datos. Los cambios al informe se hacen en Desktop; después de guardar, sincroniza `observatorio_turismo.Report/` con el `.pbix`, ejecuta la auditoría y `python -m pytest -q`. Las pruebas comparativas siguen [protocolo_pruebas.md](../docs/lab12/protocolo_pruebas.md) y sus resultados están en [resultados_pruebas.md](../docs/lab12/resultados_pruebas.md).
 
 La alternativa editable es `observatorio_turismo.pbip`, con el modelo en `observatorio_turismo.SemanticModel/model.bim` y el informe completo en `observatorio_turismo.Report/`. Para preparar una copia con la ruta de datos de otro equipo:
 
@@ -98,7 +98,7 @@ Los CSV que usa el informe están en la carpeta `data/` del repositorio y coinci
 - `model_predictions_s0.csv`
 - `model_metrics_s0.csv`
 
-Todas las lecturas usan el único parámetro de Power Query `pCarpetaDatos`. Para cambiarlo en un proyecto o `.pbix` abierto: Transformar datos > Administrar parámetros > `pCarpetaDatos`, selecciona la carpeta `data`, aplica y actualiza. El proyecto en Git deja ese parámetro vacío para evitar rutas personales. También puedes preparar una copia con `python scripts/preparar_powerbi.py --data-dir "C:\ruta\repositorio\data"`.
+Todas las lecturas usan el único parámetro de Power Query `pCarpetaDatos`. Para cambiarlo en un proyecto o `.pbix` abierto: Transformar datos > Administrar parámetros > `pCarpetaDatos`, selecciona la carpeta `data`, aplica y actualiza. En el proyecto editable el parámetro queda vacío; el `.pbix` guardado apunta a `C:/Lab12/Laboratorio-10-Dashboard/data`, una ruta sin datos personales, y se actualizó con ella el 7 de noviembre de 2026. También puedes preparar una copia con `python scripts/preparar_powerbi.py --data-dir "C:\ruta\repositorio\data"`.
 
 Para repetir la verificación de fuentes sin Desktop:
 
@@ -114,9 +114,9 @@ La integridad del informe y su correspondencia con el `.pbix` se revisan sin dep
 python scripts/verificar_informe_powerbi.py
 ```
 
-La auditoría opcional del modelo importado usa `pbixray==0.15.5`: después de instalarlo, ejecuta `python scripts/auditar_modelo_powerbi.py`. Comprueba las predicciones y llegadas almacenadas frente a los CSV y recalcula las métricas. Los resultados están en [validacion_modelos_pbix.json](../docs/lab12/validacion_modelos_pbix.json). Tampoco ejecuta las medidas nuevas ni renderiza los visuales.
+La auditoría opcional del modelo importado usa `pbixray==0.15.5`: después de instalarlo, ejecuta `python scripts/auditar_modelo_powerbi.py`. Comprueba las predicciones y llegadas almacenadas frente a los CSV y recalcula las métricas. Los resultados están en [validacion_modelos_pbix.json](../docs/lab12/validacion_modelos_pbix.json). No ejecuta las medidas del informe ni dibuja los visuales; eso se comprueba en Desktop. `verificar_informe_powerbi.py` exige que el modelo del `.pbix` sea el mismo que registró esta auditoría, así que después de guardar en Desktop hay que volver a ejecutarla.
 
-El validador oficial `@microsoft/powerbi-report-authoring-cli@0.5.0`, con el comando `validate powerbi/observatorio_turismo.Report`, terminó con cero errores y cero advertencias. Pasaron además 320 pruebas del repositorio actual, 171 de la referencia `lab10-final` y las tres tareas HTTP de Dash. El intento de abrir Desktop con la herramienta oficial devolvió `UNSUPPORTED_OS` en macOS. La evidencia y el alcance de cada comprobación se consultan en [resultados_pruebas.md](../docs/lab12/resultados_pruebas.md).
+En una revisión anterior, el validador oficial `@microsoft/powerbi-report-authoring-cli@0.5.0`, con el comando `validate powerbi/observatorio_turismo.Report`, terminó con cero errores y cero advertencias. Con el archivo guardado en Desktop pasaron las 320 pruebas del repositorio en Windows. La evidencia de cada comprobación se consulta en [resultados_pruebas.md](../docs/lab12/resultados_pruebas.md).
 
 ## Tema
 

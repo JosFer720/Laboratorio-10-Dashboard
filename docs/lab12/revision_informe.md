@@ -7,29 +7,32 @@ Se incorporaron predicciones, errores, métricas, navegación, filtros y textos 
 | Aspecto | Resultado comprobado |
 |---|---|
 | Ocho visualizaciones | V1 a V8 presentes, con matriz y dispersión en archivos distintos. |
-| Enlaces | Definidos V1 → V2, V3 → V5 y V7 → V8 por filtrado. |
+| Enlaces | V1 → V2, V3 → V5 y V7 → V8 por filtrado, ejercidos en Desktop. |
 | Jerarquía temporal | V1 conserva año, trimestre y mes y los controles de bajar y subir. |
-| Detalle | Región como parámetro de drillthrough desde V4, contexto temporal conservado, participación por país y botón de regreso. |
+| Detalle | Región como parámetro de drillthrough desde V4; en Desktop conservó 2025, mostró la participación por país y Volver regresó a Llegadas y mercados. |
 | Resumen | Tarjetas de total, máximo mensual y mes del máximo para resolver la primera tarea sin depender del nivel de V1. |
 | Controles | Año y mes sincronizados entre las tres páginas de análisis; mercado aplicado solo a las llegadas. |
-| Contexto y limpieza | Tarjeta de filtros en las seis páginas y seis marcadores con todos los estados. |
+| Contexto y limpieza | Tarjeta de filtros en las seis páginas y seis marcadores; Restablecer vista limpió años, selecciones entre gráficas y el modelo. |
+| Mensajes | Con 2025, Temporadas y hospedaje muestra el aviso de falta de hospedaje sin ceros; sin modelo elegido, V7 deja en blanco el estimado y pide elegir uno. |
 | Predicciones | V7 no suma estimaciones de modelos distintos; V8 y la tabla conservan la comparación de los tres modelos. |
 | Observado | 63 filas únicas en el modelo importado; ninguna medida del informe suma Predicciones[observed]. |
 | Métricas | MAE, RMSE y MAPE recalculados desde las 189 predicciones del propio `.pbix`, coincidentes con los CSV. |
-| Estructura | 115 archivos de definición PBIR. Validador oficial 0.5.0: cero errores y cero advertencias. Referencias válidas, sin objetos fuera del lienzo ni superpuestos. |
-| Datos | DataModel idéntico al commit recibido `a52f372`; el caché se puede leer y las llegadas y predicciones coinciden con los CSV. |
-| Pruebas de código | 320 pruebas del repositorio actual y 171 de la referencia Dash aprobadas; tres tareas HTTP correctas. |
+| Estructura | Referencias válidas, sin objetos fuera del lienzo ni superpuestos; la definición de la carpeta coincide con la guardada en el `.pbix`. |
+| Datos | El modelo guardado por Desktop se auditó contra los CSV: llegadas y predicciones coinciden y las métricas se recalculan igual. |
+| Pruebas de código | 320 pruebas del repositorio aprobadas en Windows. |
 
-Las comprobaciones estructurales se repiten con `python scripts/verificar_informe_powerbi.py`. Los resultados están en [revision_informe.json](revision_informe.json). La auditoría opcional del caché se repite con `python scripts/auditar_modelo_powerbi.py`, usando PBIXRay 0.15.5, y se guarda en [validacion_modelos_pbix.json](validacion_modelos_pbix.json).
-
-La revisión de distribución también comprobó los límites de los objetos y estimó el espacio de los textos a su tamaño declarado. Los esquemas de distribución usados para esa inspección no son capturas de Power BI ni se presentan como evidencia de ejecución.
+Las comprobaciones estructurales se repiten con `python scripts/verificar_informe_powerbi.py`. Los resultados están en [revision_informe.json](revision_informe.json). La auditoría del modelo importado se repite con `python scripts/auditar_modelo_powerbi.py`, usando PBIXRay 0.15.5, y se guarda en [validacion_modelos_pbix.json](validacion_modelos_pbix.json). La verificación exige que el modelo del `.pbix` sea el mismo que registró la auditoría.
 
 ## Alcance de la comprobación
 
-Los cambios se prepararon en macOS. No hubo una sesión de Power BI Desktop disponible para abrir esta edición, ejecutar las quince medidas de informe, revisar su apariencia real o guardar el archivo desde Desktop. La herramienta oficial devolvió `HOST_UNAVAILABLE` con diagnóstico `UNSUPPORTED_OS` al consultar y abrir Desktop. La versión `2.159.1231.0 (64 bits)` corresponde a la versión documentada antes de estos cambios. La conformidad del JSON y la lectura de DataModel no prueban que todas las interacciones se ejecuten correctamente en Desktop.
+El 7 de noviembre de 2026 el informe se abrió en Power BI Desktop 2.159.1231.0 (64 bits) en Windows 11. Abrió sin errores. Las consultas de [comprobaciones.dax](../../powerbi/comprobaciones.dax) y [comprobaciones_finales.dax](../../powerbi/comprobaciones_finales.dax) se ejecutaron contra el modelo abierto y todas coincidieron con [resultados_esperados.md](resultados_esperados.md): total de 46.711.912,89, máximo de diciembre de 2019 con 449.114, llegadas de 2024 y 2025, observado de diciembre de 2025 igual con uno o con todos los modelos, métricas y errores de los tres modelos, peso de América Central y participación de El Salvador. Después de las correcciones, el parámetro `pCarpetaDatos`, que conservaba la ruta personal del equipo donde se cargaron los datos el 5 de noviembre, se cambió a `C:/Lab12/Laboratorio-10-Dashboard/data` y se ejecutó Actualizar. Las ocho tablas se recargaron sin errores desde los CSV del repositorio y las consultas de comprobación dieron los mismos valores.
 
-En Windows falta comprobar esta edición con Actualizar y [comprobaciones_finales.dax](../../powerbi/comprobaciones_finales.dax), recorrer las seis páginas y ejercer los enlaces, el detalle, los segmentadores y cada marcador. Es necesario abrir y guardar el `.pbix` desde Desktop después de esa revisión. Las tres tareas de Dash se ejecutaron contra el servidor real; sus resultados y las limitaciones de la comparación están en [resultados_pruebas.md](resultados_pruebas.md). Los tiempos de HTTP no se presentan como tiempos de interacción. El [protocolo de interfaz](protocolo_pruebas.md) conserva pendientes sus mediciones y capturas.
+Se recorrieron las seis páginas y se ejercieron los enlaces, el detalle, los segmentadores, los mensajes sin datos y Restablecer vista. El recorrido encontró problemas de presentación que se corrigieron antes de guardar:
 
-La validación oficial detectó y permitió corregir propiedades de texto de segmentadores, referencias del tema, metadatos de los proyectos y un tooltip incompatible. La revisión de las tareas también corrigió el detalle regional para conservar el año y añadió las tarjetas de máximo mensual y la participación dentro de la región. Estos ajustes no cambian los CSV ni el modelo importado.
+- Los botones de navegación, Restablecer vista y Volver se mostraban vacíos, porque el texto y el relleno no tenían activada su visibilidad general. Se activaron y el botón de la página activa quedó en azul con texto blanco.
+- Las tarjetas de total y máximo mostraban unidades abreviadas («47 mill.»); ahora muestran la cifra completa. La medida Llegadas del archivo tenía formato sin separador de miles y se le dio el formato `#,0`, el mismo de `model.bim`.
+- V8 tenía tres paneles demasiado bajos para leer sus barras y usaba el azul de lo observado. Ahora ocupa el ancho de la página, sus paneles se leen y usa el naranja de lo estimado; la tabla de métricas y su glosario pasaron debajo.
+- La gráfica de años del detalle asignaba un color por país, incluido el naranja reservado a lo estimado. Ahora usa un panel por mercado en azul, igual que V4.
+- Títulos, subtítulos y notas que no cabían en su cuadro se ajustaron. V3 rotula «Año» y «Mes» y el eje de V6 dice «Llegadas».
 
-Para las ediciones externas se conserva el contenido importado del modelo y se reconstruye el contenedor con `scripts/empaquetar_powerbi.py`. Las referencias guardadas en `SecurityBindings` dejan de corresponder al informe editado; el empaquetado retira esa entrada desactualizada y Desktop la vuelve a generar al guardar. La comprobación pendiente de apertura se mantiene explícita.
+Después de las correcciones se restableció la vista en todas las páginas, se dejó abierta Inicio y el archivo se guardó desde Desktop. Al guardar, Desktop reescribe la definición del informe y el modelo importado aunque los datos no cambien; por eso la carpeta `observatorio_turismo.Report/` se sincronizó con lo guardado y el modelo se volvió a auditar. Queda una observación menor sin cambiar: la información sobre herramientas de las barras del detalle rotula el país con el nombre de la columna, «origin».

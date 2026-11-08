@@ -1,6 +1,6 @@
 # Observatorio de turismo sostenible
 
-Este proyecto tiene tres partes:
+Este laboratorio tiene tres partes:
 
 - Un tablero interactivo para consultar turistas y excursionistas en Guatemala entre enero de 2009 y junio de 2026, comparar tres modelos sobre su evaluación histórica y explorar la ocupación hotelera de 2022 a 2024.
 - Un pipeline que lee las fuentes institucionales de movilidad y de flujo migratorio, valida los datos con seis controles de calidad y estima los visitantes únicos de los meses sin cobertura en cada subdestino.
@@ -165,40 +165,86 @@ python scripts/demonstrate_recovery.py --workspace output/recovery-demo
 
 Comprueba el mensaje sin versión, publica una versión válida, introduce una clave duplicada, verifica el estado `FAILED` y su causa en MLflow sin métricas inventadas y comprueba que el tablero sigue consultando las mismas estimaciones aprobadas. Después corrige, publica y usa el comando de restauración para volver a consultar la primera versión. La carpeta elegida debe ser nueva para no sobrescribir datos existentes. Guarda `evidence.json`, las fuentes sintéticas, los reportes, las versiones y los registros reales de MLflow. La evidencia de una ejecución realizada está en [docs/evidencia_recuperacion.json](docs/evidencia_recuperacion.json); los registros completos permanecen fuera de Git en la carpeta de salida.
 
-## Versión en Power BI
+## Laboratorio 12: versión en Power BI
 
-El informe `powerbi/observatorio_turismo.pbix` usa los mismos CSV de `data/` y contiene ocho visualizaciones, seis páginas, filtros sincronizados, restablecimiento y comparación de los tres modelos. El proyecto `powerbi/observatorio_turismo.pbip` conserva el informe editable y la preparación del modelo. No usa datos institucionales. La última edición se comprobó en su estructura y contra los datos importados; su ejecución en Desktop está pendiente. Las instrucciones para abrirlo, cambiar rutas y comprobarlo están en [powerbi/README.md](powerbi/README.md).
+El informe `powerbi/observatorio_turismo.pbix` es la segunda versión del tablero, con los mismos CSV de `data/`, las mismas seis preguntas de gestión y los resultados de los mismos tres modelos. Tiene seis páginas, ocho visualizaciones, gráficos enlazados, una jerarquía de fechas y un detalle de región con regreso, segmentadores sincronizados y un botón para restablecer la vista. No usa datos institucionales. El `.pbix` pesa 297.159 bytes y está en el repositorio.
+
+### Versión de Power BI Desktop
+
+Power BI Desktop `2.159.1231.0 (64 bits)`, instalado desde Microsoft Store en Windows 11. El informe se abrió, se comprobó y se guardó con esa versión el 7 de noviembre de 2026. Power BI Desktop es gratuito y solo funciona en Windows; se descarga desde [Microsoft](https://learn.microsoft.com/es-es/power-bi/fundamentals/desktop-get-the-desktop).
+
+### Estructura de carpetas
 
 | Ruta | Contenido |
 |---|---|
-| `powerbi/observatorio_turismo.pbip` | Proyecto editable del modelo y del informe. |
-| `powerbi/observatorio_turismo.SemanticModel/model.bim` | Consultas Power Query, tablas, jerarquías y relaciones. |
-| `powerbi/comprobaciones.dax` | Controles para ejecutar después de actualizar en Desktop. |
-| `powerbi/comprobaciones_finales.dax` | Definiciones y controles de las medidas de predicciones, métricas y mensajes. |
+| `powerbi/observatorio_turismo.pbix` | Informe final que se abre en Power BI Desktop. |
+| `powerbi/observatorio_turismo.Report/` | Definición del informe en texto (páginas, visuales, marcadores y medidas del informe), sincronizada con el `.pbix` para revisar los cambios en Git. |
+| `powerbi/observatorio_turismo.SemanticModel/model.bim` | Consultas de Power Query, tablas, jerarquías, relaciones y medidas del modelo. |
+| `powerbi/observatorio_turismo.pbip` | Proyecto editable que une las dos carpetas anteriores. |
 | `powerbi/tema_observatorio.json` | Tema con la paleta y las fuentes del tablero. |
-| `data/model_predictions_s0.csv` | Predicciones de los tres modelos: valor observado y estimado por mes y modelo. |
-| `data/model_metrics_s0.csv` | Métricas MAE, RMSE y MAPE de cada modelo y su período de evaluación. |
-| `docs/lab12/resultados_esperados.md` | Valores de referencia para verificar que ambas versiones muestran lo mismo. |
-| `docs/lab12/protocolo_pruebas.md` | Las tres pruebas que se ejecutan en ambas versiones. |
-| `docs/lab12/modelo_de_datos.md` | Transformaciones, grano, relaciones y tratamiento del observado repetido por modelo. |
+| `powerbi/comprobaciones.dax` y `powerbi/comprobaciones_finales.dax` | Consultas para comprobar totales, observado, métricas, mensajes y medidas en la vista de consultas DAX. |
+| `powerbi/README.md` | Detalle de las páginas, las medidas, los filtros y la navegación. |
+| `data/` | Los cuatro CSV que leen las dos versiones: llegadas, ocupación hotelera, predicciones y métricas. |
+| `docs/lab12/` | Documentación del laboratorio: modelo de datos, predicciones y navegación, resultados esperados, protocolo y resultados de las pruebas, revisión del informe y bosquejo. |
+| `docs/lab12/capturas/` | Capturas de las dos versiones durante las pruebas. |
+| `scripts/` | Verificación de fuentes y del informe, auditoría del modelo importado, resultados esperados, mediciones de rendimiento y control HTTP del tablero Dash. |
 
-Los resultados esperados se recalculan con:
+### Abrir el informe
+
+1. Instala Power BI Desktop en Windows.
+2. Clona el repositorio sin convertir los saltos de línea, para que los CSV queden idénticos a los del commit de referencia: `git clone -c core.autocrlf=false https://github.com/JosFer720/Laboratorio-10-Dashboard.git` y cambia a la rama `Lab12`.
+3. Abre `powerbi/observatorio_turismo.pbix`. Ya contiene los datos importados, así que se puede revisar sin actualizar. Abre en la página Inicio.
+4. En Desktop los botones se activan con Ctrl + clic. El detalle de región se abre con clic derecho sobre una región de V4 > Obtener detalles.
+
+### Cambiar las rutas y actualizar los datos
+
+Todas las consultas leen los CSV desde un único parámetro de Power Query, `pCarpetaDatos`. Para usar la carpeta `data/` de otro equipo: Transformar datos > Administrar parámetros > `pCarpetaDatos`, escribe la ruta completa de la carpeta `data` del repositorio, acepta, cierra Power Query con Cerrar y aplicar y pulsa Actualizar en la pestaña Inicio. El `.pbix` guardado apunta a `C:/Lab12/Laboratorio-10-Dashboard/data`: si el repositorio se clona en `C:\Lab12`, Actualizar funciona sin cambiar el parámetro. Después ejecuta `powerbi/comprobaciones.dax` en la vista de consultas DAX y compara con [docs/lab12/resultados_esperados.md](docs/lab12/resultados_esperados.md).
+
+Si los CSV cambian, las fuentes se comprueban antes de actualizar con `python scripts/verificar_powerbi.py`, que se detiene si un archivo difiere del commit de referencia. Para preparar una copia del proyecto editable con la ruta de datos del equipo, sin tocar los archivos versionados: `python scripts/preparar_powerbi.py`. El detalle está en [powerbi/README.md](powerbi/README.md).
+
+### Tablas de predicciones y métricas
+
+| Tabla del informe | Archivo de origen | Contenido |
+|---|---|---|
+| `Predicciones` | `data/model_predictions_s0.csv` | 189 filas: estimado y observado por mes y modelo, de abril de 2021 a junio de 2026. Se relaciona por `date` con `Calendario` y por `model_id` con `Modelos`. |
+| `Metricas` | `data/model_metrics_s0.csv` | 3 filas: MAE, RMSE y MAPE de cada modelo sobre los mismos 63 meses. El MAPE ya viene en unidades porcentuales. Se relaciona por `model_id` con `Modelos`. |
+| `Observados` | Derivada de `Predicciones` | 63 filas: el observado nacional una sola vez por mes, para que elegir uno o los tres modelos no lo triplique. |
+| `Modelos` | Derivada de `Metricas` | 3 filas: identificador y nombre de LSTM catch22 (ventana 24), Prophet y ARIMA(1,1,1). |
+
+Cómo se evita duplicar el observado se explica en [docs/lab12/modelo_de_datos.md](docs/lab12/modelo_de_datos.md) y las medidas de predicciones en [docs/lab12/predicciones_y_navegacion.md](docs/lab12/predicciones_y_navegacion.md).
+
+### Reproducir las tres pruebas
+
+Las tres pruebas, sus pasos en cada versión y sus resultados esperados están en [docs/lab12/protocolo_pruebas.md](docs/lab12/protocolo_pruebas.md):
+
+1. En 2025, con todos los mercados, ¿cuál fue el mes con más llegadas y cuántas hubo? Esperado: diciembre de 2025, 365.573.
+2. En 2025, ¿qué región aportó más llegadas y, dentro de ella, qué país y con qué participación? Esperado: América Central, 2.143.694 (63,9 %); El Salvador, 1.582.845 (73,8 % de la región); al regresar se ven las cinco regiones.
+3. ¿Qué modelo tiene el menor MAPE y cuál es su error en diciembre de 2025? Esperado: LSTM catch22 (ventana 24), 29,2 %, error −142.131.
+
+Para repetirlas, abre el `.pbix` y el tablero del Laboratorio 10 (siguiente apartado) en el mismo equipo, vuelve a la vista inicial antes de cada prueba (recargar la página en Dash, Restablecer vista en Power BI) y sigue los pasos del protocolo. Los resultados obtenidos, la verificación de indicadores, el rendimiento y las capturas están en [docs/lab12/resultados_pruebas.md](docs/lab12/resultados_pruebas.md). Las mediciones automáticas se repiten con:
 
 ```bash
 python scripts/resultados_esperados.py
+python scripts/medir_rendimiento_dash.py --app ../tablero-lab10 --python ../tablero-lab10/.venv/Scripts/python.exe
+python scripts/pruebas_http_lab12.py --url http://127.0.0.1:8051
 ```
 
-### Versión del tablero que se compara
+La última requiere el tablero del Laboratorio 10 en ejecución en el puerto 8051 (variable `DASH_PORT=8051`).
 
-La comparación usa el tablero en Dash tal como quedó en el Laboratorio 10, identificado con el tag `lab10-final`. Para consultarlo en una carpeta aparte, sin cambiar la rama de trabajo:
+### Consultar la versión del Laboratorio 10
+
+La comparación usa el tablero en Dash tal como quedó en el Laboratorio 10, identificado con el tag `lab10-final` (commit `29a091d`), porque la rama principal ya incluye cambios posteriores. Para consultarlo en una carpeta aparte, sin cambiar la rama de trabajo:
 
 ```bash
 git worktree add ../tablero-lab10 lab10-final
 cd ../tablero-lab10
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 python app.py
 ```
 
-Se instala y se ejecuta igual que el tablero actual. Para quitar esa carpeta después: `git worktree remove ../tablero-lab10`.
+Se abre en http://127.0.0.1:8050. En macOS o Linux el entorno se activa con `source .venv/bin/activate`. Para quitar esa carpeta después: `git worktree remove ../tablero-lab10`.
 
 ## Pruebas
 
