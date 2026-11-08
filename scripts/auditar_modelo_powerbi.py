@@ -78,7 +78,7 @@ def main() -> int:
     content = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(content, encoding="utf-8")
+        args.output.write_text(content, encoding="utf-8", newline="\n")
     print(content, end="")
     return 0
 

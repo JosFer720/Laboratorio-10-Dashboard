@@ -1,23 +1,22 @@
 """Revisa el PBIR, sus interacciones y su correspondencia con el PBIX.
 
-La revisión es estructural. No sustituye abrir el informe y ejecutar sus
-consultas e interacciones en Power BI Desktop.
+La revisión es estructural y se hace sobre el archivo guardado en Power BI
+Desktop. El contenido del modelo importado se confirma con la auditoría de
+scripts/auditar_modelo_powerbi.py, registrada en docs/lab12/validacion_modelos_pbix.json.
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
-import io
 import json
 import re
-import subprocess
 import zipfile
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-BASELINE = "a52f372"
+AUDIT = ROOT / "docs/lab12/validacion_modelos_pbix.json"
 PAGES = {
     "Inicio": "f4891321a84c9cedcf63",
     "Llegadas y mercados": "7ae7283f2a8b4b668889",
@@ -131,7 +130,7 @@ def verify(report_dir: Path = ROOT / "powerbi/observatorio_turismo.Report",
     bookmarks = load(definition / "bookmarks/bookmarks.json")["items"]
     for entry in bookmarks:
         bookmark = load(definition / f"bookmarks/{entry['name']}.bookmark.json")
-        require(not bookmark["options"]["suppressData"], "El marcador no restaura filtros.")
+        require(not bookmark.get("options", {}).get("suppressData", False), "El marcador no restaura filtros.")
         require(set(bookmark["explorationState"]["sections"]) == set(PAGES.values()), "El marcador no contempla todas las páginas sincronizadas.")
         for ident, section in bookmark["explorationState"]["sections"].items():
             label = next(label for label, page_id in PAGES.items() if page_id == ident)
@@ -160,16 +159,23 @@ def verify(report_dir: Path = ROOT / "powerbi/observatorio_turismo.Report",
                 if path.is_file():
                     name = "Report/" + path.relative_to(report_dir).as_posix()
                     source_names.add(name)
-                    require(pbix.read(name) == path.read_bytes(), f"El PBIX no contiene la última versión de {name}.")
+                    embedded_bytes = pbix.read(name)
+                    if path.suffix == ".json":
+                        # Desktop guarda el JSON compacto; la carpeta lo conserva con sangría para leer los cambios.
+                        same = json.loads(embedded_bytes.decode("utf-8-sig")) == json.loads(path.read_text(encoding="utf-8-sig"))
+                    else:
+                        same = embedded_bytes == path.read_bytes()
+                    require(same, f"El PBIX no contiene la última versión de {name}.")
         embedded = {n for n in pbix.namelist() if n.startswith(("Report/definition/", "Report/StaticResources/"))}
         require(source_names == embedded, "Hay contenido de informe desactualizado en el PBIX.")
     if check_baseline:
-        content = subprocess.run(["git", "show", f"{BASELINE}:powerbi/observatorio_turismo.pbix"], cwd=ROOT,
-                                 check=True, capture_output=True).stdout
-        with zipfile.ZipFile(io.BytesIO(content)) as baseline:
-            require(imported == baseline.read("DataModel"), "Cambió el modelo importado respecto de la versión recibida.")
+        # Desktop reescribe el DataModel al guardar aunque los datos no cambien; por eso no se comparan bytes
+        # con una versión anterior, sino que se exige que la auditoría contra los CSV corresponda a este modelo.
+        audited = load(AUDIT)["sha256_modelo"]
+        require(hashlib.sha256(imported).hexdigest() == audited,
+                "El modelo importado no es el auditado; ejecuta scripts/auditar_modelo_powerbi.py.")
     return {
-        "alcance": "Revisión estructural; ejecución y revisión visual en Power BI Desktop no realizadas en esta sesión.",
+        "alcance": "Revisión estructural del archivo guardado en Power BI Desktop; el contenido del modelo se confirma con la auditoría contra los CSV.",
         "paginas": len(PAGES), "visualizaciones_principales": len(VISUALS),
         "marcadores": len(bookmarks), "medidas_de_informe": sum(len(e["measures"]) for e in extensions["entities"]),
         "referencias_validas": True, "objetos_superpuestos": len(collisions),
@@ -188,12 +194,12 @@ def main() -> int:
     args = parser.parse_args()
     try:
         result = verify()
-    except (OSError, ValueError, KeyError, subprocess.CalledProcessError, zipfile.BadZipFile) as exc:
+    except (OSError, ValueError, KeyError, zipfile.BadZipFile) as exc:
         parser.exit(1, f"Revisión detenida: {exc}\n")
     content = json.dumps(result, ensure_ascii=False, indent=2) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(content, encoding="utf-8")
+        args.output.write_text(content, encoding="utf-8", newline="\n")
     print(content, end="")
     return 0
 

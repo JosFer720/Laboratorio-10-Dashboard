@@ -20,7 +20,7 @@
                   {
                     "value": "V1: baja y sube entre año, trimestre y mes. Selecciona un período para filtrar V2; vuelve a pulsarlo para limpiar.\nV4: clic derecho sobre la región > Obtener detalles. Se conserva el año seleccionado y Volver regresa a la vista anterior.",
                     "textStyle": {
-                      "fontSize": "11pt",
+                      "fontSize": "10pt",
                       "color": "#5B6573"
                     }
                   }

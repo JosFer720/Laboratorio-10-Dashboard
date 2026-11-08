@@ -67,7 +67,8 @@
               },
               "queryRef": "extension.Predicciones.Llegadas con hospedaje",
               "nativeQueryRef": "Llegadas con hospedaje",
-              "active": true
+              "active": true,
+              "displayName": "Llegadas"
             }
           ]
         }

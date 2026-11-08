@@ -1,5 +1,5 @@
 {
-  "alcance": "Revisión estructural; ejecución y revisión visual en Power BI Desktop no realizadas en esta sesión.",
+  "alcance": "Revisión estructural del archivo guardado en Power BI Desktop; el contenido del modelo se confirma con la auditoría contra los CSV.",
   "paginas": 6,
   "visualizaciones_principales": 8,
   "marcadores": 6,
@@ -8,9 +8,9 @@
   "objetos_superpuestos": 0,
   "pbir_y_pbix_coinciden": true,
   "modelo_importado_conservado": true,
-  "sha256_modelo": "e0a04f56d8809dbe7b72ac6a48148ae3d59074fab298bab47bf135ecc3806e63",
-  "sha256_pbix": "1dd040f9e9c44e7a41b9f5940b1243dc6271f1be85d91c9d9d233ccc737a878c",
-  "bytes_pbix": 284216,
+  "sha256_modelo": "b9c49342d5625397db802e81d378cb4509a757273e2c75a35b0b0b47c8c9bf62",
+  "sha256_pbix": "6610831c1a4cf7cfc91d72a3a1876b245651e7d26af32348fe499a1bf118aa1d",
+  "bytes_pbix": 297159,
   "graficos": {
     "V1": {
       "pagina": "Llegadas y mercados",

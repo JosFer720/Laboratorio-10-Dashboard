@@ -2,9 +2,9 @@
   "name": "subtitulo",
   "position": {
     "x": 24,
-    "y": 58,
+    "y": 53,
     "width": 1080,
-    "height": 34,
+    "height": 42,
     "z": 100,
     "tabOrder": 100
   },
@@ -20,7 +20,7 @@
                   {
                     "value": "Detalle de la región elegida · los agregados no se presentan como países individuales",
                     "textStyle": {
-                      "fontSize": "11pt",
+                      "fontSize": "10.5pt",
                       "color": "#5B6573",
                       "fontFamily": "Segoe UI"
                     }

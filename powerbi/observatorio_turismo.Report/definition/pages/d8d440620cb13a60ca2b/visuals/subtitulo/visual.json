@@ -3,9 +3,9 @@
   "name": "subtitulo",
   "position": {
     "x": 24,
-    "y": 58,
+    "y": 53,
     "z": 1000,
-    "height": 34,
+    "height": 42,
     "width": 1232,
     "tabOrder": 1000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Qué tan cerca estuvo cada modelo de lo observado en la evaluación de abril de 2021 a junio de 2026",
                     "textStyle": {
-                      "fontSize": "11pt",
+                      "fontSize": "10.5pt",
                       "color": "#5B6573"
                     }
                   }

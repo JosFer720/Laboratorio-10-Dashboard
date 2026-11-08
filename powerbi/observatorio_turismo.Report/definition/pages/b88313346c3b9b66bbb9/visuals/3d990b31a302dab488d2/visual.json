@@ -28,26 +28,8 @@
               },
               "queryRef": "Calendario.year",
               "nativeQueryRef": "year",
-              "active": true
-            }
-          ]
-        },
-        "Series": {
-          "projections": [
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "Origenes"
-                    }
-                  },
-                  "Property": "origin"
-                }
-              },
-              "queryRef": "Origenes.origin",
-              "nativeQueryRef": "origin",
-              "active": true
+              "active": true,
+              "displayName": "Año"
             }
           ]
         },
@@ -65,7 +47,28 @@
                 }
               },
               "queryRef": "Calendario.Llegadas",
-              "nativeQueryRef": "Llegadas"
+              "nativeQueryRef": "Llegadas",
+              "displayName": "Llegadas"
+            }
+          ]
+        },
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Origenes"
+                    }
+                  },
+                  "Property": "origin"
+                }
+              },
+              "queryRef": "Origenes.origin",
+              "nativeQueryRef": "origin",
+              "active": true,
+              "displayName": "Mercado"
             }
           ]
         }
@@ -85,7 +88,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Llegadas por año de cada mercado'"
+                  "Value": "'Llegadas por año de cada mercado · observado'"
                 }
               }
             }
@@ -93,7 +96,73 @@
         }
       ]
     },
-    "drillFilterOtherVisuals": true
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "dataPoint": [
+        {
+          "properties": {
+            "fill": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#0B5C8E'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "smallMultiplesLayout": [
+        {
+          "properties": {
+            "rowCount": {
+              "expr": {
+                "Literal": {
+                  "Value": "2D"
+                }
+              }
+            },
+            "columnCount": {
+              "expr": {
+                "Literal": {
+                  "Value": "3D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "categoryAxis": [
+        {
+          "properties": {
+            "axisType": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Scalar'"
+                }
+              }
+            },
+            "start": {
+              "expr": {
+                "Literal": {
+                  "Value": "2009D"
+                }
+              }
+            },
+            "end": {
+              "expr": {
+                "Literal": {
+                  "Value": "2026D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
   },
   "filterConfig": {
     "filters": [

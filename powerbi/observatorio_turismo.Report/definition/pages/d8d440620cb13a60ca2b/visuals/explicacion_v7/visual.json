@@ -20,7 +20,7 @@
                   {
                     "value": "Azul continuo: llegadas observadas una sola vez por mes. Naranja discontinuo: estimación del modelo elegido. Selecciona un mes para ver sus errores abajo.",
                     "textStyle": {
-                      "fontSize": "11pt",
+                      "fontSize": "10pt",
                       "color": "#5B6573",
                       "fontFamily": "Segoe UI"
                     }
@@ -32,7 +32,7 @@
                   {
                     "value": "Los tres modelos se comparan sobre la misma serie y los mismos 63 meses, de abril de 2021 a junio de 2026; no son pronósticos futuros.",
                     "textStyle": {
-                      "fontSize": "11pt",
+                      "fontSize": "10pt",
                       "color": "#5B6573",
                       "fontFamily": "Segoe UI"
                     }

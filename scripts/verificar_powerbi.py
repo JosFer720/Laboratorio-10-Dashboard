@@ -186,7 +186,7 @@ def verify(data_dir: Path, project_dir: Path = ROOT / "powerbi") -> dict:
     peak = max(monthly, key=monthly.get)
     return {
         "referencia_commit": REFERENCE,
-        "alcance_validacion": "Fuentes CSV y estructura del proyecto; Power Query, DAX y apertura en Desktop pendientes de ejecución en Windows.",
+        "alcance_validacion": "Fuentes CSV y estructura del proyecto; no ejecuta Power Query ni DAX, que se comprueban en Power BI Desktop.",
         "sha256": hashes,
         "filas_esperadas": {"Llegadas": len(arrivals) * len(origins), "Hospedaje": len(occupancy),
                             "Predicciones": len(predictions), "Metricas": len(metrics), "Observados": len(observations),

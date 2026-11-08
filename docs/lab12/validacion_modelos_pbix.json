@@ -13,7 +13,7 @@
   "predicciones_coinciden_con_csv": true,
   "llegadas_coinciden_con_csv": true,
   "observado_una_fila_por_mes": true,
-  "sha256_modelo": "e0a04f56d8809dbe7b72ac6a48148ae3d59074fab298bab47bf135ecc3806e63",
+  "sha256_modelo": "b9c49342d5625397db802e81d378cb4509a757273e2c75a35b0b0b47c8c9bf62",
   "modelos": [
     {
       "model_id": "lstm-catch22-contexto-w24",

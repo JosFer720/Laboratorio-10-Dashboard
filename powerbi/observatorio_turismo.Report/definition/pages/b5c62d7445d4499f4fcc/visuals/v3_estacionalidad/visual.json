@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "v3_estacionalidad",
   "position": {
     "x": 24,
     "y": 320,
-    "width": 1232,
-    "height": 380,
     "z": 100,
+    "height": 380,
+    "width": 1232,
     "tabOrder": 100
   },
   "visual": {
@@ -28,7 +28,8 @@
               },
               "queryRef": "Calendario.month_name",
               "nativeQueryRef": "month_name",
-              "active": true
+              "active": true,
+              "displayName": "Mes"
             }
           ]
         },
@@ -47,7 +48,8 @@
               },
               "queryRef": "Calendario.year",
               "nativeQueryRef": "year",
-              "active": true
+              "active": true,
+              "displayName": "Año"
             }
           ]
         },
@@ -220,5 +222,51 @@
       ]
     },
     "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "8d7d864cb6ea20600ea1",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendario"
+              }
+            },
+            "Property": "month_name"
+          }
+        },
+        "type": "Categorical"
+      },
+      {
+        "name": "1a281e1d38a22676db19",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendario"
+              }
+            },
+            "Property": "year"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "651a91378aecd9a06a60",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Calendario"
+              }
+            },
+            "Property": "Llegadas"
+          }
+        },
+        "type": "Advanced"
+      }
+    ]
   }
 }

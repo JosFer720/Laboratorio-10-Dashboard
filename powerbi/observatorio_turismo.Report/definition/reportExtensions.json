@@ -9,57 +9,57 @@
           "name": "Observado histórico",
           "dataType": "Double",
           "expression": "SUM(Observados[observed])",
+          "formatString": "#,0",
           "description": "Observado nacional de evaluación, una sola vez por mes; permanece igual con uno o con todos los modelos.",
-          "displayFolder": "Informe",
-          "formatString": "#,0"
+          "displayFolder": "Informe"
         },
         {
           "name": "Estimado histórico",
           "dataType": "Double",
           "expression": "IF(HASONEVALUE(Modelos[model_id]), SUM(Predicciones[estimate]), BLANK())",
+          "formatString": "#,0",
           "description": "Estimado del único modelo elegido para V7; no suma modelos diferentes.",
-          "displayFolder": "Informe",
-          "formatString": "#,0"
+          "displayFolder": "Informe"
         },
         {
           "name": "Error mensual",
           "dataType": "Double",
           "expression": "VAR Estimado = SUM(Predicciones[estimate])\nVAR Observado = SUM(Observados[observed])\nRETURN IF(HASONEVALUE(Modelos[model_id]) && NOT ISBLANK(Estimado) && NOT ISBLANK(Observado), Estimado - Observado, BLANK())",
+          "formatString": "#,0;\\−#,0;0",
           "description": "Error con signo por mes y modelo: estimado menos observado.",
-          "displayFolder": "Informe",
-          "formatString": "#,0;−#,0;0"
+          "displayFolder": "Informe"
         },
         {
           "name": "MAE de evaluación",
           "dataType": "Double",
           "expression": "CALCULATE(MAX(Metricas[mae]), REMOVEFILTERS(Calendario))",
+          "formatString": "#,0",
           "description": "Error absoluto medio sobre los 63 meses completos.",
-          "displayFolder": "Informe",
-          "formatString": "#,0"
+          "displayFolder": "Informe"
         },
         {
           "name": "RMSE de evaluación",
           "dataType": "Double",
           "expression": "CALCULATE(MAX(Metricas[rmse]), REMOVEFILTERS(Calendario))",
+          "formatString": "#,0",
           "description": "Raíz del error cuadrático medio de los 63 meses completos.",
-          "displayFolder": "Informe",
-          "formatString": "#,0"
+          "displayFolder": "Informe"
         },
         {
           "name": "MAPE de evaluación",
           "dataType": "Double",
           "expression": "CALCULATE(MAX(Metricas[mape]), REMOVEFILTERS(Calendario))",
+          "formatString": "0.0\" %\"",
           "description": "El CSV ya contiene unidades porcentuales; no se multiplica por cien.",
-          "displayFolder": "Informe",
-          "formatString": "0.0\" %\""
+          "displayFolder": "Informe"
         },
         {
           "name": "Llegadas con hospedaje",
           "dataType": "Double",
           "expression": "IF(NOT ISBLANK(SUM(Hospedaje[rooms_available])), SUM(Llegadas[arrivals]), BLANK())",
+          "formatString": "#,0",
           "description": "Evita que la dispersión convierta los meses sin hospedaje en puntos con cero ocupación.",
-          "displayFolder": "Informe",
-          "formatString": "#,0"
+          "displayFolder": "Informe"
         },
         {
           "name": "Filtros aplicados",

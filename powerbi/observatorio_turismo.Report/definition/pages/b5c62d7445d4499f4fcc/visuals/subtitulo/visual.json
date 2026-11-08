@@ -3,9 +3,9 @@
   "name": "subtitulo",
   "position": {
     "x": 24,
-    "y": 58,
+    "y": 53,
     "z": 1000,
-    "height": 34,
+    "height": 42,
     "width": 1232,
     "tabOrder": 1000
   },
@@ -21,7 +21,7 @@
                   {
                     "value": "Cuándo se concentran las llegadas y qué tan llenos están los hoteles",
                     "textStyle": {
-                      "fontSize": "11pt",
+                      "fontSize": "10.5pt",
                       "color": "#5B6573"
                     }
                   }

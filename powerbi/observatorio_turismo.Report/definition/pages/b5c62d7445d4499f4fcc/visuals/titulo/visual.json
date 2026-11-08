@@ -2,7 +2,7 @@
   "name": "titulo",
   "position": {
     "x": 24,
-    "y": 8,
+    "y": 4,
     "width": 1060,
     "height": 48,
     "z": 100,
@@ -20,7 +20,7 @@
                   {
                     "value": "Temporadas y hospedaje",
                     "textStyle": {
-                      "fontSize": "20pt",
+                      "fontSize": "18pt",
                       "color": "#1F2933",
                       "fontFamily": "Segoe UI",
                       "fontWeight": "bold"

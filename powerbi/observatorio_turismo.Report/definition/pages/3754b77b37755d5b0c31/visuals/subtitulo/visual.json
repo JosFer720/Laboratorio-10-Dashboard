@@ -2,9 +2,9 @@
   "name": "subtitulo",
   "position": {
     "x": 24,
-    "y": 58,
+    "y": 53,
     "width": 1232,
-    "height": 34,
+    "height": 42,
     "z": 100,
     "tabOrder": 100
   },
@@ -20,7 +20,7 @@
                   {
                     "value": "Fuentes, significado de los indicadores y límites para interpretar el informe",
                     "textStyle": {
-                      "fontSize": "11pt",
+                      "fontSize": "10.5pt",
                       "color": "#5B6573",
                       "fontFamily": "Segoe UI"
                     }

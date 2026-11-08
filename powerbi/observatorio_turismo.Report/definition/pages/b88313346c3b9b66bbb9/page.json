@@ -20,45 +20,6 @@
           }
         },
         "type": "Categorical",
-        "filter": {
-          "Version": 2,
-          "From": [
-            {
-              "Name": "o",
-              "Entity": "Origenes",
-              "Type": 0
-            }
-          ],
-          "Where": [
-            {
-              "Condition": {
-                "In": {
-                  "Expressions": [
-                    {
-                      "Column": {
-                        "Expression": {
-                          "SourceRef": {
-                            "Source": "o"
-                          }
-                        },
-                        "Property": "origin_region"
-                      }
-                    }
-                  ],
-                  "Values": [
-                    [
-                      {
-                        "Literal": {
-                          "Value": "'América Central'"
-                        }
-                      }
-                    ]
-                  ]
-                }
-              }
-            }
-          ]
-        },
         "howCreated": "Drillthrough"
       }
     ]
@@ -81,8 +42,7 @@
           }
         }
       }
-    ],
-    "acceptsFilterContext": "Default"
+    ]
   },
   "visibility": "HiddenInViewMode",
   "type": "Drillthrough"
